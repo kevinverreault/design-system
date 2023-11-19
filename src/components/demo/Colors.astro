@@ -1,0 +1,40 @@
+---
+import '@styles/global.css';
+import ColorSwatch from './ColorSwatch.astro';
+
+const colorsRows = [["Primary", "Primary variant", "Secondary", "Secondary variant"], ["Background", "Surface", "Error"]]
+---
+
+<div style="background-color: hsl(240 4% 30%); padding: 1rem;">
+  {colorsRows.map((colorsRow) => {
+    return (
+    <div class="grid grid-auto-column" style="--gap: 0;">
+      {colorsRow.map((color) => <ColorSwatch color={color} />)}
+    </div>
+  )})}
+</div>
+
+<style>
+
+  .color-swatch {
+    height: 15rem;
+    margin: 0;
+  }
+
+  .color-swatch > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 0 1.5rem; 
+    height: 100%;
+  }
+
+  .circle-indicator {
+    display: grid;
+    border-radius: 50%;
+    margin-right: 2rem;
+    aspect-ratio: 1;
+    width: 2rem;
+  }
+
+</style>

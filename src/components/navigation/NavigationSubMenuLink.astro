@@ -1,0 +1,83 @@
+---
+import '@styles/global.css';
+
+export interface Props {
+  text: string;
+  path: string;  
+}
+
+const { text, path } = Astro.props;
+---
+
+  <li>
+    <a href={path}>
+      <div class="menu-item color-background">
+        <p class="text-md text-on-background">
+          {text}
+        </p>
+      </div>
+    </a>
+  </li>
+
+<style>
+
+  .menu-item {
+    width: 100%;
+    height: 100%;
+    padding: 1rem 2rem;
+    transition: background-color .2s ease-in, box-shadow .1s ease-in;
+    position: relative;
+    /* border: solid hsl(var(--color-surface));
+    border-width: 0px 1px 1px 1px; */
+  }
+
+  .menu-item p {
+    display: flex;
+    position: relative;
+    line-height: 1.5;
+    padding: 0.5rem 0;
+  }
+
+  .menu-item:hover p {
+    color: hsl(var(--color-on-surface));
+    width: 100%;
+  }
+
+  .menu-item p::before {
+    content: "";
+    position: absolute;
+    display: inline-block;
+    border: solid hsl(var(--color-primary));
+    border-width: 0 2px 2px 0;
+    padding: 3px;
+    top: 50%;
+    right: 2px;
+    opacity: 0;
+    transition: all var(--transition-bezier);
+  }
+
+  .menu-item:hover p::before {
+    transform: translate(0, -50%) rotate(-45deg);
+    opacity: 1;
+  }
+
+  .menu-item p::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -3px;
+    height: 2px;
+    width: 0;
+    background: hsl(var(--color-primary));
+    transition: all var(--transition-bezier);
+  }
+
+  .menu-item:hover p::after {
+    width: 100%;
+  }
+
+  .menu-item:active {
+    box-shadow: inset 0 0 2px 0.5px hsl(var(--color-on-surface) / .75);
+  }
+
+</style>

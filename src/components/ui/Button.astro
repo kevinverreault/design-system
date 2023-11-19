@@ -1,0 +1,174 @@
+---
+import '@styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const button = cva("button", {
+  variants: {
+    variant: {
+      primary: "primary",
+      secondary: "secondary",
+      muted: "muted",
+      danger: "danger"
+    },
+    decoration: {
+      plain: "plain",
+      outline: "outline",
+      ghost: "ghost",
+      underline: "underline"
+    },
+    size: {
+      icon: "icon",
+      small: "text-sm",
+      medium: "text-base",
+      large: "text-lg",
+      "extra-large":  "text-xl"
+    },
+    shape: {
+      rectangle: "",
+      square: "square",
+      circle: "circle",
+      rounded: "rounded",
+    }
+  }
+});
+
+export interface Props
+  extends HTMLAttributes<"button">,
+    VariantProps<typeof button> {
+    }
+      
+const { variant = "primary", decoration = "plain", size = "medium", shape = "rectangle", ...attributes} = Astro.props;
+---
+
+<button {...attributes} class:list={[button({ variant, decoration, size,  shape}), "button", "ff-sans-normal"]}>
+  <slot />
+</button>
+
+<style>
+
+  .button {
+    --border-radius: var(--border);
+    padding: 1.25em 2em;
+    border-radius: var(--border-radius);
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    border: none;
+    margin: 0;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+  }
+
+  .button:active {
+    transform: scale(0.975);
+    /* box-shadow: 0 0 0 .1rem var(--main-color); */
+  }
+
+  .primary {
+    --main-color: hsl(var(--color-primary));
+    --text-on-main-color: hsl(var(--color-on-primary));
+    --text-on-background-color: var(--main-color);
+    --accent-color: hsl(var(--color-primary-variant));
+  }
+
+  .secondary {
+    --main-color: hsl(var(--color-secondary));
+    --text-on-main-color: hsl(var(--color-on-secondary));
+    --text-on-background-color: var(--main-color);
+    --accent-color: hsl(var(--color-secondary-variant));
+  }
+
+  .muted {
+    --main-color: hsl(var(--color-surface));
+    --text-on-main-color: hsl(var(--color-on-surface));
+    --text-on-background-color: var(--text-on-main-color);
+    --accent-color: hsl(var(--color-surface) / .8);
+  }
+
+  .danger {
+    --main-color: hsl(var(--color-error) / .75);
+    --text-on-main-color: hsl(var(--color-on-error));
+    --text-on-background-color: var(--main-color);
+    --accent-color: hsl(var(--color-error) / .6);
+  }
+
+  .plain {
+    background-color: var(--main-color);
+    color: var(--text-on-main-color);
+  }
+
+  .plain:hover,
+  .plain:focus {
+    background-color: var(--accent-color);
+  }
+
+  .outline {
+    background-color: hsl(var(--color-background));
+    border: 1px solid var(--main-color);
+    color: var(--text-on-background-color);
+  }
+
+  .outline:hover,
+  .outline:focus {
+    background-color: var(--main-color);
+    color: var(--text-on-main-color);
+  }
+
+  .ghost {
+    background-color: hsl(var(--color-background));
+    color: var(--text-on-background-color);
+  }
+
+  .ghost:hover,
+  .ghost:focus {
+    background-color: var(--main-color);
+    color: var(--text-on-main-color);
+  }
+
+  .underline {
+    background-color: hsl(var(--color-background));
+    color: var(--text-on-background-color);
+  }
+
+  .underline::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    bottom: 4px;
+    height: 2px;
+    width: calc(100% - 4em);
+    background-color: var(--main-color);
+    transition: all cubic-bezier(.43,.045,.1,.95) .35s;
+  }
+
+  .underline:hover::after,
+  .underline:focus::after {
+    box-shadow: 0 1px 1px var(--main-color);
+  }
+
+  .square {
+    aspect-ratio: 1;
+    padding: 1em;
+  }
+
+  .circle {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    padding: 1em;
+  }
+
+  .icon {
+    padding: 0.75em;
+  }
+
+  .rounded {
+    --border-radius: 9999px;
+    border-radius: 9999px;
+  }
+  
+
+</style>

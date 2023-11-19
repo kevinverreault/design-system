@@ -1,0 +1,30 @@
+---
+import '@styles/global.css'
+import type { NavigationItem } from '../../data/navigation';
+import NavigationMenuItem from './NavigationMenuItem.astro';
+
+export interface Props {
+ navigationItems: NavigationItem[]
+}
+
+const { navigationItems } = Astro.props;
+---
+
+<nav>
+  <ul class="navigationMenuItems">
+    {navigationItems.map(navigationItem => 
+      <NavigationMenuItem {...navigationItem} />
+    )}
+  </ul>
+</nav>
+
+<style>
+  .navigationMenuItems {
+    display: flex;
+    width: 100%;
+    position: relative;
+    list-style: none;
+    padding-left: 0;
+    height: 4rem;
+  }
+</style>

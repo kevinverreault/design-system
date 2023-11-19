@@ -1,0 +1,62 @@
+---
+import '@styles/global.css'
+
+interface Props {
+  color: string;
+}
+
+const { color } = Astro.props;
+const colorTokens = color.toLowerCase().split(' ')
+const variant = colorTokens.join("-");
+const singleTokenVariant = colorTokens[0]
+const swatchId = `swatch-${variant}`
+const swatchColor = `color-${variant}`;
+const swatchForegoundColor = `text-on-${singleTokenVariant}`;
+const indicatorColor = `color-on-${singleTokenVariant}`
+const indicatorForegroundColor = `text-${singleTokenVariant}`;
+---
+
+<div class="color-swatch">
+  <div class:list={["text-xl", swatchColor, swatchForegoundColor ]} id={swatchId}>
+    <p>{color}</p>
+    <div class="flex items-center">
+      <div class:list={["circle-indicator", indicatorColor, indicatorForegroundColor]}>
+        <span class="text-lg" style="margin: auto;">1</span>
+      </div>
+      <span class="text-md"></span>
+    </div>
+  </div>        
+</div>
+
+<script define:vars={{ swatchId }}>
+  const colorValuePlaceholder = document.querySelector(`#${swatchId} > div > span:last-child`);
+    const colorSwatch = document.getElementById(swatchId);
+    if (colorValuePlaceholder && colorSwatch) {
+      colorValuePlaceholder.textContent = window.getComputedStyle(colorSwatch).getPropertyValue("background-color");
+    }
+</script>
+
+<style>
+
+  .color-swatch {
+    height: 15rem;
+    margin: 0;
+  }
+
+  .color-swatch > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 0 1.5rem; 
+    height: 100%;
+  }
+
+  .circle-indicator {
+    display: grid;
+    border-radius: 50%;
+    margin-right: 2rem;
+    aspect-ratio: 1;
+    width: 2rem;
+  }
+
+</style>

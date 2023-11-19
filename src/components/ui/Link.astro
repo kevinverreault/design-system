@@ -1,0 +1,50 @@
+---
+import '@styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const anchor = cva("a", {
+  variants: {
+    variant: {
+      default: "default",
+      primary: "primary",
+      secondary: "secondary"
+    },
+    size: {
+      small: "text-sm",
+      medium: "text-base",
+      large: "text-lg",
+      xl: "text-xl"
+    }
+  }
+});
+
+export interface Props
+  extends HTMLAttributes<"a">,
+    VariantProps<typeof anchor> {
+    }
+      
+const { variant = "default", size = "medium", href } = Astro.props;
+---
+
+<a href={href} class:list={[anchor({ variant, size }), "ff-sans-normal", "text-on-background"]}>
+  <slot />
+</a>
+
+<style>
+
+  a {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 0.5em 1em;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 200ms, transform 100ms linear;
+  }
+
+  .default {
+    border-bottom: .2rem solid hsl(var(--color-on-background));
+  }
+
+</style>

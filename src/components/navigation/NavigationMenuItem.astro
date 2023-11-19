@@ -1,0 +1,116 @@
+---
+import '@styles/global.css';
+import type { NavigationMenuLink } from '../../data/navigation';
+import NavigationSubMenuLink from './NavigationSubMenuLink.astro';
+
+export interface Props {
+ text: string;
+ path?: string;
+ subMenuLinks?: NavigationMenuLink[];
+}
+
+const { text, path, subMenuLinks } = Astro.props;
+
+const hasSubMenuLinks = subMenuLinks && subMenuLinks.length > 0;
+
+if (!path && !hasSubMenuLinks) {
+  throw new Error(`Path or at least one navigation link is required for item '${text}'.`)
+}
+---
+
+<li class="navigation-menu-item color-background">
+  <a class={path ? "navigation-menu-link" : "disabled-navigation-menu-link"} href={path}>
+    <div class:list={["content", hasSubMenuLinks ? "arrow-indicator" : ""]}>
+      <div class="center">
+        <p class="text-lg text-on-background ff-sans-condensed letter-spacing-sm">
+          { text }
+        </p>
+      </div>
+    </div>
+  </a>
+  { hasSubMenuLinks &&
+    <ul class="navigation-sub-menu">
+      {subMenuLinks.map(subMenuLink => <NavigationSubMenuLink {...subMenuLink} />)}
+    </ul>
+  }
+</li>
+
+<style>
+
+  .navigation-menu-item {
+    border: 1px solid hsl(var(--color-surface));
+    border-width: 1px 0;
+    transition: background-color var(--transition-bezier);
+    flex: 1 1 0px;
+    position: relative;
+    width: 100%;
+  }
+
+  .navigation-menu-item:hover {
+    background-color: hsl(var(--color-surface));
+  }
+
+  .navigation-menu-item:hover .navigation-sub-menu {
+    display: block;
+  }
+
+  .navigation-sub-menu {
+    display: none;
+    list-style: none;
+    position: absolute;
+    z-index: 1;
+    transition: all 0.1s ease-in;
+    padding: 0;
+    width: 100%;
+    border: solid hsl(var(--color-surface));
+    border-width: 1px 1px 0 0;
+    box-shadow: -1px 1px 1px 1px hsl(var(--color-surface));
+  }
+
+  .disabled-menu-link {
+    pointer-events: none;
+  }
+
+  .navigation-menu-link:active > .content {
+    box-shadow: inset 0 0 2px 0.5px hsl(var(--color-on-surface) / .75);
+  }
+
+  .content {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 0 1.5rem;
+  }
+
+  .arrow-indicator::after {
+    content: "";
+    position: absolute;
+    display: inline-block;
+    border: solid hsl(var(--color-on-background));
+    border-width: 0 2px 2px 0;
+    padding: 3px;
+    top: 50%;
+    right: 1.5rem;
+    transform: translate(0, -50%) rotate(45deg);
+    transition: all var(--transition-bezier);
+  }
+
+  .navigation-menu-item:hover .arrow-indicator::after {
+    transform: translate(0, -50%) rotate(-135deg);
+  }
+
+  .content p {
+    cursor: default;
+    user-select: none;
+  }
+
+  .navigation-menu-link > .content p {
+    cursor: pointer;
+  }
+
+  .icon {
+    transition: all var(--transition-bezier);
+  }
+
+</style>
