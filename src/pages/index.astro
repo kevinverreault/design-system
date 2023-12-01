@@ -9,11 +9,12 @@ import Icon from '../components/ui/Icon.astro';
 import Accordion from '../components/navigation/Accordion.astro';
 import ThemeToggle from '../components/ui/ThemeToggle.astro'
 
+export const prerender = true;
+
 const buttonVariants = ["primary", "secondary", "muted", "danger"] as const;
 const buttonTypes = ["outline", "ghost", "underline"] as const;
 const buttonSizes = ["icon", "small", "medium", "large", "extra-large"] as const;
 const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
-
 ---
 
 <Layout title="Design system">
