@@ -76,7 +76,7 @@ const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
 
       <h3 class="numbered-title">Navigation</h3>
       
-      <div>
+      <div style="padding: 0 9rem;">
         <nav>
           <NavigationBar navigationItems={NavigationItems} />
         </nav>
@@ -91,7 +91,7 @@ const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
           buttonVariants.map(variant => (
             <div class="grid grid-auto-column">
               <div><Button variant={variant}>{variant}</Button></div>
-              {buttonTypes.map(decoration => <div><Button variant={variant} decoration={decoration}>{decoration}</Button></div>)}
+              {buttonTypes.map(decoration => <div><Button variant={variant} decoration={decoration} textVariant={decoration === "ghost" ? "colored" : "default"}>{decoration}</Button></div>)}
             </div>
           ))
         }
@@ -106,7 +106,7 @@ const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
             <div>
               {
                 size !== "icon" ? <Button size={size}>{size}</Button> :
-                <Button size="icon" shape="circle">
+                <Button size="icon" shape="circle" aria-label="instagram">
                   <Icon icon="instagram" width="1.5rem" height="1.5rem" color="inherit"/>
                 </Button>
               }
@@ -144,7 +144,7 @@ const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
   .numbered-title span {
       margin-right: .5em;
       font-weight: 700;
-      color: hsl( var(--color-on-background) / .25);
+      color: hsl( var(--color-on-background) / .50);
   }
 
   .typography-section {

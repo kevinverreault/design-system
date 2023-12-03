@@ -12,9 +12,9 @@ const { text, path } = Astro.props;
   <li>
     <a href={path}>
       <div class="menu-item color-background">
-        <p class="text-md text-on-background">
+        <div class="content text-md text-on-background">
           {text}
-        </p>
+        </div>
       </div>
     </a>
   </li>
@@ -24,26 +24,23 @@ const { text, path } = Astro.props;
   .menu-item {
     width: 100%;
     height: 100%;
-    padding: 1rem 2rem;
+    padding: 1rem 1.5rem;
     transition: background-color .2s ease-in, box-shadow .1s ease-in;
     position: relative;
-    /* border: solid hsl(var(--color-surface));
-    border-width: 0px 1px 1px 1px; */
   }
 
-  .menu-item p {
-    display: flex;
+  .menu-item .content {
     position: relative;
     line-height: 1.5;
-    padding: 0.5rem 0;
+    padding: 0.5rem 1rem 0.5rem 0;
   }
 
-  .menu-item:hover p {
+  .menu-item:hover .content {
     color: hsl(var(--color-on-surface));
     width: 100%;
   }
 
-  .menu-item p::before {
+  .menu-item .content::before {
     content: "";
     position: absolute;
     display: inline-block;
@@ -56,12 +53,12 @@ const { text, path } = Astro.props;
     transition: all var(--transition-bezier);
   }
 
-  .menu-item:hover p::before {
+  .menu-item:hover .content::before {
     transform: translate(0, -50%) rotate(-45deg);
     opacity: 1;
   }
 
-  .menu-item p::after {
+  .menu-item .content::after {
     content: "";
     position: absolute;
     left: 0;
@@ -72,12 +69,12 @@ const { text, path } = Astro.props;
     transition: all var(--transition-bezier);
   }
 
-  .menu-item:hover p::after {
+  .menu-item:hover .content::after {
     width: 100%;
   }
 
   .menu-item:active {
-    box-shadow: inset 0 0 2px 0.5px hsl(var(--color-on-surface) / .75);
+    box-shadow: inset 0 0 1px 1px hsl(var(--color-on-surface) / .75);
   }
 
 </style>

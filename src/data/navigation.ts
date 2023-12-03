@@ -1,67 +1,50 @@
 const NavigationItems : NavigationItem[] = [
   {
+    text: "Accueil",
+    path: "/"
+  }, 
+  {
     text: "À propos",
     subMenuLinks: [
       {
         path: "/",
-        text: "Notre mission"
+        text: "Bio"
       }, {
         path: "/",
-        text: "Observation des oiseaux"
-      }, {
-        path: "/",
-        text: "Nos succès"
+        text: "Projets"
       }
     ]
   }, 
   {
-    text: "Information",
+    text: "Portfolio",
     subMenuLinks: [
       {
         path: "/",
-        text: "Cartes"
+        text: "Oiseaux"
       }, {
         path: "/",
-        text: "Biodiversité"
+        text: "Mammifères"
       }, {
         path: "/",
-        text: "Historique"
+        text: "Paysages"
       }
     ]
   }, 
   {
-    text: "Activités",
-    subMenuLinks: [
-      {
-        path: "/",
-        text: "Cartes"
-      }, {
-        path: "/",
-        text: "Biodiversité"
-      }, {
-        path: "/",
-        text: "Historique"
-      }
-    ]
-  }, 
-  {
-    text: "Actualités",
+    text: "Boutique",
     path: "/",
     subMenuLinks: [
       {
         path: "/",
-        text: "Cartes"
+        text: "Impressions"
       }, {
         path: "/",
-        text: "Biodiversité"
-      }, {
-        path: "/",
-        text: "Historique"
+        text: "Calendriers"
       }
     ]
   }, 
   {
-    text: "Nous appuyer",
+    text: "Contact",
     path: "/"
   }
 ]

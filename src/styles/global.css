@@ -1,7 +1,7 @@
 :root {
   --color-primary-h: 356;
   --color-primary-s: 29%;
-  --color-primary-l: 32%;
+  --color-primary-l: 35%;
   --color-primary: var(--color-primary-h) var(--color-primary-s) var(--color-primary-l);
   --color-primary-variant: var(--color-primary-h) var(--color-primary-s) calc(var(--color-primary-l) - 10%);
   --color-on-primary: 0 0% 100%;
@@ -11,13 +11,13 @@
   --color-secondary-l: 37%;
   --color-secondary: var(--color-secondary-h) var(--color-secondary-s) var(--color-secondary-l);
   --color-secondary-variant: var(--color-secondary-h) var(--color-secondary-s) calc(var(--color-secondary-l) - 10%);
-  --color-on-secondary: 0 0% 0%;
+  --color-on-secondary: 0 0% 100%;
   
   --color-background: 160 0% 10%;
   --color-on-background: 0 0% 100%;
-  --color-surface: 160 0% 19%;
+  --color-surface: 160 0% 20%;
   --color-on-surface: 0 0% 100%;
-  --color-error: 0 74% 38%;
+  --color-error: 0 74% 40%;
   --color-on-error: 0 0% 100%;
 
   --ff-sans-normal: "Noto Sans", sans-serif;
@@ -35,7 +35,7 @@
 
   --border: 0.5rem;
   
-  --transition-bezier: cubic-bezier(.43,.045,.1,.95) .55s;
+  --transition-bezier: cubic-bezier(.43,.045,.1,.95) .45s;
 }
 
 /* ------------------------------ */
@@ -83,8 +83,8 @@ a {
  text-decoration: none;
 }
 
-img,
-picture {
+img:not([hidden]), 
+picture:not([hidden]) {
   max-width: 100%;
   display: block;
 }

@@ -28,7 +28,11 @@ const button = cva("button", {
       rectangle: "",
       square: "square",
       circle: "circle",
-      rounded: "rounded",
+      rounded: "rounded"
+    },
+    textVariant: {
+      default: "default-text",
+      colored: "colored-text"
     }
   }
 });
@@ -38,10 +42,17 @@ export interface Props
     VariantProps<typeof button> {
     }
       
-const { variant = "primary", decoration = "plain", size = "medium", shape = "rectangle", ...attributes} = Astro.props;
+const { 
+  variant = "primary", 
+  decoration = "plain", 
+  size = "medium",
+  shape = "rectangle", 
+  textVariant = "default", 
+  ...attributes
+  } = Astro.props;
 ---
 
-<button {...attributes} class:list={[button({ variant, decoration, size,  shape}), "button", "ff-sans-normal"]}>
+<button {...attributes} class:list={[button({ variant, decoration, size,  shape, textVariant}), "button", "ff-sans-normal"]}>
   <slot />
 </button>
 
@@ -70,29 +81,37 @@ const { variant = "primary", decoration = "plain", size = "medium", shape = "rec
   .primary {
     --main-color: hsl(var(--color-primary));
     --text-on-main-color: hsl(var(--color-on-primary));
-    --text-on-background-color: var(--main-color);
     --accent-color: hsl(var(--color-primary-variant));
   }
 
   .secondary {
     --main-color: hsl(var(--color-secondary));
     --text-on-main-color: hsl(var(--color-on-secondary));
-    --text-on-background-color: var(--main-color);
     --accent-color: hsl(var(--color-secondary-variant));
   }
 
   .muted {
     --main-color: hsl(var(--color-surface));
     --text-on-main-color: hsl(var(--color-on-surface));
-    --text-on-background-color: var(--text-on-main-color);
     --accent-color: hsl(var(--color-surface) / .8);
   }
 
   .danger {
     --main-color: hsl(var(--color-error) / .75);
     --text-on-main-color: hsl(var(--color-on-error));
-    --text-on-background-color: var(--main-color);
     --accent-color: hsl(var(--color-error) / .6);
+  }
+
+  .default-text {
+    --text-on-background-color: var(--text-on-main-color);
+  }
+
+  .colored-text {
+    --text-on-background-color: var(--main-color);
+  }
+
+  .colored-text.muted {
+    --text-on-background-color: var(--text-on-main-color);
   }
 
   .plain {
@@ -138,7 +157,7 @@ const { variant = "primary", decoration = "plain", size = "medium", shape = "rec
     position: absolute;
     left: 50%;
     transform: translate(-50%, 0);
-    bottom: 4px;
+    bottom: 20%;
     height: 2px;
     width: calc(100% - 4em);
     background-color: var(--main-color);
@@ -170,5 +189,4 @@ const { variant = "primary", decoration = "plain", size = "medium", shape = "rec
     border-radius: 9999px;
   }
   
-
 </style>
