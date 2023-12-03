@@ -30,9 +30,12 @@ const { text, path } = Astro.props;
   }
 
   .menu-item .content {
+    /* display: flex; */
     position: relative;
     line-height: 1.5;
     padding: 0.5rem 1rem 0.5rem 0;
+    /* overflow-wrap: break-word; */
+    hyphens: auto;
   }
 
   .menu-item:hover .content {
