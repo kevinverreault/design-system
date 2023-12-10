@@ -35,7 +35,7 @@
 
   --border: 0.5rem;
   
-  --transition-bezier: cubic-bezier(.43,.045,.1,.95) .45s;
+  --transition-bezier: cubic-bezier(.43,.045,.1,.95) .35s;
 }
 
 /* ------------------------------ */

@@ -6,6 +6,8 @@ import Button from '@components/ui/Button.astro';
 import NavigationBar from '@components/navigation/NavigationMenu.astro';
 import { NavigationItems } from '../data/navigation';
 import Icon from '@components/ui/Icon.astro';
+import Accordion from '@components/navigation/Accordion.astro';
+import NavigationMenu from '@components/navigation/NavigationMenu.astro';
 
 const buttonVariants = ["primary", "secondary", "muted", "danger"] as const;
 const buttonTypes = ["outline", "ghost", "underline"] as const;
@@ -76,10 +78,16 @@ const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
 
       <h3 class="numbered-title">Navigation</h3>
       
-      <div style="padding: 0 9rem;">
+      <div style="padding-right: 18rem;">
         <nav>
           <NavigationBar navigationItems={NavigationItems} />
         </nav>
+      </div>
+
+      <h3 class="numbered-title">Accordion</h3>
+
+      <div style="width:33%">
+        <Accordion navigationItems={NavigationItems} />
       </div>
 
       <h3 class="numbered-title">Button</h3>
@@ -124,6 +132,7 @@ const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
           ))
         }
       </div>
+      
     </section>
   </div>
 </Layout>
