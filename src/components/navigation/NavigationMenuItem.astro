@@ -48,7 +48,7 @@ const menuItemTextStyle = "text-lg text-on-background ff-sans-condensed letter-s
   .navigation-menu-item {
     border: 1px solid hsl(var(--color-surface));
     border-width: 1px 0;
-    transition: background-color var(--transition-bezier);
+    transition: background-color ease-in 0.25s;
     flex: 1 1 0px;
     position: relative;
     width: 100%;
@@ -133,7 +133,7 @@ const menuItemTextStyle = "text-lg text-on-background ff-sans-condensed letter-s
   }
 
   .menu-header > a::after {
-    menu-header: "";
+    content: "";
     position: absolute;
     left: 0;
     top: 0;
