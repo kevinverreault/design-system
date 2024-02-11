@@ -2,8 +2,6 @@
 
 ## Project Structure
 
-Inside of your Astro project, you'll see the following folders and files:
-
 ```text
 /
 ├── public/
@@ -15,8 +13,6 @@ Inside of your Astro project, you'll see the following folders and files:
 ```
 
 ## Commands
-
-All commands are run from the root of the project, from a terminal:
 
 | Command                   | Action                                           |
 | :------------------------ | :----------------------------------------------- |
