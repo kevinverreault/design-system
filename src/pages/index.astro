@@ -1,13 +1,13 @@
 ---
-import '@styles/global.css';
+import '../styles/global.css';
 import Layout from '../layouts/Layout.astro';
-import Colors from '@components/demo/Colors.astro';
-import Button from '@components/ui/Button.astro';
-import NavigationBar from '@components/navigation/NavigationMenu.astro';
+import Colors from '../components/demo/Colors.astro';
+import Button from '../components/ui/Button.astro';
+import NavigationBar from '../components/navigation/NavigationMenu.astro';
 import { NavigationItems } from '../data/navigation';
-import Icon from '@components/ui/Icon.astro';
-import Accordion from '@components/navigation/Accordion.astro';
-import ThemeToggle from '@components/ui/ThemeToggle.astro'
+import Icon from '../components/ui/Icon.astro';
+import Accordion from '../components/navigation/Accordion.astro';
+import ThemeToggle from '../components/ui/ThemeToggle.astro'
 
 const buttonVariants = ["primary", "secondary", "muted", "danger"] as const;
 const buttonTypes = ["outline", "ghost", "underline"] as const;
