@@ -7,7 +7,7 @@ import NavigationBar from '@components/navigation/NavigationMenu.astro';
 import { NavigationItems } from '../data/navigation';
 import Icon from '@components/ui/Icon.astro';
 import Accordion from '@components/navigation/Accordion.astro';
-import NavigationMenu from '@components/navigation/NavigationMenu.astro';
+import ThemeToggle from '@components/ui/ThemeToggle.astro'
 
 const buttonVariants = ["primary", "secondary", "muted", "danger"] as const;
 const buttonTypes = ["outline", "ghost", "underline"] as const;
@@ -18,7 +18,13 @@ const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
 
 <Layout title="Design system">
   <div class="container flow" style="--flow-space: 2rem; margin-top: 2rem;">
-    <h1>Design system</h1>
+    <div class="flex flex-row items-center justify-space-between">
+      <h1>Design system</h1>
+
+      <div>
+        <ThemeToggle />
+      </div>
+    </div>
     
     <section id="colors" class="flow">
       <h2 class="numbered-title"><span>01</span> Colors</h2>

@@ -13,10 +13,10 @@
   --color-secondary-variant: var(--color-secondary-h) var(--color-secondary-s) calc(var(--color-secondary-l) - 10%);
   --color-on-secondary: 0 0% 100%;
   
-  --color-background: 160 0% 10%;
-  --color-on-background: 0 0% 100%;
-  --color-surface: 160 0% 20%;
-  --color-on-surface: 0 0% 100%;
+  --color-background: 0 0% 100%;
+  --color-on-background: 160 0% 10%;
+  --color-surface: 160 0% 85%;
+  --color-on-surface: 160 0% 20%;
   --color-error: 0 74% 40%;
   --color-on-error: 0 0% 100%;
 
@@ -36,6 +36,16 @@
   --border: 0.5rem;
   
   --transition-bezier: cubic-bezier(.43,.045,.1,.95) .35s;
+  --theme-transition: 0.2s ease-in-out;
+}
+
+:root.theme-dark {
+  --color-background: 160 0% 10%;
+  --color-on-background: 0 0% 100%;
+  --color-surface: 160 0% 20%;
+  --color-on-surface: 0 0% 100%;
+  --color-error: 0 74% 40%;
+  --color-on-error: 0 0% 100%;
 }
 
 /* ------------------------------ */
@@ -128,6 +138,13 @@ select {
 .items-center {	align-items: center; }
 .items-baseline	 { align-items: baseline; }
 .items-stretch { align-items: stretch; }
+
+.justify-start { justify-content: start ; }
+.justify-end { justify-content: end ; }
+.justify-center { justify-content: center ; }
+.justify-space-between { justify-content: space-between ; }
+.justify-space-evenly { justify-content: space-evenly ; }
+.justify-space-around { justify-content: space-around ; }
 
 .center {
   display: flex;
