@@ -20,9 +20,9 @@ const button = cva("button", {
     size: {
       icon: "icon",
       small: "text-sm",
-      medium: "text-base",
-      large: "text-lg",
-      "extra-large":  "text-xl"
+      medium: "text-md",
+      large: "text-xl",
+      "extra-large":  "text-2xl"
     },
     shape: {
       rectangle: "",
@@ -60,7 +60,7 @@ const {
 
   .button {
     --border-radius: var(--border);
-    padding: 1.25em 2em;
+    padding: 0.75em 1.5em;
     border-radius: var(--border-radius);
     position: relative;
     display: inline-grid;
@@ -159,7 +159,7 @@ const {
     transform: translate(-50%, 0);
     bottom: 20%;
     height: 2px;
-    width: calc(100% - 4em);
+    width: calc(100% - 3em);
     background-color: var(--main-color);
     transition: all cubic-bezier(.43,.045,.1,.95) .35s;
   }
