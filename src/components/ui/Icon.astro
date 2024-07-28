@@ -11,7 +11,8 @@ function getSVG(name: string) {
   const filepath = `/src/svg/${name}.svg`;
   const files = import.meta.glob<string>('/src/svg/**/*.svg', {
     eager: true,
-    as: 'raw',
+    query: '?raw',
+    import: 'default'
   });
 
   if (!(filepath in files)) {
