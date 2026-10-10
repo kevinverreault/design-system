@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.4.1",
-    "astro": "^4.1.2",
+    "astro": "^5.18.2",
     "cva": "npm:class-variance-authority@^0.7.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "node-html-parser": "^6.1.11"
