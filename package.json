@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.4.1",
-    "astro": "^5.18.2",
+    "astro": "^6.4.8",
     "cva": "npm:class-variance-authority@^0.7.0",
     "typescript": "^5.9.3"
   },
