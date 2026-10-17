@@ -1,0 +1,31 @@
+---
+import '../../styles/global.css'
+import './control.css'
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props extends Omit<HTMLAttributes<"input">, "type"> {}
+
+const { class: className, ...attributes } = Astro.props;
+---
+
+<input {...attributes} type="checkbox" class:list={["form-check", "checkbox", className]} />
+
+<style>
+  .checkbox {
+    border-radius: calc(var(--border) / 2);
+  }
+
+  .checkbox::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    background-color: currentColor;
+    transform: scale(0);
+    transition: transform 120ms ease-in-out;
+  }
+
+  .checkbox:checked::before {
+    transform: scale(1);
+  }
+</style>

@@ -1,0 +1,116 @@
+/*
+ * Shared look of the boxed form controls (Input, Textarea, Select): border,
+ * focus ring, error, disabled and read-only states. Padding and line height
+ * come from the --control-* tokens that Button uses too, so an Input, a
+ * Select and a Button of the same size are the same height.
+ */
+.form-control {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: calc(var(--control-padding-block) - var(--control-border-width)) calc(var(--control-padding-inline) - var(--control-border-width));
+  line-height: var(--control-line-height);
+  color: hsl(var(--color-on-background));
+  background-color: hsl(var(--color-background));
+  border: var(--control-border-width) solid hsl(var(--color-on-background) / .5);
+  border-radius: var(--border);
+  transition: border-color var(--theme-transition), background-color var(--theme-transition);
+}
+
+/*
+ * Single-line controls get the height a Button has naturally (line height plus
+ * padding): WebKit gives inputs a taller minimum line box than buttons.
+ */
+input.form-control,
+select.form-control {
+  height: calc(1em * var(--control-line-height) + 2 * var(--control-padding-block));
+}
+
+/* Native popups (select options, date pickers) follow the theme. */
+.theme-dark .form-control {
+  color-scheme: dark;
+}
+
+.form-control::placeholder {
+  color: hsl(var(--color-on-background) / .6);
+  opacity: 1;
+}
+
+.form-control:hover:not(:disabled, [readonly]) {
+  border-color: hsl(var(--color-on-background) / .8);
+}
+
+.form-control[aria-invalid="true"] {
+  border-color: hsl(var(--color-error-text));
+}
+
+.form-control[readonly] {
+  background-color: hsl(var(--color-surface) / .4);
+  border-style: dashed;
+}
+
+.form-control:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/*
+ * Shared look of the check-style controls (Checkbox, radios, Switch): a
+ * native input with its appearance removed. In forced-colours mode they go
+ * back to the native appearance, which the system already draws legibly.
+ */
+.form-check {
+  appearance: none;
+  flex: none;
+  display: inline-grid;
+  place-content: center;
+  width: 1.125em;
+  height: 1.125em;
+  margin: 0;
+  font: inherit;
+  color: hsl(var(--color-on-primary));
+  background-color: hsl(var(--color-background));
+  border: var(--control-border-width) solid hsl(var(--color-on-background) / .5);
+  cursor: pointer;
+  transition: background-color var(--theme-transition), border-color var(--theme-transition);
+}
+
+.form-check:checked {
+  background-color: hsl(var(--color-primary));
+  border-color: hsl(var(--color-accent));
+}
+
+.form-check[aria-invalid="true"] {
+  border-color: hsl(var(--color-error-text));
+}
+
+.form-check:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* Shared by every form control, boxed or not. */
+.form-control:focus-visible,
+.form-check:focus-visible {
+  outline: 2px solid hsl(var(--color-accent));
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .form-control[aria-invalid="true"] {
+    border-width: calc(var(--control-border-width) * 2);
+  }
+
+  .form-control:disabled {
+    color: GrayText;
+    border-color: GrayText;
+  }
+
+  .form-check {
+    appearance: auto;
+  }
+
+  .form-check::before {
+    display: none;
+  }
+}

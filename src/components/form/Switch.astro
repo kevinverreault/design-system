@@ -1,0 +1,44 @@
+---
+import '../../styles/global.css'
+import './control.css'
+import type { HTMLAttributes } from "astro/types";
+
+/** An on/off toggle: a native checkbox exposed as `role="switch"`, so it submits and validates like one. */
+export interface Props extends Omit<HTMLAttributes<"input">, "type" | "role"> {}
+
+const { class: className, ...attributes } = Astro.props;
+---
+
+<input {...attributes} type="checkbox" role="switch" class:list={["form-check", "switch", className]} />
+
+<style>
+  .switch {
+    --switch-padding: 0.125em;
+    --thumb-size: 0.875em;
+    display: inline-flex;
+    align-items: center;
+    width: 2.25em;
+    height: 1.25em;
+    padding: var(--switch-padding);
+    border-radius: 9999px;
+    background-color: hsl(var(--color-on-background) / .15);
+  }
+
+  .switch::before {
+    content: "";
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    border-radius: 50%;
+    background-color: hsl(var(--color-on-background) / .7);
+    transition: transform 150ms ease-in-out, background-color 150ms ease-in-out;
+  }
+
+  .switch:checked {
+    background-color: hsl(var(--color-primary));
+  }
+
+  .switch:checked::before {
+    background-color: hsl(var(--color-on-primary));
+    transform: translateX(calc(2.25em - 2 * var(--control-border-width) - 2 * var(--switch-padding) - var(--thumb-size)));
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+import '../../styles/global.css'
+import './control.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const textarea = cva("form-control textarea", {
+  variants: {
+    size: {
+      small: "text-sm",
+      medium: "text-md",
+      large: "text-xl"
+    }
+  }
+});
+
+export interface Props
+  extends Omit<HTMLAttributes<"textarea">, "value">,
+    VariantProps<typeof textarea> {
+  /** Initial content of the textarea. */
+  value?: string;
+}
+
+const { value = "", rows = 4, size = "medium", class: className, ...attributes } = Astro.props;
+---
+
+<textarea {...attributes} rows={rows} class:list={[textarea({ size }), "ff-sans-normal", className]}>{value}</textarea>
+
+<style>
+  .textarea {
+    resize: vertical;
+  }
+</style>

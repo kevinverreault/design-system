@@ -1,0 +1,59 @@
+---
+import '../../styles/global.css'
+import './control.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const select = cva("form-control select", {
+  variants: {
+    size: {
+      small: "text-sm",
+      medium: "text-md",
+      large: "text-xl"
+    }
+  }
+});
+
+/**
+ * A native select; put `option` and `optgroup` elements in the default slot.
+ * `size` is the shared size variant (it matches Button's), not the native visible-rows count.
+ */
+export interface Props
+  extends Omit<HTMLAttributes<"select">, "size">,
+    VariantProps<typeof select> {
+}
+
+const { size = "medium", class: className, ...attributes } = Astro.props;
+---
+
+<select {...attributes} class:list={[select({ size }), "ff-sans-normal", className]}>
+  <slot />
+</select>
+
+<style>
+  /* The chevron is drawn with gradients in the text colour, so it follows the theme. */
+  .select {
+    appearance: none;
+    padding-inline-end: calc(var(--control-padding-inline) + 1em);
+    background-image:
+      linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position:
+      calc(100% - var(--control-padding-inline) + 0.1em) 50%,
+      calc(100% - var(--control-padding-inline) + 0.45em) 50%;
+    background-size: 0.35em 0.35em;
+    background-repeat: no-repeat;
+    cursor: pointer;
+  }
+
+  .select:disabled {
+    cursor: not-allowed;
+  }
+
+  @media (forced-colors: active) {
+    .select {
+      appearance: auto;
+      padding-inline-end: calc(var(--control-padding-inline) - var(--control-border-width));
+    }
+  }
+</style>
