@@ -84,13 +84,26 @@ describe('Image', () => {
     expect(figure.classList.contains('fit-cover')).toBe(false);
   });
 
-  test('passes image attributes to the img and the class to the figure', async () => {
-    const figure = await renderFigure({ src: remote, alt: 'A heron', class: 'hero', id: 'heron', loading: 'eager', width: 600, height: 400 });
+  test('passes unknown attributes such as id, class and aria-* to the figure', async () => {
+    const figure = await renderFigure({ src: remote, alt: 'A heron', id: 'heron', class: 'hero', 'aria-label': 'Heron photo', 'data-index': '3' });
     const img = figure.querySelector('img')!;
 
+    expect(figure.id).toBe('heron');
     expect(figure.classList.contains('hero')).toBe(true);
-    expect(img.id).toBe('heron');
+    expect(figure.getAttribute('aria-label')).toBe('Heron photo');
+    expect(figure.getAttribute('data-index')).toBe('3');
+    expect(img.id).toBe('');
+    expect(img.hasAttribute('aria-label')).toBe(false);
+  });
+
+  test('passes image attributes such as loading, width and height to the img', async () => {
+    const figure = await renderFigure({ src: remote, alt: 'A heron', loading: 'eager', width: 600, height: 400, fetchpriority: 'high' });
+    const img = figure.querySelector('img')!;
+
     expect(img.getAttribute('loading')).toBe('eager');
     expect(img.getAttribute('width')).toBe('600');
+    expect(img.getAttribute('height')).toBe('400');
+    expect(img.getAttribute('fetchpriority')).toBe('high');
+    expect(figure.hasAttribute('loading')).toBe(false);
   });
 });

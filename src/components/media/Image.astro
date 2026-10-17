@@ -23,27 +23,45 @@ const image = cva("image", {
   }
 });
 
+/** Attributes that belong to the image itself; they go on the img. */
+type ImageElementAttributes = Pick<HTMLAttributes<"img">, "loading" | "decoding" | "fetchpriority" | "sizes">;
+
 /**
- * Unknown attributes (id, aria-*, data-*, loading, …) go on the img, not the
- * figure root: the Image-specific rule wins over the general convention.
- * Only `class` is applied to the figure.
+ * Unknown attributes (id, class, aria-*, data-*, …) go on the root figure, as
+ * for every component. The image attributes above, plus width and height, go
+ * on the img.
  */
 export interface Props
-  extends Omit<HTMLAttributes<"img">, "src" | "alt" | "width" | "height">,
+  extends HTMLAttributes<"figure">,
+    ImageElementAttributes,
     VariantProps<typeof image> {
-  width?: number;
-  height?: number;
   /** An imported local asset (optimised by Astro) or a remote URL string. */
   src: ImageMetadata | string;
   /** Required. Use an empty string for decorative images. */
   alt: string;
+  width?: number;
+  height?: number;
   /** Owner of the photo; rendered as "© {credit}". The `credit` slot replaces it. */
   credit?: string;
 }
 
 const RESPONSIVE_WIDTHS = [480, 800, 1200, 1600, 2400];
 
-const { src, alt, credit, ratio = "auto", fit = "cover", sizes, class: className, ...attributes } = Astro.props;
+const {
+  src,
+  alt,
+  credit,
+  ratio = "auto",
+  fit = "cover",
+  width,
+  height,
+  loading,
+  decoding,
+  fetchpriority,
+  sizes,
+  class: className,
+  ...attributes
+} = Astro.props;
 
 const isRemote = typeof src === "string";
 
@@ -59,11 +77,11 @@ const widths = isRemote
   : [...RESPONSIVE_WIDTHS.filter(width => width < src.width), src.width];
 ---
 
-<figure class:list={[image({ ratio, fit }), className]}>
+<figure {...attributes} class:list={[image({ ratio, fit }), className]}>
   {
     isRemote
-      ? <img {...attributes} src={src} alt={alt} sizes={sizes} loading={attributes.loading ?? "lazy"} decoding="async" />
-      : <OptimizedImage {...attributes} src={src} alt={alt} widths={widths} sizes={sizes ?? "100vw"} />
+      ? <img src={src} alt={alt} width={width} height={height} sizes={sizes} loading={loading ?? "lazy"} decoding={decoding ?? "async"} fetchpriority={fetchpriority} />
+      : <OptimizedImage src={src} alt={alt} width={width} height={height} widths={widths} sizes={sizes ?? "100vw"} loading={loading} decoding={decoding} fetchpriority={fetchpriority} />
   }
   {
     hasCredit &&

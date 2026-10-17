@@ -264,11 +264,11 @@ const imageRatios = ["1:1", "3:2", "16:9"] as const;
       <h3 class="numbered-title">Sources and credit</h3>
 
       <Row columns={3}>
-        <Pane id="image-local">
-          <Image src={dusk} alt="Mountains at dusk, local asset" credit="Kevin Verreault 2024" />
+        <Pane>
+          <Image id="image-local" src={dusk} alt="Mountains at dusk, local asset" credit="Kevin Verreault 2024" />
         </Pane>
-        <Pane id="image-remote">
-          <Image src="/images/snow.jpg" alt="Snowfield, URL source" credit="Credit on a white photo" width={1200} height={800} />
+        <Pane>
+          <Image id="image-remote" src="/images/snow.jpg" alt="Snowfield, URL source" credit="Credit on a white photo" width={1200} height={800} />
         </Pane>
         <Pane>
           <Image src={dusk} alt="Mountains at dusk, no credit" />
