@@ -33,6 +33,14 @@ import TabPanel from '../components/navigation/TabPanel.astro';
 import Breadcrumbs from '../components/navigation/Breadcrumbs.astro';
 import Pagination from '../components/navigation/Pagination.astro';
 import Footer from '../components/navigation/Footer.astro';
+import Dialog from '../components/overlay/Dialog.astro';
+import AlertDialog from '../components/overlay/AlertDialog.astro';
+import Sheet from '../components/overlay/Sheet.astro';
+import { sheetSides, type SheetSide } from '../components/overlay/dialog-variants';
+import Lightbox from '../components/media/Lightbox.astro';
+import Popover from '../components/overlay/Popover.astro';
+import DropdownMenu from '../components/overlay/DropdownMenu.astro';
+import Tooltip from '../components/overlay/Tooltip.astro';
 
 const buttonVariants = ["primary", "secondary", "muted", "danger"] as const;
 const buttonTypes = ["outline", "ghost", "underline"] as const;
@@ -86,6 +94,15 @@ const paginationItems = [1, 2, 3, 4, 5].map(page => ({ text: String(page), path:
 const footerGroups = NavigationItems
   .filter(item => item.subMenuLinks)
   .map(item => ({ title: item.text, links: item.subMenuLinks! }));
+const sheetSideNames = Object.keys(sheetSides) as SheetSide[];
+const dialogSizes = ["small", "medium", "large"] as const;
+const printActions = [
+  { text: "View the photo", path: "#dropdown-menu" },
+  { text: "Add to cart", value: "add" },
+  { text: "Add to wishlist", value: "wishlist" },
+  { text: "Reserve a framed print", value: "reserve", disabled: true },
+  { text: "Share", value: "share" }
+];
 const footerSocial = [
   { icon: "instagram", text: "Instagram", path: "#footer" },
   { icon: "facebook", text: "Facebook", path: "#footer" },
@@ -683,11 +700,129 @@ const footerSocial = [
 
       <Footer groups={footerGroups} social={footerSocial} copyright="Kevin Verreault 2024" />
     </section>
+
+    <section id="dialog" class="flow">
+      <h2 class="numbered-title"><span>20</span> Dialog</h2>
+
+      <p>A native modal dialog: Escape or a click outside closes it, and focus returns to the Button that opened it.</p>
+
+      <Dialog id="dialog-demo" title="Order a print" description="Choose a size; framing is quoted separately.">
+        <Button slot="trigger" id="dialog-demo-trigger">Order a print</Button>
+        <FormField label="Print size"><RadioGroup name="dialog-format" options={printFormats} value="a4" /></FormField>
+        <Fragment slot="footer">
+          <Button variant="muted" value="cancel">Cancel</Button>
+          <Button value="order">Add to cart</Button>
+        </Fragment>
+      </Dialog>
+
+      <h3 class="numbered-title">Sizes</h3>
+
+      <div class="flex flex-row" style="flex-wrap: wrap;">
+        {
+          dialogSizes.map(size => (
+            <Dialog id={`dialog-${size}`} size={size} title={`size="${size}"`}>
+              <Button slot="trigger" variant="muted">{size}</Button>
+              <p>A {size} dialog. Its width shrinks to fit narrow screens.</p>
+            </Dialog>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="alert-dialog" class="flow">
+      <h2 class="numbered-title"><span>21</span> Alert dialog</h2>
+
+      <p>Asks for an explicit choice: no close button, and a click outside doesn't close it. Escape cancels.</p>
+
+      <AlertDialog id="alert-dialog-demo" title="Delete this print?" description="It will be removed from your cart. This cannot be undone." actionLabel="Delete">
+        <Button slot="trigger" id="alert-dialog-demo-trigger" variant="danger">Delete print</Button>
+      </AlertDialog>
+      <AlertDialog id="alert-dialog-primary" title="Publish this gallery?" description="Visitors will see it on the portfolio page." actionLabel="Publish" actionVariant="primary">
+        <Button slot="trigger" variant="muted">Publish gallery</Button>
+      </AlertDialog>
+      <p>Last choice: <output id="alert-dialog-result">none</output></p>
+    </section>
+
+    <section id="sheet" class="flow">
+      <h2 class="numbered-title"><span>22</span> Sheet</h2>
+
+      <div class="flex flex-row" style="flex-wrap: wrap;">
+        {
+          sheetSideNames.map(side => (
+            <Sheet id={`sheet-${side}`} side={side} title={`side="${side}"`} description="A dialog attached to one edge of the viewport.">
+              <Button slot="trigger" id={`sheet-${side}-trigger`} variant="secondary">{side}</Button>
+              <p>Use it for a mobile menu or a cart panel.</p>
+            </Sheet>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="lightbox" class="flow">
+      <h2 class="numbered-title"><span>23</span> Lightbox</h2>
+
+      <p>One Lightbox on the page opens every <a href="#gallery">Gallery</a> image at full size, with its credit. The arrow keys move to the previous or next photo.</p>
+
+      <Lightbox id="lightbox-demo" />
+    </section>
+
+    <section id="popover" class="flow">
+      <h2 class="numbered-title"><span>24</span> Popover</h2>
+
+      <p>A small panel anchored to its trigger. Escape or a click outside closes it.</p>
+
+      <Popover id="popover-demo" label="Print details">
+        <Button slot="trigger" id="popover-demo-trigger" variant="muted">Print details</Button>
+        <div class="flow" style="--flow-space: .5rem;">
+          <p class="text-lg">Fine-art print</p>
+          <p class="text-sm">Pigment ink on 310 g cotton rag, signed and numbered on the back.</p>
+        </div>
+      </Popover>
+    </section>
+
+    <section id="dropdown-menu" class="flow">
+      <h2 class="numbered-title"><span>25</span> Dropdown menu</h2>
+
+      <p>Open it with a click, Enter, Space or the arrow keys; move with the arrows, Home and End; Escape closes it.</p>
+
+      <DropdownMenu id="dropdown-menu-demo" label="Print actions" items={printActions}>
+        <Button slot="trigger" id="dropdown-menu-demo-trigger" variant="muted">Actions</Button>
+      </DropdownMenu>
+      <p>Last action: <output id="dropdown-menu-result">none</output></p>
+    </section>
+
+    <section id="tooltip" class="flow">
+      <h2 class="numbered-title"><span>26</span> Tooltip</h2>
+
+      <p>Shows on hover and on keyboard focus, and describes its trigger. It sits above, or below when there is no room above.</p>
+
+      <div class="flex flex-row items-center">
+        {
+          footerSocial.map(({ icon, text }) => (
+            <Tooltip text={`Follow on ${text}`} id={`tooltip-${icon}`}>
+              <Button size="icon" shape="circle" variant="muted" aria-label={text} id={`tooltip-${icon}-trigger`}>
+                <Icon icon={icon} width="1.5rem" height="1.5rem" color="inherit" aria-hidden="true" />
+              </Button>
+            </Tooltip>
+          ))
+        }
+      </div>
+    </section>
   </div>
 </Layout>
 
 <script>
   import { toast, type ToastVariant } from '../components/feedback/toast';
+
+  const alertDialog = document.querySelector<HTMLDialogElement>('#alert-dialog-demo')!;
+  alertDialog.addEventListener('close', () => {
+    document.querySelector('#alert-dialog-result')!.textContent = alertDialog.returnValue || 'none';
+  });
+
+  document.querySelector('#dropdown-menu-demo')!.addEventListener('click', event => {
+    const item = (event.target as Element).closest<HTMLButtonElement>('button[role="menuitem"]');
+    if (item) document.querySelector('#dropdown-menu-result')!.textContent = item.value;
+  });
 
   document.querySelectorAll<HTMLElement>('[data-toast]').forEach(trigger => {
     trigger.addEventListener('click', () => toast(trigger.dataset.toast!, {

@@ -1,0 +1,20 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import Icon from '../ui/Icon.astro';
+
+/**
+ * The close button of a native dialog (Dialog, Sheet, Lightbox). It sits in a
+ * `form method="dialog"`, so it closes the dialog without JavaScript.
+ * Unknown attributes, such as the class that styles it, go on the button.
+ */
+export interface Props extends HTMLAttributes<"button"> {
+  /** The button's accessible name. */
+  label: string;
+}
+
+const { label, ...attributes } = Astro.props;
+---
+
+<form method="dialog" class="dialog-close-form">
+  <button {...attributes} aria-label={label}><Icon icon="x" aria-hidden="true" /></button>
+</form>

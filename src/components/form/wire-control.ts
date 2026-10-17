@@ -1,12 +1,11 @@
 /**
  * FormField receives its control as rendered HTML (the default slot), so it
- * wires ids and aria attributes by rewriting the control's opening tag. Doing
- * it at render time keeps the wiring in the HTML, with no client JavaScript.
+ * wires ids and aria attributes by rewriting the control's opening tag.
  */
+import { ATTRIBUTE_LIST, buildOpeningTag, parseAttributes } from '../../lib/opening-tag';
 
-/** Opening tag of a form control. Quoted attribute values may contain `>`. */
-const CONTROL_TAG = /<(input|select|textarea|fieldset)((?:\s+[^\s"'<>/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*)\s*(\/?)>/gi;
-const ATTRIBUTE = /([^\s"'<>/=]+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s"'=<>`]+))?/g;
+/** Opening tag of a form control. */
+const CONTROL_TAG = new RegExp(String.raw`<(input|select|textarea|fieldset)${ATTRIBUTE_LIST}\s*(\/?)>`, "gi");
 
 /**
  * - `field`: a boxed control (input, select, textarea), labelled above.
@@ -32,27 +31,6 @@ export interface WiredControl {
   kind: ControlKind;
 }
 
-let fieldCount = 0;
-
-/** A page-unique id prefix for one FormField. */
-export function nextFieldId(): string {
-  return `field-${++fieldCount}`;
-}
-
-interface Attribute {
-  name: string;
-  value?: string;
-  source: string;
-}
-
-function parseAttributes(source: string): Attribute[] {
-  return [...source.matchAll(ATTRIBUTE)].map(([match, name, quoted]) => ({
-    name: name.toLowerCase(),
-    value: quoted?.replace(/^(["'])(.*)\1$/s, "$2"),
-    source: match
-  }));
-}
-
 /** Wires the first visible form control in `html`, or returns undefined when there is none. */
 export function wireControl(html: string, wiring: ControlWiring): WiredControl | undefined {
   for (const match of html.matchAll(CONTROL_TAG)) {
@@ -76,9 +54,7 @@ export function wireControl(html: string, wiring: ControlWiring): WiredControl |
     if (describedBy) added["aria-describedby"] = describedBy;
     if (wiring.invalid) added["aria-invalid"] = "true";
 
-    const kept = attributes.filter(attribute => !(attribute.name in added)).map(attribute => ` ${attribute.source}`);
-    const additions = Object.entries(added).map(([name, value]) => ` ${name}="${value.replaceAll('"', "&quot;")}"`);
-    const wired = `<${element}${kept.join("")}${additions.join("")}${selfClosing ? " /" : ""}>`;
+    const wired = buildOpeningTag(element, attributes, added, Boolean(selfClosing));
     const start = match.index;
 
     return { html: html.slice(0, start) + wired + html.slice(start + tag.length), id, kind };

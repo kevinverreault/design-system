@@ -1,0 +1,68 @@
+---
+import '../../styles/global.css'
+import './popover.css'
+import type { HTMLAttributes } from "astro/types";
+import { uniqueId } from '../../lib/unique-id';
+import { wireTrigger } from './wire-trigger';
+
+/**
+ * A small panel of extra content, anchored below its trigger. It uses the
+ * `popover` attribute, so the trigger toggles it without JavaScript, and
+ * Escape or a click outside closes it. It is a non-modal dialog named by
+ * `label`.
+ *
+ * Slots: `trigger` (a Button that toggles it) and the default slot (the
+ * panel). Unknown attributes go on the panel.
+ */
+export interface Props extends HTMLAttributes<"div"> {
+  /** Accessible name of the panel. */
+  label: string;
+}
+
+const { label, id: givenId, class: className, ...attributes } = Astro.props;
+
+const id = givenId || uniqueId("popover");
+
+if (typeof label !== "string" || label.trim() === "") {
+  throw new Error(`Popover '${id}' needs a non-empty label: it is the panel's accessible name.`);
+}
+
+const trigger = Astro.slots.has("trigger")
+  ? wireTrigger(await Astro.slots.render("trigger"), { popovertarget: id, "aria-controls": id })
+  : undefined;
+
+if (!trigger) {
+  throw new Error(`Popover '${label}' needs an element, such as a Button, in its trigger slot.`);
+}
+---
+
+<popover-root>
+  <Fragment set:html={trigger} />
+  <div {...attributes} id={id} popover="auto" role="dialog" aria-label={label} class:list={["popover", "popover-panel", className]}>
+    <slot />
+  </div>
+</popover-root>
+
+<style>
+  popover-root {
+    display: contents;
+  }
+
+  .popover {
+    width: max-content;
+    max-width: min(20rem, calc(100vw - 2 * var(--space-sm)));
+    padding: var(--space-sm);
+  }
+</style>
+
+<script>
+  import { connectPanel } from './popover';
+
+  class PopoverRoot extends HTMLElement {
+    connectedCallback() {
+      connectPanel(this, '[popover]');
+    }
+  }
+
+  customElements.define('popover-root', PopoverRoot);
+</script>

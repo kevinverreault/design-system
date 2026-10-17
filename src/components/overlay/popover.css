@@ -1,0 +1,40 @@
+/*
+ * Shared look and placement of the panels that open below their trigger
+ * (Popover, DropdownMenu). The block margin is the gap to the trigger; the
+ * script fallback in popover.ts reads it, so it applies in both paths.
+ */
+.popover-panel {
+  margin: var(--space-xs) 0;
+  border: 1px solid hsl(var(--color-on-background) / .15);
+  border-radius: var(--border);
+  background-color: hsl(var(--color-background));
+  color: hsl(var(--color-on-background));
+  box-shadow: 0 0.5rem 1.5rem hsl(var(--color-scrim) / .15);
+}
+
+@supports (position-area: block-end) {
+  .popover-panel {
+    inset: auto;
+    position-area: block-end span-inline-end;
+    position-try-fallbacks: flip-block, flip-inline;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .popover-panel:popover-open {
+    animation: popover-panel-in 150ms ease-out;
+  }
+}
+
+@keyframes popover-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+}
+
+@media (forced-colors: active) {
+  .popover-panel {
+    border-color: CanvasText;
+  }
+}

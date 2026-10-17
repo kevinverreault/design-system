@@ -23,6 +23,9 @@
   --color-on-success: 0 0% 100%;
   --color-warning: 30 100% 33%;
   --color-on-warning: 0 0% 100%;
+  /* Dims the page behind modal overlays; the same in both themes. */
+  --color-scrim: 0 0% 0%;
+  --color-on-scrim: 0 0% 100%;
 
   --ff-sans-normal: "Noto Sans", sans-serif;
   --ff-serif: "DM Serif Text", serif;
@@ -39,6 +42,7 @@
 
   --border: 0.5rem;
 
+  --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 2rem;
   --space-lg: 4rem;

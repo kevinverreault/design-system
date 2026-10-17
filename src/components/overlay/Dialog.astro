@@ -1,0 +1,22 @@
+---
+import DialogBase, { type Props as DialogBaseProps } from './DialogBase.astro';
+
+/**
+ * A modal dialog on the native `dialog` element: the browser traps focus,
+ * closes it on Escape and draws the backdrop. A click outside also closes it.
+ *
+ * Slots: `trigger` (a Button that opens the dialog; focus returns to it on
+ * close), the default slot (body) and `footer` (a `form method="dialog"`, so
+ * a submit Button there closes the dialog with its `value` as `returnValue`).
+ */
+export interface Props extends Omit<DialogBaseProps, "lightDismiss" | "side" | "closeLabel"> {
+  /** Accessible name of the close button. */
+  closeLabel?: string;
+}
+---
+
+<DialogBase {...Astro.props} lightDismiss>
+  <slot name="trigger" slot="trigger" />
+  <slot />
+  <slot name="footer" slot="footer" />
+</DialogBase>

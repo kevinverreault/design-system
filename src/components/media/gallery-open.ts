@@ -38,11 +38,7 @@ export interface GalleryOpenDetail {
   index: number;
   /** Every image of the Gallery, in display order, for previous/next. */
   images: GalleryImageDetail[];
-  /**
-   * The link that was activated; focus returns to it when the viewer closes.
-   * It holds the thumbnail's Image figure, so its figcaption is the credit
-   * footer as rendered ("©" included), ready to clone.
-   */
+  /** The link that was activated; focus returns to it when the viewer closes. */
   trigger: HTMLAnchorElement;
 }
 
