@@ -1,0 +1,234 @@
+---
+import '../../styles/global.css'
+import type { HTMLAttributes } from "astro/types";
+import { nextOverlayId, wireTrigger } from './wire-trigger';
+
+/**
+ * One menu item: a link when it has a `path` (the `{ text, path }` shape of
+ * navigation items), otherwise a button whose `value` tells the action apart.
+ */
+export interface DropdownMenuItem {
+  text: string;
+  path?: string;
+  value?: string;
+  /** Shown and reachable with the arrow keys, but does nothing. */
+  disabled?: boolean;
+}
+
+/**
+ * A compact list of actions that opens from its trigger, on the `popover`
+ * attribute, with the ARIA menu button keyboard pattern: Enter, Space or
+ * ArrowDown open it on the first item and ArrowUp on the last; the arrow keys,
+ * Home and End move between items; Escape and Tab close it and return focus to
+ * the trigger. Choosing an item closes the menu; listen for `click` on the
+ * menu and read the item's `value`.
+ *
+ * Slot: `trigger` (a Button). Unknown attributes go on the menu.
+ */
+export interface Props extends HTMLAttributes<"div"> {
+  /** Accessible name of the menu. */
+  label: string;
+  items: readonly DropdownMenuItem[];
+}
+
+const { label, items, id: givenId, class: className, ...attributes } = Astro.props;
+
+const id = givenId || nextOverlayId("menu");
+
+if (!Array.isArray(items) || items.length === 0) {
+  throw new Error(`DropdownMenu '${label}' needs at least one item.`);
+}
+
+const ambiguous = items.find(item => item.path !== undefined && item.value !== undefined);
+
+if (ambiguous) {
+  throw new Error(`DropdownMenu item '${ambiguous.text}' has both a path and a value; a link has a path, an action button has a value.`);
+}
+
+const trigger = Astro.slots.has("trigger")
+  ? wireTrigger(await Astro.slots.render("trigger"), { popovertarget: id, "aria-haspopup": "menu", "aria-controls": id })
+  : undefined;
+
+if (!trigger) {
+  throw new Error(`DropdownMenu '${label}' needs an element, such as a Button, in its trigger slot.`);
+}
+---
+
+<dropdown-menu>
+  <Fragment set:html={trigger} />
+  <div {...attributes} id={id} popover="auto" role="menu" aria-label={label} class:list={["menu", className]}>
+    {
+      items.map(({ text, path, value, disabled }) => {
+        const Item = path === undefined ? "button" : "a";
+        return (
+          <Item
+            role="menuitem"
+            tabindex="-1"
+            class="menu-item"
+            href={disabled ? undefined : path}
+            type={Item === "button" ? "button" : undefined}
+            value={value}
+            aria-disabled={disabled ? "true" : undefined}
+          >{text}</Item>
+        );
+      })
+    }
+  </div>
+</dropdown-menu>
+
+<style>
+  dropdown-menu {
+    display: contents;
+  }
+
+  .menu {
+    min-width: 12rem;
+    max-width: calc(100vw - 2 * var(--space-sm));
+    padding: 0.25rem;
+    border: 1px solid hsl(var(--color-on-background) / .15);
+    border-radius: var(--border);
+    background-color: hsl(var(--color-background));
+    color: hsl(var(--color-on-background));
+    box-shadow: 0 0.5rem 1.5rem hsl(var(--color-scrim) / .15);
+  }
+
+  .menu:popover-open {
+    display: grid;
+  }
+
+  @supports (position-area: block-end) {
+    .menu {
+      inset: auto;
+      margin: 0.5rem 0;
+      position-area: block-end span-inline-end;
+      position-try-fallbacks: flip-block, flip-inline;
+    }
+  }
+
+  .menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.5em 0.75em;
+    border: 0;
+    border-radius: calc(var(--border) / 2);
+    background: none;
+    color: inherit;
+    font-size: var(--fs-md);
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .menu-item:focus-visible,
+  .menu-item:hover {
+    outline: none;
+    background-color: hsl(var(--color-surface));
+    color: hsl(var(--color-on-surface));
+  }
+
+  .menu-item[aria-disabled="true"] {
+    color: hsl(var(--color-on-background) / .5);
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .menu:popover-open {
+      animation: menu-in 150ms ease-out;
+    }
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.25rem);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .menu {
+      border-color: CanvasText;
+    }
+
+    .menu-item:focus-visible,
+    .menu-item:hover {
+      outline: 2px solid Highlight;
+    }
+  }
+</style>
+
+<script>
+  import { anchorPopover, syncExpanded } from './popover';
+
+  class DropdownMenu extends HTMLElement {
+    connectedCallback() {
+      const menu = this.querySelector<HTMLElement>('[role="menu"]');
+      const trigger = menu && this.querySelector<HTMLElement>(`[popovertarget="${menu.id}"]`);
+
+      if (!menu || !trigger) return;
+
+      const items = [...menu.querySelectorAll<HTMLElement>('[role="menuitem"]')];
+
+      const focusItem = (index: number) => items[(index + items.length) % items.length].focus();
+      const close = () => {
+        menu.hidePopover();
+        trigger.focus();
+      };
+
+      anchorPopover(menu, trigger, 'bottom');
+      syncExpanded(menu, trigger);
+
+      // Opening from the keyboard focuses at once: the toggle event comes later, after the next key may have moved focus.
+      trigger.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+
+        event.preventDefault();
+        if (!menu.matches(':popover-open')) menu.showPopover();
+        focusItem(event.key === 'ArrowDown' ? 0 : -1);
+      });
+
+      menu.addEventListener('toggle', event => {
+        if ((event as ToggleEvent).newState === 'open') {
+          // Opened by a click, Enter or Space on the trigger.
+          if (!menu.contains(document.activeElement)) focusItem(0);
+        } else if (!document.activeElement || document.activeElement === document.body || menu.contains(document.activeElement)) {
+          trigger.focus();
+        }
+      });
+
+      menu.addEventListener('keydown', event => {
+        const current = items.indexOf(document.activeElement as HTMLElement);
+        const next = {
+          ArrowDown: current + 1,
+          ArrowUp: current - 1,
+          Home: 0,
+          End: -1,
+        }[event.key];
+
+        if (next !== undefined) {
+          event.preventDefault();
+          focusItem(next);
+        } else if (event.key === 'Tab' || event.key === 'Escape') {
+          event.preventDefault();
+          close();
+        } else if (event.key === ' ' && document.activeElement instanceof HTMLAnchorElement) {
+          event.preventDefault();
+          document.activeElement.click();
+        }
+      });
+
+      menu.addEventListener('click', event => {
+        const item = (event.target as Element).closest<HTMLElement>('[role="menuitem"]');
+        if (!item) return;
+
+        if (item.getAttribute('aria-disabled') === 'true') {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          return;
+        }
+
+        close();
+      });
+    }
+  }
+
+  customElements.define('dropdown-menu', DropdownMenu);
+</script>

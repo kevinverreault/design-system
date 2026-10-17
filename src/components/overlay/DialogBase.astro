@@ -1,0 +1,255 @@
+---
+import '../../styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+import Icon from '../ui/Icon.astro';
+import { nextOverlayId, wireTrigger } from './wire-trigger';
+
+const dialog = cva("dialog", {
+  variants: {
+    size: {
+      small: "size-small",
+      medium: "size-medium",
+      large: "size-large"
+    },
+    side: {
+      none: "",
+      left: "sheet side-left",
+      right: "sheet side-right",
+      top: "sheet side-top",
+      bottom: "sheet side-bottom"
+    }
+  }
+});
+
+/**
+ * The shell Dialog, AlertDialog and Sheet share; use those instead. It renders
+ * the `trigger` slot wired to a native `dialog` through invoker commands
+ * (`commandfor` / `command="show-modal"`), with a `dialog-trigger` element
+ * that opens it where commands are unsupported and returns focus to the
+ * trigger on close.
+ *
+ * The `footer` slot sits in a `form method="dialog"`, so a submit button there
+ * closes the dialog and leaves its `value` in the dialog's `returnValue`.
+ */
+export interface Props extends HTMLAttributes<"dialog">, VariantProps<typeof dialog> {
+  /** The dialog's accessible name, shown as its heading. */
+  title: string;
+  /** Supporting text, linked through aria-describedby. */
+  description?: string;
+  /** Accessible name of the close button; `false` renders none. */
+  closeLabel?: string | false;
+  /** Close on a click outside the dialog as well as on Escape. */
+  lightDismiss: boolean;
+}
+
+const {
+  title,
+  description,
+  closeLabel = "Close",
+  lightDismiss,
+  size = "medium",
+  side = "none",
+  id: givenId,
+  class: className,
+  ...attributes
+} = Astro.props;
+
+const id = givenId || nextOverlayId("dialog");
+
+if (typeof title !== "string" || title.trim() === "") {
+  throw new Error(`Dialog '${id}' needs a non-empty title: it is the dialog's accessible name.`);
+}
+
+const ids = { title: `${id}-title`, description: `${id}-description` };
+
+/** A slot's HTML, or undefined when it is empty (wrappers forward every slot). */
+async function renderSlot(name: string) {
+  const html = Astro.slots.has(name) ? await Astro.slots.render(name) : "";
+  return html.trim() === "" ? undefined : html;
+}
+
+const [triggerHtml, body, footer] = await Promise.all([renderSlot("trigger"), renderSlot("default"), renderSlot("footer")]);
+const trigger = triggerHtml && wireTrigger(triggerHtml, { commandfor: id, command: "show-modal", "aria-haspopup": "dialog" });
+
+if (triggerHtml && !trigger) {
+  throw new Error(`Dialog '${id}' needs an element, such as a Button, in its trigger slot.`);
+}
+---
+
+{trigger && <dialog-trigger><Fragment set:html={trigger} /></dialog-trigger>}
+<dialog
+  {...attributes}
+  id={id}
+  aria-labelledby={ids.title}
+  aria-describedby={description ? ids.description : undefined}
+  closedby={lightDismiss ? "any" : "closerequest"}
+  class:list={[dialog({ size, side }), className]}
+>
+  <header class="dialog-header">
+    <h2 id={ids.title} class="dialog-title">{title}</h2>
+    {description && <p id={ids.description} class="dialog-description">{description}</p>}
+  </header>
+  {
+    closeLabel &&
+    <form method="dialog" class="dialog-close-form">
+      <button class="dialog-close" aria-label={closeLabel}><Icon icon="x" aria-hidden="true" /></button>
+    </form>
+  }
+  {body && <div class="dialog-body"><Fragment set:html={body} /></div>}
+  {footer && <form method="dialog" class="dialog-footer"><Fragment set:html={footer} /></form>}
+</dialog>
+
+<style>
+  dialog-trigger {
+    display: contents;
+  }
+
+  .dialog[open] {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr auto;
+    align-content: start;
+    gap: var(--space-sm);
+  }
+
+  .dialog {
+    width: min(var(--dialog-width), calc(100vw - 2 * var(--space-sm)));
+    max-height: calc(100dvh - 2 * var(--space-sm));
+    padding: var(--space-sm);
+    /* Scrolls vertically only: the scale-in animation would otherwise leave a horizontal scrollbar. */
+    overflow: hidden auto;
+    border: 1px solid hsl(var(--color-on-background) / .15);
+    border-radius: var(--border);
+    background-color: hsl(var(--color-background));
+    color: hsl(var(--color-on-background));
+    box-shadow: 0 1rem 3rem hsl(var(--color-scrim) / .3);
+  }
+
+  .dialog::backdrop {
+    background-color: hsl(var(--color-scrim) / .5);
+  }
+
+  .size-small { --dialog-width: 24rem; }
+  .size-medium { --dialog-width: 32rem; }
+  .size-large { --dialog-width: 48rem; }
+
+  .dialog-header {
+    display: grid;
+    gap: 0.25em;
+  }
+
+  .dialog-title {
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .dialog-description {
+    font-size: var(--fs-sm);
+    color: hsl(var(--color-on-background) / .75);
+  }
+
+  .dialog-close {
+    display: grid;
+    place-items: center;
+    padding: 0.375em;
+    border: 0;
+    border-radius: var(--border);
+    background: none;
+    color: hsl(var(--color-on-background) / .75);
+    cursor: pointer;
+  }
+
+  .dialog-close:hover,
+  .dialog-close:focus-visible {
+    background-color: hsl(var(--color-surface));
+    color: hsl(var(--color-on-background));
+  }
+
+  .dialog-close:focus-visible {
+    outline: 2px solid hsl(var(--color-accent));
+    outline-offset: 2px;
+  }
+
+  .dialog-close :global(svg) {
+    width: 1.25em;
+    height: 1.25em;
+  }
+
+  .dialog-body,
+  .dialog-footer {
+    grid-column: 1 / -1;
+  }
+
+  .dialog-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5em;
+  }
+
+  /* Sheet: a full-height or full-width panel along one edge of the viewport. */
+  .sheet {
+    max-width: 100vw;
+    max-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .side-left,
+  .side-right {
+    width: min(24rem, 90vw);
+    height: 100dvh;
+  }
+
+  .side-left { margin-inline-end: auto; }
+  .side-right { margin-inline-start: auto; }
+
+  .side-top,
+  .side-bottom {
+    width: 100vw;
+    max-height: 80dvh;
+  }
+
+  .side-top { margin-block-end: auto; }
+  .side-bottom { margin-block-start: auto; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dialog[open] { animation: dialog-in 200ms ease-out; }
+    .dialog[open]::backdrop { animation: backdrop-in 200ms ease-out; }
+    .side-left[open] { animation-name: sheet-in-left; }
+    .side-right[open] { animation-name: sheet-in-right; }
+    .side-top[open] { animation-name: sheet-in-top; }
+    .side-bottom[open] { animation-name: sheet-in-bottom; }
+  }
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes backdrop-in {
+    from { opacity: 0; }
+  }
+
+  @keyframes sheet-in-left { from { transform: translateX(-100%); } }
+  @keyframes sheet-in-right { from { transform: translateX(100%); } }
+  @keyframes sheet-in-top { from { transform: translateY(-100%); } }
+  @keyframes sheet-in-bottom { from { transform: translateY(100%); } }
+
+  @media (forced-colors: active) {
+    .dialog {
+      border-color: CanvasText;
+    }
+  }
+</style>
+
+<script>
+  import { DialogTrigger, installLightDismissFallback } from './dialog';
+
+  installLightDismissFallback();
+  customElements.define('dialog-trigger', DialogTrigger);
+</script>

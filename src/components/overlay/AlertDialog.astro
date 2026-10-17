@@ -1,0 +1,39 @@
+---
+import Button, { type Props as ButtonProps } from '../ui/Button.astro';
+import DialogBase, { type Props as DialogBaseProps } from './DialogBase.astro';
+
+/**
+ * A modal dialog that asks for an explicit choice, such as confirming a
+ * destructive action. It has the `alertdialog` role, no close button and no
+ * light dismiss: only Escape (which cancels) or one of its buttons closes it.
+ *
+ * Its footer holds Cancel (focused first) and the action. They close the
+ * dialog with `returnValue` "cancel" or "confirm"; listen for the dialog's
+ * `close` event to act on it.
+ *
+ * Slots: `trigger` (a Button that opens it; focus returns there on close) and
+ * an optional default slot for more detail.
+ */
+export interface Props extends Omit<DialogBaseProps, "lightDismiss" | "side" | "closeLabel" | "role"> {
+  /** Text of the button that confirms. */
+  actionLabel: string;
+  /** Variant of the action button. */
+  actionVariant?: ButtonProps["variant"];
+  cancelLabel?: string;
+}
+
+const { actionLabel, actionVariant = "danger", cancelLabel = "Cancel", ...attributes } = Astro.props;
+
+if (typeof actionLabel !== "string" || actionLabel.trim() === "") {
+  throw new Error(`AlertDialog '${attributes.title}' needs a non-empty actionLabel for its confirm button.`);
+}
+---
+
+<DialogBase {...attributes} role="alertdialog" lightDismiss={false} closeLabel={false}>
+  {Astro.slots.has("trigger") && <slot name="trigger" slot="trigger" />}
+  {Astro.slots.has("default") && <slot />}
+  <Fragment slot="footer">
+    <Button variant="muted" value="cancel" autofocus>{cancelLabel}</Button>
+    <Button variant={actionVariant} value="confirm">{actionLabel}</Button>
+  </Fragment>
+</DialogBase>

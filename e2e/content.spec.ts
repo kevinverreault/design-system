@@ -59,6 +59,7 @@ test.describe('Gallery', () => {
 
   test('opens the full-size image through its link when nothing claims the click', async ({ page }) => {
     await page.goto('/#gallery');
+    await page.locator('light-box').evaluateAll(lightboxes => lightboxes.forEach(lightbox => lightbox.remove()));
 
     const link = page.locator('#gallery-default a').nth(1);
     const href = await link.evaluate((element: HTMLAnchorElement) => element.href);

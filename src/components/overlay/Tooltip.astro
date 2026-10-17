@@ -1,0 +1,148 @@
+---
+import '../../styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+import { nextOverlayId, wireTrigger } from './wire-trigger';
+
+const tooltip = cva("tooltip", {
+  variants: {
+    placement: {
+      top: "placement-top",
+      bottom: "placement-bottom"
+    }
+  }
+});
+
+/**
+ * A short label that shows on hover and on keyboard focus, so that an
+ * icon-only Button can explain itself. The trigger (the default slot) is
+ * described by the tooltip through aria-describedby; the tooltip is a
+ * `role="tooltip"` popover. Escape hides it, and it stays open while hovered.
+ *
+ * Unknown attributes go on the tooltip.
+ */
+export interface Props extends HTMLAttributes<"div">, VariantProps<typeof tooltip> {
+  text: string;
+}
+
+const { text, placement = "top", id: givenId, class: className, ...attributes } = Astro.props;
+
+const id = givenId || nextOverlayId("tooltip");
+
+if (typeof text !== "string" || text.trim() === "") {
+  throw new Error(`Tooltip '${id}' needs non-empty text.`);
+}
+
+const trigger = Astro.slots.has("default")
+  ? wireTrigger(await Astro.slots.render("default"), { "aria-describedby": id })
+  : undefined;
+
+if (!trigger) {
+  throw new Error(`Tooltip '${text}' needs an element, such as a Button, in its default slot.`);
+}
+---
+
+<tool-tip data-placement={placement}>
+  <Fragment set:html={trigger} />
+  <div {...attributes} id={id} popover="manual" role="tooltip" class:list={[tooltip({ placement }), className]}>{text}</div>
+</tool-tip>
+
+<style>
+  tool-tip {
+    display: contents;
+  }
+
+  .tooltip {
+    max-width: min(16rem, calc(100vw - 2 * var(--space-sm)));
+    padding: 0.375em 0.625em;
+    border: 0;
+    border-radius: calc(var(--border) / 2);
+    background-color: hsl(var(--color-on-background));
+    color: hsl(var(--color-background));
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+  }
+
+  @supports (position-area: block-start) {
+    .tooltip {
+      inset: auto;
+      position-try-fallbacks: flip-block;
+    }
+
+    .placement-top {
+      margin: 0 0 0.5rem;
+      position-area: block-start;
+    }
+
+    .placement-bottom {
+      margin: 0.5rem 0 0;
+      position-area: block-end;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tooltip:popover-open {
+      animation: tooltip-in 100ms ease-out;
+    }
+  }
+
+  @keyframes tooltip-in {
+    from { opacity: 0; }
+  }
+
+  @media (forced-colors: active) {
+    .tooltip {
+      border: 1px solid CanvasText;
+    }
+  }
+</style>
+
+<script>
+  import { anchorPopover, type Placement } from './popover';
+
+  /** Delay before hiding, so the pointer can cross from the trigger to the tooltip. */
+  const HIDE_DELAY = 100;
+
+  class ToolTip extends HTMLElement {
+    connectedCallback() {
+      const tip = this.querySelector<HTMLElement>('[role="tooltip"]');
+      const trigger = tip && this.querySelector<HTMLElement>(`[aria-describedby~="${tip.id}"]`);
+
+      if (!tip || !trigger) return;
+
+      let hideTimer: number | undefined;
+      const isOpen = () => tip.matches(':popover-open');
+      const show = () => {
+        window.clearTimeout(hideTimer);
+        if (!isOpen()) tip.showPopover();
+      };
+      const hide = () => {
+        window.clearTimeout(hideTimer);
+        if (isOpen()) tip.hidePopover();
+      };
+      const hideSoon = () => {
+        window.clearTimeout(hideTimer);
+        hideTimer = window.setTimeout(hide, HIDE_DELAY);
+      };
+      const onEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') hide();
+      };
+
+      anchorPopover(tip, trigger, (this.dataset.placement ?? 'top') as Placement);
+
+      trigger.addEventListener('pointerenter', show);
+      trigger.addEventListener('pointerleave', hideSoon);
+      tip.addEventListener('pointerenter', show);
+      tip.addEventListener('pointerleave', hideSoon);
+      trigger.addEventListener('focus', show);
+      trigger.addEventListener('blur', hide);
+
+      tip.addEventListener('toggle', event => {
+        if ((event as ToggleEvent).newState === 'open') document.addEventListener('keydown', onEscape);
+        else document.removeEventListener('keydown', onEscape);
+      });
+    }
+  }
+
+  customElements.define('tool-tip', ToolTip);
+</script>

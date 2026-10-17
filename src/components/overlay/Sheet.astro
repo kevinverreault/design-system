@@ -1,0 +1,31 @@
+---
+import DialogBase, { type Props as DialogBaseProps } from './DialogBase.astro';
+
+const SIDES = ["left", "right", "top", "bottom"] as const;
+
+/**
+ * A modal dialog that slides in from one edge of the viewport, for a mobile
+ * menu or a cart panel. It behaves like Dialog: Escape and a click outside
+ * close it, and focus returns to its trigger.
+ *
+ * Slots: `trigger`, the default slot (body) and `footer`, as for Dialog.
+ */
+export interface Props extends Omit<DialogBaseProps, "lightDismiss" | "side" | "size" | "closeLabel"> {
+  /** The edge the sheet is attached to. */
+  side?: (typeof SIDES)[number];
+  /** Accessible name of the close button. */
+  closeLabel?: string;
+}
+
+const { side = "right", ...attributes } = Astro.props;
+
+if (!SIDES.includes(side)) {
+  throw new Error(`Sheet side must be one of ${SIDES.join(", ")}, received '${side}'.`);
+}
+---
+
+<DialogBase {...attributes} side={side} lightDismiss>
+  {Astro.slots.has("trigger") && <slot name="trigger" slot="trigger" />}
+  {Astro.slots.has("default") && <slot />}
+  {Astro.slots.has("footer") && <slot name="footer" slot="footer" />}
+</DialogBase>
