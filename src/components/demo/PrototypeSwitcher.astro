@@ -1,0 +1,102 @@
+---
+/**
+ * PROTOTYPE: floating variant switcher. Throwaway, lives on the
+ * prototype/form-controls-look branch only.
+ *
+ * Cycles `?variant=` through `variants` and mirrors it onto
+ * `<html data-proto="…">`, so prototype CSS can key off it.
+ * Rendered in dev only.
+ */
+interface Props {
+  variants: { key: string; name: string }[];
+}
+
+const { variants } = Astro.props;
+---
+
+{import.meta.env.DEV && (
+  <prototype-switcher data-variants={JSON.stringify(variants)}>
+    <button type="button" data-step="-1" aria-label="Previous variant">←</button>
+    <output aria-live="polite"></output>
+    <button type="button" data-step="1" aria-label="Next variant">→</button>
+  </prototype-switcher>
+)}
+
+<script>
+  class PrototypeSwitcher extends HTMLElement {
+    connectedCallback() {
+      const variants: { key: string; name: string }[] = JSON.parse(this.dataset.variants ?? '[]');
+      const label = this.querySelector('output')!;
+      const keys = variants.map(v => v.key);
+
+      const apply = (key: string) => {
+        const variant = variants.find(v => v.key === key) ?? variants[0];
+        document.documentElement.dataset.proto = variant.key;
+        label.textContent = `${variant.key} (${variant.name})`;
+        const url = new URL(location.href);
+        url.searchParams.set('variant', variant.key);
+        history.replaceState(null, '', url);
+      };
+
+      const step = (delta: number) => {
+        const current = keys.indexOf(document.documentElement.dataset.proto ?? keys[0]);
+        apply(keys[(current + delta + keys.length) % keys.length]);
+      };
+
+      this.querySelectorAll<HTMLButtonElement>('[data-step]').forEach(button =>
+        button.addEventListener('click', () => step(Number(button.dataset.step)))
+      );
+
+      document.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        const target = event.target as HTMLElement;
+        if (target.closest('input, textarea, select, [contenteditable], [role="tablist"], [role="menu"]')) return;
+        step(event.key === 'ArrowLeft' ? -1 : 1);
+      });
+
+      apply(new URL(location.href).searchParams.get('variant') ?? keys[0]);
+    }
+  }
+
+  customElements.define('prototype-switcher', PrototypeSwitcher);
+</script>
+
+<style>
+  prototype-switcher {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    translate: -50% 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .375rem .5rem;
+    font: 600 14px/1 system-ui, sans-serif;
+    color: #fff;
+    background: #111;
+    border: 2px dashed #ffcc00;
+    border-radius: 9999px;
+    box-shadow: 0 6px 24px rgb(0 0 0 / .35);
+  }
+
+  prototype-switcher output {
+    min-width: 13rem;
+    text-align: center;
+  }
+
+  prototype-switcher button {
+    width: 2rem;
+    height: 2rem;
+    font: inherit;
+    color: inherit;
+    background: #333;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  prototype-switcher button:hover {
+    background: #555;
+  }
+</style>

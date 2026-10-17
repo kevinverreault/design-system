@@ -16,6 +16,7 @@ import Checkbox from '../components/form/Checkbox.astro';
 import RadioGroup from '../components/form/RadioGroup.astro';
 import Switch from '../components/form/Switch.astro';
 import FormField from '../components/form/FormField.astro';
+import FormControlsPrototype from '../components/form/FormControlsPrototype.astro'; // PROTOTYPE
 import Row from '../components/layout/Row.astro';
 import Pane from '../components/layout/Pane.astro';
 import Image from '../components/media/Image.astro';
@@ -380,6 +381,8 @@ const footerSocial = [
       <h2 class="numbered-title"><span>06</span> Form controls</h2>
 
       <p>Every control wraps a native element, so submission and validation work without JavaScript. Tab through the fields to see the focus ring.</p>
+
+      <FormControlsPrototype />
 
       <div id="form-alignment" class="flow">
         <h3 class="numbered-title">Sizes</h3>

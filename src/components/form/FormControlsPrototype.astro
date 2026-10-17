@@ -1,0 +1,347 @@
+---
+/**
+ * PROTOTYPE: what should Input, Switch and Select look like?
+ * Throwaway, lives on the prototype/form-controls-look branch only.
+ *
+ * Three variants plus the current look, switchable with `?variant=` (A, B, C, current)
+ * and the floating bar. The variant CSS keys off `<html data-proto>` and restyles
+ * the real controls everywhere on the showcase, not just the preview row.
+ *
+ * Every variant also fixes the Switch bug: `.form-check` sets `place-content: center`,
+ * so the "off" thumb sat in the middle and the "on" thumb overshot the track.
+ */
+import Label from './Label.astro';
+import Input from './Input.astro';
+import Select from './Select.astro';
+import Switch from './Switch.astro';
+import Button from '../ui/Button.astro';
+import PrototypeSwitcher from '../demo/PrototypeSwitcher.astro';
+
+const variants = [
+  { key: 'A', name: 'Soft halo' },
+  { key: 'B', name: 'Filled underline' },
+  { key: 'C', name: 'Bold outline' },
+  { key: 'current', name: 'Current' }
+];
+---
+
+<div class="proto-preview flow" id="form-controls-prototype">
+  <p class="proto-tag">Prototype · <code>?variant=</code> A / B / C / current · ← → to switch · click or tab into the fields</p>
+
+  <div class="proto-row">
+    <div class="proto-field">
+      <Label for="proto-input">Name</Label>
+      <Input id="proto-input" placeholder="Jane Doe" />
+    </div>
+    <div class="proto-field">
+      <Label for="proto-select">Print size</Label>
+      <Select id="proto-select">
+        <option>A4 — 21 × 30 cm</option>
+        <option>A3 — 30 × 42 cm</option>
+      </Select>
+    </div>
+    <Button>Send</Button>
+  </div>
+
+  <div class="proto-row">
+    <div class="proto-field">
+      <Label for="proto-error">Email</Label>
+      <Input id="proto-error" type="email" value="not-an-email" aria-invalid="true" />
+    </div>
+    <label class="proto-inline"><Switch /> Off</label>
+    <label class="proto-inline"><Switch checked /> On</label>
+    <label class="proto-inline"><Switch disabled checked /> Disabled on</label>
+  </div>
+</div>
+
+<PrototypeSwitcher variants={variants} />
+
+<style>
+  .proto-preview {
+    padding: 1.25rem;
+    border: 2px dashed #ffcc00;
+    border-radius: .5rem;
+  }
+
+  .proto-tag {
+    font: 600 12px/1.4 system-ui, sans-serif;
+    color: hsl(var(--color-on-background) / .7);
+  }
+
+  .proto-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1rem 1.5rem;
+  }
+
+  .proto-field {
+    display: grid;
+    gap: .375rem;
+    flex: 1 1 14rem;
+  }
+
+  .proto-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding-block: .75rem;
+  }
+</style>
+
+<style is:global>
+  /* Shared by every variant: the thumb starts at the start edge. */
+  html[data-proto]:not([data-proto="current"]) .switch {
+    justify-content: flex-start;
+  }
+
+  /* ───────────────────────── A · Soft halo ─────────────────────────
+     One coloured edge: on focus the border itself turns accent and a soft
+     same-colour halo grows outside it. No separate outline. */
+
+  html[data-proto="A"] .form-control {
+    border-color: hsl(var(--color-on-background) / .25);
+    border-radius: .5rem;
+    transition: border-color .15s, box-shadow .15s, background-color .15s;
+  }
+
+  html[data-proto="A"] .form-control:hover:not(:disabled, [readonly], :focus-visible) {
+    border-color: hsl(var(--color-on-background) / .45);
+  }
+
+  html[data-proto="A"] .form-control:focus-visible {
+    outline: none;
+    border-color: hsl(var(--color-accent));
+    box-shadow: 0 0 0 3px hsl(var(--color-accent) / .22);
+  }
+
+  html[data-proto="A"] .form-control[aria-invalid="true"] {
+    border-color: hsl(var(--color-error-text));
+  }
+
+  html[data-proto="A"] .form-control[aria-invalid="true"]:focus-visible {
+    box-shadow: 0 0 0 3px hsl(var(--color-error-text) / .22);
+  }
+
+  html[data-proto="A"] .select {
+    background-image:
+      linear-gradient(45deg, transparent 50%, hsl(var(--color-accent)) 50%),
+      linear-gradient(135deg, hsl(var(--color-accent)) 50%, transparent 50%);
+  }
+
+  html[data-proto="A"] .select:hover:not(:disabled, :focus-visible) {
+    background-color: hsl(var(--color-accent) / .05);
+  }
+
+  /* iOS-style switch: the thumb is always light with a drop shadow, so it
+     never melts into a light page; the track carries the state. */
+  html[data-proto="A"] .switch {
+    --w: 2.5em;
+    --pad: .1875em;
+    --thumb: 1.125em;
+    width: var(--w);
+    height: 1.5em;
+    padding: var(--pad);
+    border-color: transparent;
+    background-color: hsl(var(--color-on-background) / .18);
+  }
+
+  html[data-proto="A"] .switch::before {
+    width: var(--thumb);
+    height: var(--thumb);
+    background-color: hsl(0 0% 100%);
+    box-shadow: 0 1px 3px rgb(0 0 0 / .3), 0 0 0 .5px rgb(0 0 0 / .08);
+    transform: none;
+  }
+
+  html[data-proto="A"] .switch:checked {
+    background-color: hsl(var(--color-accent));
+  }
+
+  html[data-proto="A"] .switch:checked::before {
+    background-color: hsl(0 0% 100%);
+    transform: translateX(calc(var(--w) - 2 * var(--control-border-width) - 2 * var(--pad) - var(--thumb)));
+  }
+
+  /* ─────────────────────── B · Filled underline ──────────────────────
+     A tinted fill with a bottom rule only; focus thickens the rule to the
+     accent colour. No box edge at all, so nothing to double up. */
+
+  html[data-proto="B"] .form-control {
+    border: 0;
+    border-bottom: 1px solid hsl(var(--color-on-background) / .45);
+    border-radius: .375rem .375rem 0 0;
+    background-color: hsl(var(--color-on-background) / .05);
+    transition: box-shadow .15s, background-color .15s, border-color .15s;
+  }
+
+  html[data-proto="B"] .form-control:hover:not(:disabled, [readonly], :focus-visible) {
+    background-color: hsl(var(--color-on-background) / .08);
+  }
+
+  html[data-proto="B"] .form-control:focus-visible {
+    outline: none;
+    border-bottom-color: hsl(var(--color-accent));
+    box-shadow: inset 0 -2px 0 hsl(var(--color-accent));
+    background-color: hsl(var(--color-accent) / .06);
+  }
+
+  html[data-proto="B"] .form-control[aria-invalid="true"] {
+    border-bottom-color: hsl(var(--color-error-text));
+    box-shadow: inset 0 -1px 0 hsl(var(--color-error-text));
+  }
+
+  html[data-proto="B"] .form-control[aria-invalid="true"]:focus-visible {
+    box-shadow: inset 0 -2px 0 hsl(var(--color-error-text));
+    background-color: hsl(var(--color-error-text) / .06);
+  }
+
+  /* Chevron sits in its own segment, split off by a hairline. */
+  html[data-proto="B"] .select {
+    padding-inline-end: calc(var(--control-padding-inline) + 2em);
+    background-image:
+      linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%),
+      linear-gradient(hsl(var(--color-on-background) / .2), hsl(var(--color-on-background) / .2));
+    background-position:
+      calc(100% - 1.15em) 55%,
+      calc(100% - .8em) 55%,
+      calc(100% - 2.5em) 50%;
+    background-size: .35em .35em, .35em .35em, 1px 55%;
+  }
+
+  /* Material-style switch: an outlined track with a small grey thumb when off;
+     when on, a filled track and a bigger thumb with a check mark. */
+  html[data-proto="B"] .switch {
+    --w: 2.75em;
+    --pad: .1875em;
+    --b: 2px;
+    width: var(--w);
+    height: 1.5em;
+    padding: 0 var(--pad);
+    border: var(--b) solid hsl(var(--color-on-background) / .5);
+    background-color: hsl(var(--color-on-background) / .06);
+  }
+
+  html[data-proto="B"] .switch::before {
+    display: grid;
+    place-items: center;
+    width: .75em;
+    height: .75em;
+    margin-inline-start: .125em;
+    background-color: hsl(var(--color-on-background) / .55);
+    font: 700 .75em/1 system-ui, sans-serif;
+    color: transparent;
+    transition: all .15s ease-in-out;
+    transform: none;
+  }
+
+  html[data-proto="B"] .switch:checked {
+    border-color: hsl(var(--color-accent));
+    background-color: hsl(var(--color-accent));
+  }
+
+  html[data-proto="B"] .switch:checked::before {
+    content: "✓";
+    width: 1.5em;
+    height: 1.5em;
+    margin-inline-start: 0;
+    color: hsl(var(--color-accent));
+    background-color: hsl(var(--color-on-primary));
+    /* in the thumb's own em (.75 of the track's): track width minus borders, padding and thumb */
+    transform: translateX(calc((var(--w) - 2 * var(--pad)) / .75 - 2 * var(--b) / .75 - 1.5em));
+  }
+
+  /* ──────────────────────── C · Bold outline ─────────────────────────
+     A single 2px border that turns accent on focus; rounder corners.
+     The focus state is the border, never a second line. */
+
+  html[data-proto="C"] .form-control {
+    border: 2px solid hsl(var(--color-on-background) / .28);
+    border-radius: .75rem;
+    transition: border-color .15s, background-color .15s;
+  }
+
+  html[data-proto="C"] .form-control:hover:not(:disabled, [readonly], :focus-visible) {
+    border-color: hsl(var(--color-on-background) / .55);
+  }
+
+  html[data-proto="C"] .form-control:focus-visible {
+    outline: none;
+    border-color: hsl(var(--color-accent));
+  }
+
+  html[data-proto="C"] .form-control[aria-invalid="true"] {
+    border-color: hsl(var(--color-error-text));
+  }
+
+  /* An error field is already red, so focus thickens the same red edge. */
+  html[data-proto="C"] .form-control[aria-invalid="true"]:focus-visible {
+    box-shadow: 0 0 0 1px hsl(var(--color-error-text));
+  }
+
+  /* Pill select with an accent tint and the chevron in a filled circle. */
+  html[data-proto="C"] .select {
+    padding-inline-end: calc(var(--control-padding-inline) + 1.75em);
+    border-color: hsl(var(--color-accent) / .45);
+    border-radius: 9999px;
+    font-weight: 600;
+    background-color: hsl(var(--color-accent) / .07);
+    background-image:
+      linear-gradient(45deg, transparent 50%, hsl(var(--color-on-primary)) 50%),
+      linear-gradient(135deg, hsl(var(--color-on-primary)) 50%, transparent 50%),
+      radial-gradient(circle closest-side, hsl(var(--color-primary)) 96%, transparent);
+    background-position:
+      calc(100% - 1.3em) 58%,
+      calc(100% - .95em) 58%,
+      calc(100% - .4em) 50%;
+    background-size: .35em .35em, .35em .35em, 1.6em 1.6em;
+  }
+
+  html[data-proto="C"] .select:hover:not(:disabled, :focus-visible) {
+    background-color: hsl(var(--color-accent) / .13);
+  }
+
+  html[data-proto="C"] .select:focus-visible {
+    border-color: hsl(var(--color-accent));
+  }
+
+  /* Thin track, oversized thumb that overhangs it, with a shadow so it
+     always stands off the page; on, the thumb itself takes the accent. */
+  html[data-proto="C"] .switch {
+    --w: 2.25em;
+    --thumb: 1.25em;
+    width: var(--w);
+    height: .875em;
+    margin-block: .1875em;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+    background-color: hsl(var(--color-on-background) / .25);
+  }
+
+  html[data-proto="C"] .switch::before {
+    flex: none;
+    width: var(--thumb);
+    height: var(--thumb);
+    background-color: hsl(0 0% 98%);
+    box-shadow: 0 1px 3px rgb(0 0 0 / .4);
+    transform: translateX(-.125em);
+  }
+
+  html[data-proto="C"] .switch:checked {
+    background-color: hsl(var(--color-accent) / .45);
+  }
+
+  html[data-proto="C"] .switch:checked::before {
+    background-color: hsl(var(--color-accent));
+    transform: translateX(calc(var(--w) - var(--thumb) + .125em));
+  }
+
+  /* Forced colours: give the native outline back to every variant. */
+  @media (forced-colors: active) {
+    html[data-proto] .form-control:focus-visible {
+      outline: 2px solid CanvasText;
+    }
+  }
+</style>
