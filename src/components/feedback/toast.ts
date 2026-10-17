@@ -1,4 +1,6 @@
-export type ToastVariant = 'info' | 'success' | 'warning' | 'danger';
+import type { StatusVariant } from './variants';
+
+export type ToastVariant = StatusVariant;
 
 export interface ToastOptions {
   variant?: ToastVariant;

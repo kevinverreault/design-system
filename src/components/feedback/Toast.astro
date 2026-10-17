@@ -1,34 +1,31 @@
 ---
 import '../../styles/global.css'
+import type { HTMLAttributes } from "astro/types";
 import Icon from '../ui/Icon.astro';
+import { statusVariants } from './variants';
 
 /**
  * The page's single Toast region. Place it once in the layout, then queue
- * messages with `toast()` from './toast'.
+ * messages with `toast()` from './toast'. Info and success toasts are
+ * announced politely; warning and danger toasts interrupt, as Alert does.
  */
-export interface Props {
+export interface Props extends HTMLAttributes<"div"> {
   /** Accessible name of the notifications landmark. */
   label?: string;
   /** Accessible name of each toast's close button. */
   dismissLabel?: string;
 }
 
-const { label = "Notifications", dismissLabel = "Dismiss" } = Astro.props;
-
-const icons = {
-  info: "info",
-  success: "circle-check",
-  warning: "triangle-alert",
-  danger: "circle-alert"
-};
+const { label = "Notifications", dismissLabel = "Dismiss", class: className, ...attributes } = Astro.props;
 ---
 
-<toast-region data-dismiss-label={dismissLabel}>
-  <section class="toast-region" aria-label={label}>
+<toast-region {...attributes} data-dismiss-label={dismissLabel} class:list={["toast-region", className]}>
+  <section aria-label={label}>
+    <div class="toast-list" role="alert" aria-live="assertive" aria-atomic="false"></div>
     <div class="toast-list" role="status" aria-live="polite"></div>
   </section>
   {
-    Object.entries(icons).map(([variant, icon]) => (
+    Object.entries(statusVariants).map(([variant, { icon }]) => (
       <template data-variant={variant}><Icon icon={icon} class="toast-icon" aria-hidden="true" /></template>
     ))
   }
@@ -36,7 +33,9 @@ const icons = {
 </toast-region>
 
 <style>
-  .toast-region {
+  .toast-region section {
+    display: grid;
+    gap: 0.5em;
     position: fixed;
     z-index: 1000;
     inset-block-end: var(--space-sm);
@@ -132,6 +131,7 @@ const icons = {
 
 <script>
   import { TOAST_EVENT, type ToastDetail } from './toast';
+  import { isStatusVariant, statusVariants } from './variants';
 
   class ToastRegion extends HTMLElement {
     connectedCallback() {
@@ -146,7 +146,8 @@ const icons = {
       this.show((event as CustomEvent<ToastDetail>).detail);
     };
 
-    show({ message, variant, duration }: ToastDetail) {
+    show({ message, variant: requested, duration }: ToastDetail) {
+      const variant = isStatusVariant(requested) ? requested : 'info';
       const toast = document.createElement('div');
       toast.className = `toast ${variant}`;
 
@@ -165,7 +166,7 @@ const icons = {
       dismiss.addEventListener('click', () => toast.remove());
 
       toast.append(text, dismiss);
-      this.querySelector('.toast-list')!.append(toast);
+      this.querySelector(`.toast-list[role="${statusVariants[variant].role}"]`)!.append(toast);
 
       // The timer pauses while the toast is hovered or focused, so it can't vanish mid-read.
       let timer: number | undefined;

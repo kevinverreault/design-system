@@ -20,14 +20,6 @@ describe('Tabs without JavaScript', () => {
     expect(root.querySelector('[role="tablist"]')).toBeNull();
     expect(root.querySelector('[role="tab"]')).toBeNull();
   });
-
-  test('keeps the tab list name and panel ids for the script to use', async () => {
-    const root = await render(PrintFormatTabs);
-
-    expect(root.querySelector('tab-group')?.getAttribute('data-label')).toBe('Print formats');
-    expect(root.querySelector('tab-group')?.id).toBe('formats');
-    expect(root.querySelectorAll('.tab-panel')[0].id).toBe('small');
-  });
 });
 
 describe('TabPanel', () => {

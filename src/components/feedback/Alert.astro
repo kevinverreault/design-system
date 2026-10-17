@@ -3,6 +3,7 @@ import '../../styles/global.css'
 import { cva, type VariantProps } from 'cva';
 import type { HTMLAttributes } from "astro/types";
 import Icon from '../ui/Icon.astro';
+import { isStatusVariant, statusVariants } from './variants';
 
 const alert = cva("alert", {
   variants: {
@@ -15,14 +16,6 @@ const alert = cva("alert", {
   }
 });
 
-/** Warnings and errors interrupt; info and success wait their turn. */
-const ROLES = {
-  info: "status",
-  success: "status",
-  warning: "alert",
-  danger: "alert"
-} as const;
-
 export interface Props
   extends Omit<HTMLAttributes<"div">, "title">,
     VariantProps<typeof alert> {
@@ -34,12 +27,12 @@ export interface Props
 
 const { variant = "info", title, icon, class: className, ...attributes } = Astro.props;
 
-if (!variant || !(variant in ROLES)) {
+if (!isStatusVariant(variant)) {
   throw new Error(`Alert variant must be info, success, warning or danger, received '${variant}'.`);
 }
 ---
 
-<div role={ROLES[variant]} {...attributes} class:list={[alert({ variant }), className]}>
+<div role={statusVariants[variant].role} {...attributes} class:list={[alert({ variant }), className]}>
   {icon && <Icon icon={icon} class="alert-icon" aria-hidden="true" />}
   <div class="alert-content">
     {title && <p class="alert-title">{title}</p>}

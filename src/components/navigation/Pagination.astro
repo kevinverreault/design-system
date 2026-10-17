@@ -29,16 +29,17 @@ if (!Number.isInteger(current) || current < 1 || current > items.length) {
 
 const previous = items[current - 2];
 const next = items[current];
+
+/** Links a previous/next step to its page, or disables it at either end of the list. */
+function stepAttributes(page: NavigationMenuLink | undefined, rel: "prev" | "next"): HTMLAttributes<"a"> {
+  return page ? { href: page.path, rel } : { role: "link", "aria-disabled": "true" };
+}
 ---
 
 <nav aria-label={label} {...attributes} class:list={["pagination", "text-sm", className]}>
   <ul>
     <li>
-      {
-        previous
-          ? <a class="pagination-step pagination-previous" href={previous.path} rel="prev"><Icon icon="chrevron-left" aria-hidden="true" />{previousLabel}</a>
-          : <a class="pagination-step pagination-previous" role="link" aria-disabled="true"><Icon icon="chrevron-left" aria-hidden="true" />{previousLabel}</a>
-      }
+      <a class="pagination-step pagination-previous" {...stepAttributes(previous, "prev")}><Icon icon="chrevron-left" aria-hidden="true" />{previousLabel}</a>
     </li>
     {
       items.map(({ text, path }, index) => (
@@ -48,11 +49,7 @@ const next = items[current];
       ))
     }
     <li>
-      {
-        next
-          ? <a class="pagination-step pagination-next" href={next.path} rel="next">{nextLabel}<Icon icon="chrevron-right" aria-hidden="true" /></a>
-          : <a class="pagination-step pagination-next" role="link" aria-disabled="true">{nextLabel}<Icon icon="chrevron-right" aria-hidden="true" /></a>
-      }
+      <a class="pagination-step pagination-next" {...stepAttributes(next, "next")}>{nextLabel}<Icon icon="chrevron-right" aria-hidden="true" /></a>
     </li>
   </ul>
 </nav>
