@@ -2,7 +2,6 @@
 import '../../styles/global.css'
 import { getImage } from 'astro:assets';
 import { cva, type VariantProps } from 'cva';
-import type { ImageMetadata } from 'astro';
 import type { HTMLAttributes } from "astro/types";
 import Image, { type Props as ImageProps } from './Image.astro';
 
@@ -21,24 +20,18 @@ const gallery = cva("gallery", {
   }
 });
 
-export interface GalleryImage {
-  /** An imported local asset or a remote URL. */
-  src: ImageMetadata | string;
-  /** Required and non-empty: every image is a link to its full-size version. */
-  alt: string;
-  /** Owner of the photo; shown as "© {credit}" in the credit footer. */
-  credit?: string;
-  /** Intrinsic size of a remote image, to reserve its space. */
-  width?: number;
-  height?: number;
-}
+/**
+ * One Gallery image, with the Image props of the same name. Its alt must not
+ * be empty: every image is a link to its full-size version.
+ */
+export type GalleryImage = Pick<ImageProps, "src" | "alt" | "credit" | "width" | "height">;
 
 /**
  * A responsive grid of Images. Columns are as many as fit at the chosen
  * minimum column width, down to one on narrow screens.
  *
  * Each image links to its full-size version and can be opened by a Lightbox
- * through the `gallery-open` event; see `gallery.ts`.
+ * through the `gallery-open` event; see `gallery-open.ts`.
  */
 export interface Props
   extends HTMLAttributes<"ul">,
@@ -52,7 +45,8 @@ const FULL_SIZE_MAX_WIDTH = 2400;
 
 /**
  * A column is at most twice its minimum width (the grid adds a column as soon
- * as two fit), so thumbnails never need more than that.
+ * as two fit), so thumbnails never need more than that. Keep these in step
+ * with the --gallery-column-width values below.
  */
 const THUMBNAIL_SIZES = {
   small: "(max-width: 24rem) 100vw, 24rem",
@@ -65,7 +59,7 @@ const {
   ratio = "3:2",
   fit = "cover",
   columnWidth = "medium",
-  gap = "medium",
+  gap = "small",
   class: className,
   ...attributes
 } = Astro.props;
@@ -99,7 +93,7 @@ const items = await Promise.all(images.map(async image => {
 </ul>
 
 <script>
-  import { handleGalleryClick } from './gallery';
+  import { handleGalleryClick } from './gallery-open';
 
   document.addEventListener('click', handleGalleryClick);
 </script>
@@ -118,9 +112,9 @@ const items = await Promise.all(images.map(async image => {
   .column-width-medium { --gallery-column-width: 18rem; }
   .column-width-large { --gallery-column-width: 24rem; }
 
-  .gap-small { --gallery-gap: calc(var(--space-sm) / 2); }
-  .gap-medium { --gallery-gap: var(--space-sm); }
-  .gap-large { --gallery-gap: var(--space-md); }
+  .gap-small { --gallery-gap: var(--space-sm); }
+  .gap-medium { --gallery-gap: var(--space-md); }
+  .gap-large { --gallery-gap: var(--space-lg); }
 
   .gallery-link {
     display: block;

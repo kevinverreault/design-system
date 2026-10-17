@@ -1,16 +1,6 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
 import type { HTMLAttributes } from "astro/types";
-
-const card = cva("card", {
-  variants: {
-    linked: {
-      true: "linked",
-      false: ""
-    }
-  }
-});
 
 type LinkAttributes = Pick<HTMLAttributes<"a">, "href" | "target" | "rel" | "hreflang" | "referrerpolicy">;
 
@@ -20,19 +10,18 @@ type LinkAttributes = Pick<HTMLAttributes<"a">, "href" | "target" | "rel" | "hre
  * `header`, the default slot (body) and `footer`.
  *
  * With `href`, the whole card is one anchor. It then can't hold any other
- * interactive element (link, button, form control, tabindex), and rendering
- * fails if it does.
+ * interactive element (link, button, form control, media controls,
+ * tabindex), and rendering fails if it does.
  */
 export interface Props
   extends Omit<HTMLAttributes<"article">, keyof LinkAttributes>,
-    LinkAttributes,
-    Omit<VariantProps<typeof card>, "linked"> {
+    LinkAttributes {
   /** The element of a card without `href`. A linked card is always an anchor. */
   as?: "article" | "div" | "section" | "li";
 }
 
 const AREAS = ["media", "header", "default", "footer"] as const;
-const INTERACTIVE_CONTENT = /<(a|button|input|select|textarea|details|summary|iframe|embed|object)\b|\s(tabindex|contenteditable)\s*=/i;
+const INTERACTIVE_CONTENT = /<(a|button|input|select|textarea|label|details|summary|iframe|embed|object)\b|<(audio|video)\b[^>]*\scontrols\b|\s(tabindex|contenteditable)\s*=/i;
 
 const { as, href, class: className, ...attributes } = Astro.props;
 
@@ -55,7 +44,7 @@ if (linked && Object.values(areas).some(html => INTERACTIVE_CONTENT.test(html)))
 const Element = linked ? "a" : as ?? "article";
 ---
 
-<Element {...attributes} href={href} class:list={[card({ linked }), className]}>
+<Element {...attributes} href={href} class:list={["card", linked && "linked", className]}>
   {areas.media && <div class="card-media"><Fragment set:html={areas.media} /></div>}
   {areas.header && <header class="card-header"><Fragment set:html={areas.header} /></header>}
   {areas.default && <div class="card-body"><Fragment set:html={areas.default} /></div>}
@@ -91,7 +80,7 @@ const Element = linked ? "a" : as ?? "article";
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: calc(var(--space-sm) / 2);
     margin-top: auto;
     padding-top: var(--space-sm);
   }

@@ -51,11 +51,11 @@ describe('Gallery', () => {
     expect(figures.every(figure => figure.classList.contains('ratio-1-1'))).toBe(true);
   });
 
-  test('uses medium columns and gap by default', async () => {
+  test('uses medium columns and a small gap by default', async () => {
     const gallery = await renderGallery({ images: [heron] });
 
     expect(gallery.classList.contains('column-width-medium')).toBe(true);
-    expect(gallery.classList.contains('gap-medium')).toBe(true);
+    expect(gallery.classList.contains('gap-small')).toBe(true);
   });
 
   test('takes a column width and gap', async () => {

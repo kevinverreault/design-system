@@ -79,6 +79,8 @@ describe('Card', () => {
     ['a link', '<a href="/bio">Bio</a>'],
     ['a button', '<button>Add to cart</button>'],
     ['an input', '<input name="quantity">'],
+    ['a label', '<label>Quantity</label>'],
+    ['a video with controls', '<video src="/clip.mp4" controls></video>'],
     ['a focusable element', '<span tabindex="0">Focus me</span>']
   ])('fails when a linked card contains %s', async (_, content) => {
     await expect(renderCard({ href: '/boutique/heron' }, { footer: content })).rejects.toThrow(/interactive/);

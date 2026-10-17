@@ -15,6 +15,10 @@ const badge = cva("badge", {
   }
 });
 
+/**
+ * Besides the shared primary/secondary/muted/danger variants, Badge has an
+ * `outline` variant: a bordered badge on the page background.
+ */
 export interface Props
   extends HTMLAttributes<"span">,
     VariantProps<typeof badge> {
