@@ -1,0 +1,120 @@
+---
+import '../../styles/global.css'
+import type { HTMLAttributes } from "astro/types";
+
+type LinkAttributes = Pick<HTMLAttributes<"a">, "href" | "target" | "rel" | "hreflang" | "referrerpolicy">;
+
+/**
+ * Areas are named slots, rendered in this order and only when given:
+ * `media` (flush with the card edges; takes the Image component),
+ * `header`, the default slot (body) and `footer`.
+ *
+ * With `href`, the whole card is one anchor. It then can't hold any other
+ * interactive element (link, button, form control, media controls,
+ * tabindex), and rendering fails if it does.
+ */
+export interface Props
+  extends Omit<HTMLAttributes<"article">, keyof LinkAttributes>,
+    LinkAttributes {
+  /** The element of a card without `href`. A linked card is always an anchor. */
+  as?: "article" | "div" | "section" | "li";
+}
+
+const AREAS = ["media", "header", "default", "footer"] as const;
+const INTERACTIVE_CONTENT = /<(a|button|input|select|textarea|label|details|summary|iframe|embed|object)\b|<(audio|video)\b[^>]*\scontrols\b|\s(tabindex|contenteditable)\s*=/i;
+
+const { as, href, class: className, ...attributes } = Astro.props;
+
+const linked = href !== undefined;
+
+if (linked && as) {
+  throw new Error(`A linked Card always renders as an anchor; remove as="${as}" or href.`);
+}
+
+const areas = Object.fromEntries(
+  await Promise.all(
+    AREAS.filter(area => Astro.slots.has(area)).map(async area => [area, await Astro.slots.render(area)] as const)
+  )
+) as Partial<Record<(typeof AREAS)[number], string>>;
+
+if (linked && Object.values(areas).some(html => INTERACTIVE_CONTENT.test(html))) {
+  throw new Error(`A linked Card (href="${href}") is a single anchor and can't contain interactive elements; remove the nested link, button, form control or tabindex.`);
+}
+
+const Element = linked ? "a" : as ?? "article";
+---
+
+<Element {...attributes} href={href} class:list={["card", linked && "linked", className]}>
+  {areas.media && <div class="card-media"><Fragment set:html={areas.media} /></div>}
+  {areas.header && <header class="card-header"><Fragment set:html={areas.header} /></header>}
+  {areas.default && <div class="card-body"><Fragment set:html={areas.default} /></div>}
+  {areas.footer && <footer class="card-footer"><Fragment set:html={areas.footer} /></footer>}
+</Element>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid hsl(var(--color-on-background) / .15);
+    border-radius: var(--border);
+    background-color: hsl(var(--color-background));
+    color: hsl(var(--color-on-background));
+  }
+
+  .card-header,
+  .card-body,
+  .card-footer {
+    padding-inline: var(--space-sm);
+  }
+
+  .card-header {
+    padding-top: var(--space-sm);
+  }
+
+  .card-body {
+    padding-top: var(--space-sm);
+  }
+
+  .card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: calc(var(--space-sm) / 2);
+    margin-top: auto;
+    padding-top: var(--space-sm);
+  }
+
+  /* Whatever area comes last closes the card with the same padding. */
+  .card > :last-child:not(.card-media) {
+    padding-bottom: var(--space-sm);
+  }
+
+  .card-media :global(img) {
+    display: block;
+    width: 100%;
+  }
+
+  .linked {
+    text-decoration: none;
+    transition: border-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
+  }
+
+  .linked:hover {
+    border-color: hsl(var(--color-primary));
+    box-shadow: 0 0.25rem 1rem hsl(var(--color-on-background) / .12);
+  }
+
+  .linked:focus-visible {
+    outline: 2px solid hsl(var(--color-primary));
+    outline-offset: 2px;
+  }
+
+  @media (forced-colors: active) {
+    .linked:hover,
+    .linked:focus-visible {
+      border-color: Highlight;
+      outline-color: Highlight;
+    }
+  }
+</style>

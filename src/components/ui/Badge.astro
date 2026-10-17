@@ -1,0 +1,77 @@
+---
+import '../../styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const badge = cva("badge", {
+  variants: {
+    variant: {
+      primary: "primary",
+      secondary: "secondary",
+      muted: "muted",
+      danger: "danger",
+      outline: "outline"
+    }
+  }
+});
+
+/**
+ * Besides the shared primary/secondary/muted/danger variants, Badge has an
+ * `outline` variant: a bordered badge on the page background.
+ */
+export interface Props
+  extends HTMLAttributes<"span">,
+    VariantProps<typeof badge> {
+}
+
+const { variant = "primary", class: className, ...attributes } = Astro.props;
+---
+
+<span {...attributes} class:list={[badge({ variant }), "ff-sans-normal", className]}>
+  <slot />
+</span>
+
+<style>
+  /*
+   * The transparent border becomes visible in forced-colours mode, where the
+   * background is dropped, so the badge keeps its outline.
+   */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    padding: 0.125em 0.625em;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    line-height: 1.4;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .primary {
+    background-color: hsl(var(--color-primary));
+    color: hsl(var(--color-on-primary));
+  }
+
+  .secondary {
+    background-color: hsl(var(--color-secondary));
+    color: hsl(var(--color-on-secondary));
+  }
+
+  .muted {
+    background-color: hsl(var(--color-surface));
+    color: hsl(var(--color-on-surface));
+  }
+
+  .danger {
+    background-color: hsl(var(--color-error));
+    color: hsl(var(--color-on-error));
+  }
+
+  .outline {
+    border-color: hsl(var(--color-on-background) / .4);
+    color: hsl(var(--color-on-background));
+  }
+</style>
