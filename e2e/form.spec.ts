@@ -1,0 +1,165 @@
+import { expect, test, type Locator } from '@playwright/test';
+
+const height = (locator: Locator) => locator.evaluate(element => element.getBoundingClientRect().height);
+
+/**
+ * Where a Switch's thumb (its ::before) sits along the track, as fractions of
+ * the track width: the thumb is the track's only flex item, offset by its
+ * transform. 0 is the track's start edge, 1 its end edge.
+ */
+const thumbPosition = (locator: Locator) => locator.evaluate(element => {
+  const track = getComputedStyle(element);
+  const thumb = getComputedStyle(element, '::before');
+  const width = element.getBoundingClientRect().width;
+  const thumbWidth = parseFloat(thumb.width);
+  const inset = parseFloat(track.borderLeftWidth) + parseFloat(track.paddingLeft);
+  const free = width - inset - parseFloat(track.borderRightWidth) - parseFloat(track.paddingRight) - thumbWidth;
+  const offset = { center: free / 2, 'flex-end': free, end: free }[track.justifyContent] ?? 0;
+  const translate = thumb.transform === 'none' ? 0 : new DOMMatrixReadOnly(thumb.transform).m41;
+  const start = inset + offset + translate;
+  return { start: start / width, centre: (start + thumbWidth / 2) / width, end: (start + thumbWidth) / width };
+});
+
+test.describe('Form controls', () => {
+  for (const size of ['small', 'medium', 'large']) {
+    test(`an Input, a Select and a Button of size ${size} are the same height`, async ({ page }) => {
+      await page.goto('/#form-alignment');
+
+      const button = await height(page.locator(`#align-button-${size}`));
+
+      expect(await height(page.locator(`#align-input-${size}`))).toBeCloseTo(button, 1);
+      expect(await height(page.locator(`#align-select-${size}`))).toBeCloseTo(button, 1);
+    });
+  }
+
+  test('clicking a FormField label focuses its control', async ({ page }) => {
+    await page.goto('/#input');
+
+    await page.locator('#input-default label').click();
+
+    await expect(page.locator('#input-default input')).toBeFocused();
+  });
+
+  test('a control reached with the keyboard shows focus as a single accent edge, not a second ring', async ({ page }) => {
+    await page.goto('/#label');
+
+    const input = page.locator('#label-standalone');
+    const edge = () => input.evaluate(element => {
+      const style = getComputedStyle(element);
+      return { border: style.borderTopColor, outline: style.outlineStyle };
+    });
+    const accent = await page.evaluate(() => {
+      const probe = document.body.appendChild(document.createElement('span'));
+      probe.style.color = 'hsl(var(--color-accent))';
+      const colour = getComputedStyle(probe).color;
+      probe.remove();
+      return colour;
+    });
+
+    const resting = await edge();
+    await input.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(input).toBeFocused();
+
+    await expect.poll(edge).toEqual({ border: accent, outline: 'none' });
+    expect(resting.border).not.toBe(accent);
+  });
+
+  test('a FormField error is announced as the control description', async ({ page }) => {
+    await page.goto('/#input');
+
+    const input = page.getByRole('textbox', { name: 'Postal code' });
+
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(input).toHaveAccessibleDescription('Enter a postal code such as H2X 1Y4.');
+  });
+
+  test('a Switch is exposed as a switch and toggles with the keyboard', async ({ page }) => {
+    await page.goto('/#switch');
+
+    const toggle = page.getByRole('switch', { name: 'Email me when new prints arrive' });
+    await expect(toggle).not.toBeChecked();
+
+    await toggle.focus();
+    await page.keyboard.press('Space');
+
+    await expect(toggle).toBeChecked();
+  });
+
+  test('a Switch thumb sits at the start when off and at the end when on, on the track', async ({ page }) => {
+    await page.goto('/#switch');
+
+    const off = await thumbPosition(page.getByRole('switch', { name: 'Email me when new prints arrive' }));
+    const on = await thumbPosition(page.getByRole('switch', { name: 'On', exact: true }));
+
+    expect(off.centre).toBeLessThan(.3);
+    expect(on.centre).toBeGreaterThan(.7);
+    for (const thumb of [off, on]) {
+      // it may overhang the track a little, never leave it
+      expect(thumb.centre).toBeGreaterThan(0);
+      expect(thumb.centre).toBeLessThan(1);
+      expect(thumb.start).toBeGreaterThan(-.15);
+      expect(thumb.end).toBeLessThan(1.15);
+    }
+  });
+
+  test('a RadioGroup in a FormField is a named radiogroup', async ({ page }) => {
+    await page.goto('/#radio-group');
+
+    const group = page.locator('#radio-group-field').getByRole('radiogroup', { name: 'Print size' });
+    await group.getByRole('radio', { name: /A3/ }).check();
+
+    await expect(group.getByRole('radio', { name: /A3/ })).toBeChecked();
+    await expect(group).toHaveAccessibleDescription('Framing is quoted separately.');
+  });
+
+  test('the browser validates required fields natively, without JavaScript', async ({ page }) => {
+    await page.goto('/#form-field');
+
+    const form = page.locator('#form-field-demo');
+    await form.getByRole('button', { name: 'Send' }).click();
+
+    expect(await form.evaluate((element: HTMLFormElement) => element.checkValidity())).toBe(false);
+    await expect(form.getByRole('textbox', { name: 'Name' })).toBeFocused();
+  });
+
+  test('an open Select popup takes the theme colours', async ({ page }) => {
+    await page.goto('/#select');
+    test.skip(!(await page.evaluate(() => CSS.supports('appearance', 'base-select'))), 'no customisable select: the native popup follows color-scheme');
+
+    await page.locator('theme-toggle button').click();
+    await expect(page.locator('html')).toHaveClass(/theme-dark/);
+
+    const select = page.locator('#select-default select');
+    await select.click();
+    await expect(select.locator('option').first()).toBeVisible();
+
+    const colours = await select.evaluate(element => {
+      const background = document.body.appendChild(document.createElement('span'));
+      background.style.color = 'hsl(var(--color-background))';
+      const page = getComputedStyle(background).color;
+      background.remove();
+      return { page, popup: getComputedStyle(element, '::picker(select)').backgroundColor };
+    });
+
+    expect(colours.popup).toBe(colours.page);
+  });
+
+  test('controls switch colours with the theme', async ({ page }) => {
+    await page.goto('/#input');
+
+    const input = page.locator('#input-default').getByRole('textbox', { name: 'Name' });
+    const colours = () => input.evaluate(element => {
+      const style = getComputedStyle(element);
+      return `${style.backgroundColor} ${style.color}`;
+    });
+
+    const light = await colours();
+
+    await page.locator('theme-toggle button').click();
+    await expect(page.locator('html')).toHaveClass(/theme-dark/);
+
+    await expect.poll(colours).not.toBe(light);
+  });
+});

@@ -1,0 +1,26 @@
+---
+import '../../styles/global.css'
+import './control.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const input = cva("form-control input", {
+  variants: {
+    size: {
+      small: "text-sm",
+      medium: "text-md",
+      large: "text-xl"
+    }
+  }
+});
+
+/** `size` is the shared size variant (it matches Button's), not the native character width; set a width in CSS instead. */
+export interface Props
+  extends Omit<HTMLAttributes<"input">, "size">,
+    VariantProps<typeof input> {
+}
+
+const { type = "text", size = "medium", class: className, ...attributes } = Astro.props;
+---
+
+<input {...attributes} type={type} class:list={[input({ size }), "ff-sans-normal", className]} />

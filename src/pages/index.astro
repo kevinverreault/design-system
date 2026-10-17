@@ -8,19 +8,89 @@ import { NavigationItems } from '../data/navigation';
 import Icon from '../components/ui/Icon.astro';
 import Accordion from '../components/navigation/Accordion.astro';
 import ThemeToggle from '../components/ui/ThemeToggle.astro'
+import Label from '../components/form/Label.astro';
+import Input from '../components/form/Input.astro';
+import Textarea from '../components/form/Textarea.astro';
+import Select from '../components/form/Select.astro';
+import Checkbox from '../components/form/Checkbox.astro';
+import RadioGroup from '../components/form/RadioGroup.astro';
+import Switch from '../components/form/Switch.astro';
+import FormField from '../components/form/FormField.astro';
 import Row from '../components/layout/Row.astro';
 import Pane from '../components/layout/Pane.astro';
 import Image from '../components/media/Image.astro';
 import dusk from '../assets/showcase/dusk.jpg';
+import Card from '../components/ui/Card.astro';
+import Badge from '../components/ui/Badge.astro';
+import Avatar from '../components/ui/Avatar.astro';
+import Separator from '../components/ui/Separator.astro';
+import Table from '../components/ui/Table.astro';
+import Skeleton from '../components/ui/Skeleton.astro';
+import Gallery from '../components/media/Gallery.astro';
+import Alert from '../components/feedback/Alert.astro';
+import Tabs from '../components/navigation/Tabs.astro';
+import TabPanel from '../components/navigation/TabPanel.astro';
+import Breadcrumbs from '../components/navigation/Breadcrumbs.astro';
+import Pagination from '../components/navigation/Pagination.astro';
+import Footer from '../components/navigation/Footer.astro';
 
 const buttonVariants = ["primary", "secondary", "muted", "danger"] as const;
 const buttonTypes = ["outline", "ghost", "underline"] as const;
 const buttonSizes = ["icon", "small", "medium", "large", "extra-large"] as const;
 const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
+const controlSizes = ["small", "medium", "large"] as const;
+const printFormats = [
+  { value: "a4", label: "A4 — 21 × 30 cm" },
+  { value: "a3", label: "A3 — 30 × 42 cm" },
+  { value: "a2", label: "A2 — 42 × 59 cm", disabled: true }
+];
 const rowBackgrounds = ["background", "surface", "primary", "secondary"] as const;
 const rowGaps = ["small", "medium", "large"] as const;
 const paneAlignments = ["start", "center", "end"] as const;
 const imageRatios = ["1:1", "3:2", "16:9"] as const;
+const badgeVariants = ["primary", "secondary", "muted", "danger", "outline"] as const;
+const avatarSizes = ["small", "medium", "large"] as const;
+const printColumns = [
+  { key: "size", label: "Size" },
+  { key: "paper", label: "Paper" },
+  { key: "edition", label: "Edition", align: "center" },
+  { key: "price", label: "Price", align: "end" }
+] as const;
+const printRows = [
+  { size: "20 × 30 cm", paper: "Matte", edition: "Open", price: "45 $" },
+  { size: "30 × 45 cm", paper: "Lustre", edition: "Open", price: "75 $" },
+  { size: "40 × 60 cm", paper: "Fine art", edition: "25", price: "120 $" },
+  { size: "60 × 90 cm", paper: "Fine art", edition: "10", price: "240 $" }
+];
+const galleryImages = [
+  { src: dusk, alt: "Mountains at dusk", credit: "Kevin Verreault 2024" },
+  { src: "/images/snow.jpg", alt: "Snowfield under a white sky", credit: "Kevin Verreault 2023", width: 1200, height: 800 },
+  { src: dusk, alt: "Ridge line at dusk" },
+  { src: "/images/snow.jpg", alt: "Tracks in the snow", credit: "Kevin Verreault 2022", width: 1200, height: 800 },
+  { src: dusk, alt: "Last light over the hills", credit: "Kevin Verreault 2024" },
+  { src: "/images/snow.jpg", alt: "Fresh snow", width: 1200, height: 800 }
+];
+
+const alerts = [
+  { variant: "info", icon: "info", title: "Shipping", message: "Prints ship within five business days." },
+  { variant: "success", icon: "circle-check", title: "Order received", message: "A confirmation email is on its way." },
+  { variant: "warning", icon: "triangle-alert", title: "Limited edition", message: "Only three prints of this photo remain." },
+  { variant: "danger", icon: "circle-alert", title: "Payment declined", message: "Check your card details and try again." }
+] as const;
+const breadcrumbItems = [
+  { text: "Accueil", path: "/" },
+  { text: "Portfolio", path: "#breadcrumbs" },
+  { text: "Oiseaux", path: "#breadcrumbs" }
+];
+const paginationItems = [1, 2, 3, 4, 5].map(page => ({ text: String(page), path: `#pagination-page-${page}` }));
+const footerGroups = NavigationItems
+  .filter(item => item.subMenuLinks)
+  .map(item => ({ title: item.text, links: item.subMenuLinks! }));
+const footerSocial = [
+  { icon: "instagram", text: "Instagram", path: "#footer" },
+  { icon: "facebook", text: "Facebook", path: "#footer" },
+  { icon: "x-twitter", text: "X", path: "#footer" }
+];
 
 ---
 
@@ -305,8 +375,327 @@ const imageRatios = ["1:1", "3:2", "16:9"] as const;
         </Pane>
       </Row>
     </section>
+
+    <section id="form-controls" class="flow">
+      <h2 class="numbered-title"><span>06</span> Form controls</h2>
+
+      <p>Every control wraps a native element, so submission and validation work without JavaScript. Tab through the fields to see the focus ring.</p>
+
+      <div id="form-alignment" class="flow">
+        <h3 class="numbered-title">Sizes</h3>
+
+        <p>An Input, a Select and a Button of the same size are the same height.</p>
+
+        {
+          controlSizes.map(size => (
+            <div class="demo-control-row">
+              <Input size={size} id={`align-input-${size}`} aria-label={`${size} input`} placeholder={`size="${size}"`} />
+              <Select size={size} id={`align-select-${size}`} aria-label={`${size} select`}><option>{size}</option></Select>
+              <Button size={size} id={`align-button-${size}`}>{size}</Button>
+              <Button size={size} decoration="outline">outline</Button>
+            </div>
+          ))
+        }
+      </div>
+
+      <div id="label" class="flow">
+        <h3 class="numbered-title">Label</h3>
+
+        <div class="demo-form-grid">
+          <div class="demo-stack">
+            <Label for="label-standalone">A standalone Label</Label>
+            <Input id="label-standalone" name="standalone" />
+          </div>
+        </div>
+      </div>
+
+      <div id="input" class="flow">
+        <h3 class="numbered-title">Input</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="input-default" label="Name"><Input name="name" autocomplete="name" placeholder="Jane Doe" /></FormField>
+          <FormField id="input-hint" label="Email" hint="We only use it to answer you."><Input type="email" name="email" autocomplete="email" placeholder="you@example.com" /></FormField>
+          <FormField id="input-error" label="Postal code" error="Enter a postal code such as H2X 1Y4."><Input name="postal-code" value="H2X" pattern="[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d" /></FormField>
+          <FormField id="input-disabled" label="Disabled"><Input name="disabled" value="Can't touch this" disabled /></FormField>
+          <FormField id="input-readonly" label="Read-only"><Input name="readonly" value="Order #1024" readonly /></FormField>
+        </div>
+      </div>
+
+      <div id="textarea" class="flow">
+        <h3 class="numbered-title">Textarea</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="textarea-default" label="Message" hint="A few words about the print you want."><Textarea name="message" placeholder="Hello…" /></FormField>
+          <FormField id="textarea-error" label="Message" error="The message can't be empty."><Textarea name="message-error" required /></FormField>
+          <FormField id="textarea-disabled" label="Disabled"><Textarea name="message-disabled" value="Disabled" disabled /></FormField>
+          <FormField id="textarea-readonly" label="Read-only"><Textarea name="message-readonly" value="Sent on 12 May." readonly /></FormField>
+        </div>
+      </div>
+
+      <div id="select" class="flow">
+        <h3 class="numbered-title">Select</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="select-default" label="Category">
+            <Select name="category">
+              <option value="birds">Oiseaux</option>
+              <option value="mammals">Mammifères</option>
+              <option value="landscapes">Paysages</option>
+            </Select>
+          </FormField>
+          <FormField id="select-error" label="Format" error="Pick a format.">
+            <Select name="format" required>
+              <option value="">Choose…</option>
+              <option value="a4">A4</option>
+            </Select>
+          </FormField>
+          <FormField id="select-disabled" label="Disabled">
+            <Select name="select-disabled" disabled><option>Unavailable</option></Select>
+          </FormField>
+        </div>
+
+        <p>A native select has no read-only state; use a read-only Input instead.</p>
+      </div>
+
+      <div id="checkbox" class="flow">
+        <h3 class="numbered-title">Checkbox</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="checkbox-default" label="Subscribe to the newsletter"><Checkbox name="newsletter" /></FormField>
+          <FormField id="checkbox-checked" label="Checked" hint="One email a month."><Checkbox name="checked" checked /></FormField>
+          <FormField id="checkbox-error" label="I accept the terms" error="You must accept the terms."><Checkbox name="terms" required /></FormField>
+          <FormField id="checkbox-disabled" label="Disabled"><Checkbox name="checkbox-disabled" disabled /></FormField>
+          <FormField id="checkbox-disabled-checked" label="Disabled and checked"><Checkbox name="checkbox-disabled-checked" checked disabled /></FormField>
+        </div>
+      </div>
+
+      <div id="radio-group" class="flow">
+        <h3 class="numbered-title">Radio group</h3>
+
+        <div class="demo-form-grid">
+          <RadioGroup id="radio-group-standalone" name="format-standalone" legend="Standalone, with a legend" options={printFormats} value="a4" />
+          <FormField id="radio-group-field" label="Print size" hint="Framing is quoted separately."><RadioGroup name="format-field" options={printFormats} /></FormField>
+          <FormField id="radio-group-error" label="Print size" error="Pick a print size."><RadioGroup name="format-error" options={printFormats} required /></FormField>
+          <FormField id="radio-group-disabled" label="Disabled"><RadioGroup name="format-disabled" options={printFormats} value="a3" disabled /></FormField>
+          <FormField id="radio-group-horizontal" label="Horizontal"><RadioGroup name="format-horizontal" orientation="horizontal" options={[{ value: "portrait", label: "Portrait" }, { value: "landscape", label: "Landscape" }]} value="landscape" /></FormField>
+        </div>
+      </div>
+
+      <div id="switch" class="flow">
+        <h3 class="numbered-title">Switch</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="switch-default" label="Email me when new prints arrive"><Switch name="alerts" /></FormField>
+          <FormField id="switch-checked" label="On" hint="Checkbox semantics, toggle look."><Switch name="on" checked /></FormField>
+          <FormField id="switch-error" label="Required" error="Turn this on to continue."><Switch name="required-switch" required /></FormField>
+          <FormField id="switch-disabled" label="Disabled"><Switch name="switch-disabled" disabled /></FormField>
+          <FormField id="switch-disabled-checked" label="Disabled and on"><Switch name="switch-disabled-checked" checked disabled /></FormField>
+        </div>
+      </div>
+
+      <div id="form-field" class="flow">
+        <h3 class="numbered-title">Form field</h3>
+
+        <p>A contact form built from FormFields. Submitting it empty shows the browser's own validation.</p>
+
+        <form id="form-field-demo" class="demo-form flow" action="#form-field">
+          <FormField label="Name"><Input name="contact-name" autocomplete="name" required /></FormField>
+          <FormField label="Email" hint="We only use it to answer you."><Input type="email" name="contact-email" autocomplete="email" required /></FormField>
+          <FormField label="Print size"><RadioGroup name="contact-format" options={printFormats} required /></FormField>
+          <FormField label="Message"><Textarea name="contact-message" required /></FormField>
+          <FormField label="Subscribe to the newsletter"><Checkbox name="contact-newsletter" /></FormField>
+          <div><Button type="submit">Send</Button></div>
+        </form>
+      </div>
+    </section>
+    <section id="card" class="flow">
+      <h2 class="numbered-title"><span>07</span> Card</h2>
+
+      <Row columns={3}>
+        <Pane>
+          <Card href="#card" id="card-linked">
+            <Image slot="media" src={dusk} alt="Mountains at dusk" ratio="3:2" credit="Kevin Verreault 2024" />
+            <h3 slot="header" class="text-lg">Dusk over the hills</h3>
+            <p>The whole card is one link; the image keeps its credit footer.</p>
+            <Fragment slot="footer"><Badge>New</Badge> <span>From 45 $</span></Fragment>
+          </Card>
+        </Pane>
+        <Pane>
+          <Card id="card-actions">
+            <h3 slot="header" class="text-lg">Calendar 2025</h3>
+            <p>A card that doesn't link can hold its own actions.</p>
+            <Fragment slot="footer"><Button size="small">Add to cart</Button><Button size="small" variant="muted">Details</Button></Fragment>
+          </Card>
+        </Pane>
+        <Pane>
+          <Card id="card-body-only" as="div">
+            <p>Only the body is given, so only the body renders.</p>
+          </Card>
+        </Pane>
+      </Row>
+    </section>
+
+    <section id="badge" class="flow">
+      <h2 class="numbered-title"><span>08</span> Badge</h2>
+
+      <div class="flex flex-row items-center">
+        {badgeVariants.map(variant => <Badge variant={variant}>{variant}</Badge>)}
+      </div>
+
+      <p>Heron at dawn <Badge variant="secondary">New</Badge> <Badge variant="danger">Sold out</Badge></p>
+    </section>
+
+    <section id="avatar" class="flow">
+      <h2 class="numbered-title"><span>09</span> Avatar</h2>
+
+      <h3 class="numbered-title">Image</h3>
+
+      <div class="flex flex-row items-center">
+        {avatarSizes.map(size => <Avatar src={dusk} name="Kevin Verreault" size={size} />)}
+        <Avatar src="/images/snow.jpg" name="Remote source" />
+      </div>
+
+      <h3 class="numbered-title">Initials fallback</h3>
+
+      <div class="flex flex-row items-center" id="avatar-initials">
+        {avatarSizes.map(size => <Avatar name="Kevin Verreault" size={size} />)}
+        <Avatar name="Élodie" />
+      </div>
+
+      <div class="flex flex-row items-center">
+        <Avatar name="Kevin Verreault" alt="" />
+        <span>Kevin Verreault (decorative avatar next to the name)</span>
+      </div>
+    </section>
+
+    <section id="separator" class="flow">
+      <h2 class="numbered-title"><span>10</span> Separator</h2>
+
+      <p>Decorative (role="none"), the default:</p>
+      <Separator />
+      <p>Semantic (role="separator"), when the division matters to screen-reader users:</p>
+      <Separator decorative={false} id="separator-semantic" />
+
+      <div class="flex flex-row items-center">
+        <span>Oiseaux</span>
+        <Separator orientation="vertical" />
+        <span>Mammifères</span>
+        <Separator orientation="vertical" decorative={false} />
+        <span>Paysages</span>
+      </div>
+    </section>
+
+    <section id="table" class="flow">
+      <h2 class="numbered-title"><span>11</span> Table</h2>
+
+      <Table caption="Print sizes and prices" columns={printColumns} rows={printRows} rowHeader="size" />
+
+      <Table caption="Striped and hover" columns={printColumns} rows={printRows} rowHeader="size" striped hover id="table-striped" />
+    </section>
+
+    <section id="skeleton" class="flow">
+      <h2 class="numbered-title"><span>12</span> Skeleton</h2>
+
+      <Row columns={3}>
+        <Pane>
+          <div class="flow" aria-busy="true" aria-label="Loading a product" id="skeleton-demo" style="width: 100%;">
+            <Skeleton style="aspect-ratio: 3 / 2" />
+            <div class="flex flex-row items-center">
+              <Skeleton shape="circle" />
+              <div class="flow" style="flex: 1; --flow-space: .5rem;">
+                <Skeleton shape="line" />
+                <Skeleton shape="line" style="width: 60%" />
+              </div>
+            </div>
+          </div>
+        </Pane>
+      </Row>
+    </section>
+
+    <section id="gallery" class="flow">
+      <h2 class="numbered-title"><span>13</span> Gallery</h2>
+
+      <Gallery images={galleryImages} id="gallery-default" aria-label="Paysages" />
+
+      <h3 class="numbered-title">Small square thumbnails</h3>
+
+      <Gallery images={galleryImages} ratio="1:1" columnWidth="small" gap="small" aria-label="Paysages, small" />
+    </section>
+
+    <section id="alert" class="flow">
+      <h2 class="numbered-title"><span>14</span> Alert</h2>
+
+      <h3 class="numbered-title">Variants</h3>
+
+      {
+        alerts.map(({ variant, icon, title, message }) => (
+          <Alert variant={variant} icon={icon} title={title} id={`alert-${variant}`}>{message}</Alert>
+        ))
+      }
+
+      <h3 class="numbered-title">Without icon or title</h3>
+
+      <Alert>info and success use role="status"; warning and danger use role="alert".</Alert>
+    </section>
+
+    <section id="toast" class="flow">
+      <h2 class="numbered-title"><span>15</span> Toast</h2>
+
+      <p>One Toast region sits in the layout. Any script queues a message in it with <code>toast(message, &#123; variant, duration &#125;)</code>.</p>
+
+      <div class="flex flex-row" style="flex-wrap: wrap;">
+        <Button id="toast-info" variant="muted" data-toast="Prints ship within five business days." data-toast-variant="info">info</Button>
+        <Button id="toast-success" variant="muted" data-toast="Added to cart" data-toast-variant="success">success</Button>
+        <Button id="toast-warning" variant="muted" data-toast="Only three prints remain" data-toast-variant="warning">warning</Button>
+        <Button id="toast-danger" variant="muted" data-toast="Payment declined" data-toast-variant="danger">danger</Button>
+        <Button id="toast-short" variant="secondary" data-toast="Saved for two seconds" data-toast-variant="success" data-toast-duration="2000">2 second toast</Button>
+      </div>
+    </section>
+
+    <section id="tabs" class="flow">
+      <h2 class="numbered-title"><span>16</span> Tabs</h2>
+
+      <p>Without JavaScript every panel shows under its heading.</p>
+
+      <Tabs label="Print formats" id="tabs-print-formats">
+        <TabPanel label="Small"><p>20 × 30 cm, printed on matte paper.</p></TabPanel>
+        <TabPanel label="Medium"><p>40 × 60 cm, printed on fine-art paper.</p></TabPanel>
+        <TabPanel label="Large"><p>60 × 90 cm, mounted on aluminium.</p></TabPanel>
+      </Tabs>
+    </section>
+
+    <section id="breadcrumbs" class="flow">
+      <h2 class="numbered-title"><span>17</span> Breadcrumbs</h2>
+
+      <Breadcrumbs items={breadcrumbItems} aria-label="Fil d'Ariane" />
+    </section>
+
+    <section id="pagination" class="flow">
+      <h2 class="numbered-title"><span>18</span> Pagination</h2>
+
+      <Pagination items={paginationItems} current={3} />
+      <Pagination items={paginationItems} current={1} aria-label="First page" />
+      <Pagination items={paginationItems} current={5} aria-label="Last page" previousLabel="Précédent" nextLabel="Suivant" />
+    </section>
+
+    <section id="footer" class="flow">
+      <h2 class="numbered-title"><span>19</span> Footer</h2>
+
+      <Footer groups={footerGroups} social={footerSocial} copyright="Kevin Verreault 2024" />
+    </section>
   </div>
 </Layout>
+
+<script>
+  import { toast, type ToastVariant } from '../components/feedback/toast';
+
+  document.querySelectorAll<HTMLElement>('[data-toast]').forEach(trigger => {
+    trigger.addEventListener('click', () => toast(trigger.dataset.toast!, {
+      variant: trigger.dataset.toastVariant as ToastVariant | undefined,
+      duration: Number(trigger.dataset.toastDuration) || undefined
+    }));
+  });
+</script>
 
 <style>
 
@@ -356,6 +745,35 @@ const imageRatios = ["1:1", "3:2", "16:9"] as const;
 
   #interactive-elements > h4 {
     margin-left: 1rem;
+  }
+
+  .demo-control-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .demo-control-row > :global(.input),
+  .demo-control-row > :global(.select) {
+    width: 14rem;
+  }
+
+  .demo-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1.5rem 2rem;
+    align-items: start;
+  }
+
+  .demo-stack {
+    display: grid;
+    gap: 0.375rem;
+  }
+
+  .demo-form {
+    max-width: 32rem;
+    --flow-space: 1.25rem;
   }
 
   .demo-pane {

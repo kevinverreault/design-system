@@ -1,0 +1,20 @@
+---
+import '../../styles/global.css'
+import './control.css'
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props extends Omit<HTMLAttributes<"textarea">, "value"> {
+  /** Initial content of the textarea. */
+  value?: string;
+}
+
+const { value = "", rows = 4, class: className, ...attributes } = Astro.props;
+---
+
+<textarea {...attributes} rows={rows} class:list={["form-control", "textarea", "text-md", "ff-sans-normal", className]}>{value}</textarea>
+
+<style>
+  .textarea {
+    resize: vertical;
+  }
+</style>

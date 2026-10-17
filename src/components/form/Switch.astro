@@ -1,0 +1,63 @@
+---
+import '../../styles/global.css'
+import './control.css'
+import type { HTMLAttributes } from "astro/types";
+
+/** An on/off toggle: a native checkbox exposed as `role="switch"`, so it submits and validates like one. */
+export interface Props extends Omit<HTMLAttributes<"input">, "type" | "role"> {}
+
+const { class: className, ...attributes } = Astro.props;
+---
+
+<input {...attributes} type="checkbox" role="switch" class:list={["form-check", "switch", className]} />
+
+<style>
+  /*
+   * A thin track with an oversized thumb that overhangs it. The thumb is
+   * always light with a shadow, so it stands off the page in both themes;
+   * when on, the thumb takes the accent colour and the track a tint of it.
+   */
+  .switch {
+    --track-width: 2.25em;
+    --thumb-size: 1.25em;
+    --overhang: 0.125em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: var(--track-width);
+    height: 0.875em;
+    margin-block: 0.1875em;
+    padding: 0;
+    border: 0;
+    border-radius: 9999px;
+    overflow: visible;
+    background-color: hsl(var(--color-on-background) / .25);
+  }
+
+  .switch::before {
+    content: "";
+    flex: none;
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    border-radius: 50%;
+    background-color: hsl(0 0% 98%);
+    box-shadow: 0 1px 3px rgb(0 0 0 / .4);
+    transform: translateX(calc(-1 * var(--overhang)));
+    transition: transform 150ms ease-in-out, background-color 150ms ease-in-out;
+  }
+
+  .switch:checked {
+    background-color: hsl(var(--color-accent) / .45);
+  }
+
+  .switch:checked::before {
+    background-color: hsl(var(--color-accent));
+    transform: translateX(calc(var(--track-width) - var(--thumb-size) + var(--overhang)));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .switch::before {
+      transition: none;
+    }
+  }
+</style>

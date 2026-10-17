@@ -1,0 +1,115 @@
+---
+import '../../styles/global.css'
+import './control.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const radioGroup = cva("radio-group", {
+  variants: {
+    orientation: {
+      vertical: "vertical",
+      horizontal: "horizontal"
+    }
+  }
+});
+
+export interface RadioOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+
+/**
+ * A fieldset of native radios sharing one `name`. `name`, `value` and
+ * `required` go to the radios; other attributes (`disabled`, `id`, aria-*, …)
+ * go to the fieldset, so `disabled` disables the whole group.
+ */
+export interface Props
+  extends HTMLAttributes<"fieldset">,
+    VariantProps<typeof radioGroup> {
+  name: string;
+  options: RadioOption[];
+  /** Value of the option checked initially. */
+  value?: string;
+  required?: boolean;
+  /** Visible group label. Leave it out inside a FormField, which labels the group. */
+  legend?: string;
+}
+
+const { name, options, value, required, legend, orientation = "vertical", class: className, ...attributes } = Astro.props;
+
+if (!options?.length) {
+  throw new Error(`RadioGroup '${name}' needs at least one option.`);
+}
+
+if (value !== undefined && !options.some(option => option.value === value)) {
+  throw new Error(`RadioGroup '${name}' value '${value}' matches none of its options (${options.map(option => option.value).join(", ")}).`);
+}
+---
+
+<fieldset {...attributes} role="radiogroup" class:list={[radioGroup({ orientation }), "ff-sans-normal", className]}>
+  {legend && <legend class="legend">{legend}</legend>}
+  {
+    options.map(option => (
+      <label class="option">
+        <input type="radio" class="form-check radio" name={name} value={option.value} checked={option.value === value} required={required} disabled={option.disabled} />
+        <span>{option.label}</span>
+      </label>
+    ))
+  }
+</fieldset>
+
+<style>
+  .radio-group {
+    display: flex;
+    gap: 0.5em 1.5em;
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+  }
+
+  .vertical { flex-direction: column; }
+  .horizontal { flex-direction: row; flex-wrap: wrap; }
+
+  .legend {
+    padding: 0;
+    margin-bottom: 0.5em;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  .option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    cursor: pointer;
+  }
+
+  /* Radios in a disabled fieldset match :disabled too, so this covers both. */
+  .option:has(:disabled) {
+    cursor: not-allowed;
+  }
+
+  .option:has(:disabled) > span {
+    opacity: .55;
+  }
+
+  .radio {
+    border-radius: 50%;
+  }
+
+  .radio::before {
+    content: "";
+    width: 0.45em;
+    height: 0.45em;
+    border-radius: 50%;
+    background-color: currentColor;
+    transform: scale(0);
+    transition: transform 120ms ease-in-out;
+  }
+
+  .radio:checked::before {
+    transform: scale(1);
+  }
+</style>
