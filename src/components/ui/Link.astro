@@ -24,10 +24,10 @@ export interface Props
     VariantProps<typeof anchor> {
     }
       
-const { variant = "default", size = "medium", href } = Astro.props;
+const { variant = "default", size = "medium", class: className, ...attributes } = Astro.props;
 ---
 
-<a href={href} class:list={[anchor({ variant, size }), "ff-sans-normal", "text-on-background"]}>
+<a {...attributes} class:list={[anchor({ variant, size }), "ff-sans-normal", "text-on-background", className]}>
   <slot />
 </a>
 

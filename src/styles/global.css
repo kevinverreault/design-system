@@ -34,6 +34,12 @@
   --fs-sm: 0.875rem;
 
   --border: 0.5rem;
+
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 4rem;
+
+  --container-max-width: 80rem;
   
   --transition-bezier: cubic-bezier(.43,.045,.1,.95) .35s;
   --theme-transition: 0.2s ease-in-out;
@@ -178,7 +184,7 @@ select {
 .container {
   /* padding-inline: 2rem; */
   margin-inline: auto;
-  max-width: 80rem;
+  max-width: var(--container-max-width);
 }
 
 .screen-reader-only {
