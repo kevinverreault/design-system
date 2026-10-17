@@ -19,6 +19,10 @@
   --color-on-surface: 160 0% 20%;
   --color-error: 0 74% 40%;
   --color-on-error: 0 0% 100%;
+  --color-success: 142 60% 26%;
+  --color-on-success: 0 0% 100%;
+  --color-warning: 30 100% 33%;
+  --color-on-warning: 0 0% 100%;
 
   --ff-sans-normal: "Noto Sans", sans-serif;
   --ff-serif: "DM Serif Text", serif;
@@ -52,6 +56,10 @@
   --color-on-surface: 0 0% 100%;
   --color-error: 0 74% 40%;
   --color-on-error: 0 0% 100%;
+  --color-success: 142 50% 55%;
+  --color-on-success: 160 0% 10%;
+  --color-warning: 38 95% 60%;
+  --color-on-warning: 160 0% 10%;
 }
 
 /* ------------------------------ */

@@ -1,0 +1,188 @@
+---
+import '../../styles/global.css'
+import Icon from '../ui/Icon.astro';
+
+/**
+ * The page's single Toast region. Place it once in the layout, then queue
+ * messages with `toast()` from './toast'.
+ */
+export interface Props {
+  /** Accessible name of the notifications landmark. */
+  label?: string;
+  /** Accessible name of each toast's close button. */
+  dismissLabel?: string;
+}
+
+const { label = "Notifications", dismissLabel = "Dismiss" } = Astro.props;
+
+const icons = {
+  info: "info",
+  success: "circle-check",
+  warning: "triangle-alert",
+  danger: "circle-alert"
+};
+---
+
+<toast-region data-dismiss-label={dismissLabel}>
+  <section class="toast-region" aria-label={label}>
+    <div class="toast-list" role="status" aria-live="polite"></div>
+  </section>
+  {
+    Object.entries(icons).map(([variant, icon]) => (
+      <template data-variant={variant}><Icon icon={icon} class="toast-icon" aria-hidden="true" /></template>
+    ))
+  }
+  <template data-dismiss><Icon icon="x" aria-hidden="true" /></template>
+</toast-region>
+
+<style>
+  .toast-region {
+    position: fixed;
+    z-index: 1000;
+    inset-block-end: var(--space-sm);
+    inset-inline-end: var(--space-sm);
+    width: min(24rem, calc(100vw - 2 * var(--space-sm)));
+    pointer-events: none;
+  }
+
+  .toast-list {
+    display: grid;
+    gap: 0.5em;
+  }
+
+  .toast-list :global(.toast) {
+    display: flex;
+    gap: 0.75em;
+    align-items: flex-start;
+    padding: 0.75em 0.75em 0.75em 1em;
+    border: 1px solid hsl(var(--toast-color) / .5);
+    border-inline-start-width: 0.25em;
+    border-inline-start-color: hsl(var(--toast-color));
+    border-radius: var(--border);
+    background-color: hsl(var(--color-background));
+    color: hsl(var(--color-on-background));
+    box-shadow: 0 0.5rem 1.5rem hsl(var(--color-on-background) / .15);
+    font-size: var(--fs-md);
+    pointer-events: auto;
+  }
+
+  .toast-list :global(.info) { --toast-color: var(--color-secondary); }
+  .toast-list :global(.success) { --toast-color: var(--color-success); }
+  .toast-list :global(.warning) { --toast-color: var(--color-warning); }
+  .toast-list :global(.danger) { --toast-color: var(--color-error); }
+
+  .toast-list :global(.toast-icon) {
+    flex-shrink: 0;
+    width: 1.25em;
+    height: 1.25em;
+    margin-top: 0.125em;
+    color: hsl(var(--toast-color));
+  }
+
+  .toast-list :global(.toast-message) {
+    flex: 1;
+  }
+
+  .toast-list :global(.toast-dismiss) {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    padding: 0.25em;
+    border: 0;
+    border-radius: var(--border);
+    background: none;
+    color: hsl(var(--color-on-background) / .75);
+    cursor: pointer;
+  }
+
+  .toast-list :global(.toast-dismiss:hover),
+  .toast-list :global(.toast-dismiss:focus-visible) {
+    background-color: hsl(var(--color-surface));
+    color: hsl(var(--color-on-background));
+  }
+
+  .toast-list :global(.toast-dismiss svg) {
+    width: 1em;
+    height: 1em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .toast-list :global(.toast) {
+      animation: toast-in 200ms ease-out;
+    }
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .toast-list :global(.toast) {
+      border-color: CanvasText;
+    }
+
+    .toast-list :global(.toast-icon) {
+      color: CanvasText;
+    }
+  }
+</style>
+
+<script>
+  import { TOAST_EVENT, type ToastDetail } from './toast';
+
+  class ToastRegion extends HTMLElement {
+    connectedCallback() {
+      document.addEventListener(TOAST_EVENT, this.onToast);
+    }
+
+    disconnectedCallback() {
+      document.removeEventListener(TOAST_EVENT, this.onToast);
+    }
+
+    onToast = (event: Event) => {
+      this.show((event as CustomEvent<ToastDetail>).detail);
+    };
+
+    show({ message, variant, duration }: ToastDetail) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${variant}`;
+
+      const icon = this.querySelector<HTMLTemplateElement>(`template[data-variant="${variant}"]`);
+      if (icon) toast.append(icon.content.cloneNode(true));
+
+      const text = document.createElement('p');
+      text.className = 'toast-message';
+      text.textContent = message;
+
+      const dismiss = document.createElement('button');
+      dismiss.type = 'button';
+      dismiss.className = 'toast-dismiss';
+      dismiss.setAttribute('aria-label', this.dataset.dismissLabel ?? 'Dismiss');
+      dismiss.append(this.querySelector<HTMLTemplateElement>('template[data-dismiss]')!.content.cloneNode(true));
+      dismiss.addEventListener('click', () => toast.remove());
+
+      toast.append(text, dismiss);
+      this.querySelector('.toast-list')!.append(toast);
+
+      // The timer pauses while the toast is hovered or focused, so it can't vanish mid-read.
+      let timer: number | undefined;
+      let hovered = false;
+      let focused = false;
+      const restart = () => {
+        window.clearTimeout(timer);
+        if (!hovered && !focused) timer = window.setTimeout(() => toast.remove(), duration);
+      };
+
+      toast.addEventListener('mouseenter', () => { hovered = true; restart(); });
+      toast.addEventListener('mouseleave', () => { hovered = false; restart(); });
+      toast.addEventListener('focusin', () => { focused = true; restart(); });
+      toast.addEventListener('focusout', event => { focused = toast.contains(event.relatedTarget as Node | null); restart(); });
+      restart();
+    }
+  }
+
+  customElements.define('toast-region', ToastRegion);
+</script>

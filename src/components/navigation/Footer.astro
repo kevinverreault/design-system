@@ -1,0 +1,151 @@
+---
+import '../../styles/global.css'
+import type { HTMLAttributes } from "astro/types";
+import type { NavigationMenuLink } from '../../data/navigation';
+import Icon from '../ui/Icon.astro';
+
+export interface FooterGroup {
+  title: string;
+  links: NavigationMenuLink[];
+}
+
+/** A social profile link; `text` is its accessible name, `icon` a name from the icon set. */
+export interface FooterSocialLink extends NavigationMenuLink {
+  icon: string;
+}
+
+export interface Props extends HTMLAttributes<"footer"> {
+  groups: FooterGroup[];
+  social?: FooterSocialLink[];
+  /** Owner and year; rendered as "© {copyright}". */
+  copyright: string;
+  /** Accessible name of the footer's navigation landmark. */
+  navigationLabel?: string;
+}
+
+const { groups, social = [], copyright, navigationLabel = "Footer", class: className, ...attributes } = Astro.props;
+---
+
+<footer {...attributes} class:list={["footer", className]}>
+  <nav class="footer-groups" aria-label={navigationLabel}>
+    {
+      groups.map(({ title, links }) => (
+        <div class="footer-group">
+          <h2 class="footer-group-title text-sm ff-sans-condensed letter-spacing-sm uppercase">{title}</h2>
+          <ul>
+            {links.map(({ text, path }) => <li><a href={path}>{text}</a></li>)}
+          </ul>
+        </div>
+      ))
+    }
+  </nav>
+
+  <div class="footer-bottom text-sm">
+    <p class="footer-copyright">© {copyright}</p>
+    {
+      social.length > 0 &&
+      <ul class="footer-social">
+        {
+          social.map(({ icon, text, path }) => (
+            <li>
+              <a href={path} aria-label={text}><Icon icon={icon} aria-hidden="true" /></a>
+            </li>
+          ))
+        }
+      </ul>
+    }
+  </div>
+</footer>
+
+<style>
+  .footer {
+    display: grid;
+    gap: var(--space-md);
+    padding-block: var(--space-md);
+    border-top: 1px solid hsl(var(--color-surface));
+    background-color: hsl(var(--color-background));
+    color: hsl(var(--color-on-background));
+  }
+
+  .footer-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: var(--space-md);
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer-group-title {
+    margin-bottom: 0.75em;
+    font-weight: 700;
+  }
+
+  .footer-group li + li {
+    margin-top: 0.5em;
+  }
+
+  .footer-group a {
+    color: hsl(var(--color-on-background) / .75);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.25em;
+    transition: color 200ms, text-decoration-color 200ms;
+  }
+
+  .footer-group a:hover,
+  .footer-group a:focus-visible {
+    color: hsl(var(--color-on-background));
+    text-decoration-color: currentColor;
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid hsl(var(--color-surface));
+  }
+
+  .footer-copyright {
+    color: hsl(var(--color-on-background) / .75);
+  }
+
+  .footer-social {
+    display: flex;
+    gap: 0.5em;
+  }
+
+  .footer-social a {
+    display: grid;
+    place-items: center;
+    width: 2.5em;
+    height: 2.5em;
+    border-radius: 50%;
+    color: hsl(var(--color-on-background));
+    transition: background-color 200ms, color 200ms;
+  }
+
+  .footer-social a:hover,
+  .footer-social a:focus-visible {
+    background-color: hsl(var(--color-primary));
+    color: hsl(var(--color-on-primary));
+  }
+
+  .footer-social :global(svg) {
+    width: 1.25em;
+    height: 1.25em;
+  }
+
+  @media (forced-colors: active) {
+    .footer,
+    .footer-bottom {
+      border-color: CanvasText;
+    }
+  }
+</style>

@@ -1,0 +1,10 @@
+---
+import Tabs from '../../src/components/navigation/Tabs.astro';
+import TabPanel from '../../src/components/navigation/TabPanel.astro';
+---
+
+<Tabs label="Print formats" id="formats">
+  <TabPanel label="Small" id="small"><p>20 × 30 cm</p></TabPanel>
+  <TabPanel label="Medium"><p>40 × 60 cm</p></TabPanel>
+  <TabPanel label="Large" headingLevel={2}><p>60 × 90 cm</p></TabPanel>
+</Tabs>

@@ -12,6 +12,12 @@ import Row from '../components/layout/Row.astro';
 import Pane from '../components/layout/Pane.astro';
 import Image from '../components/media/Image.astro';
 import dusk from '../assets/showcase/dusk.jpg';
+import Alert from '../components/feedback/Alert.astro';
+import Tabs from '../components/navigation/Tabs.astro';
+import TabPanel from '../components/navigation/TabPanel.astro';
+import Breadcrumbs from '../components/navigation/Breadcrumbs.astro';
+import Pagination from '../components/navigation/Pagination.astro';
+import Footer from '../components/navigation/Footer.astro';
 
 const buttonVariants = ["primary", "secondary", "muted", "danger"] as const;
 const buttonTypes = ["outline", "ghost", "underline"] as const;
@@ -21,6 +27,26 @@ const rowBackgrounds = ["background", "surface", "primary", "secondary"] as cons
 const rowGaps = ["small", "medium", "large"] as const;
 const paneAlignments = ["start", "center", "end"] as const;
 const imageRatios = ["1:1", "3:2", "16:9"] as const;
+const alerts = [
+  { variant: "info", icon: "info", title: "Shipping", message: "Prints ship within five business days." },
+  { variant: "success", icon: "circle-check", title: "Order received", message: "A confirmation email is on its way." },
+  { variant: "warning", icon: "triangle-alert", title: "Limited edition", message: "Only three prints of this photo remain." },
+  { variant: "danger", icon: "circle-alert", title: "Payment declined", message: "Check your card details and try again." }
+] as const;
+const breadcrumbItems = [
+  { text: "Accueil", path: "/" },
+  { text: "Portfolio", path: "#breadcrumbs" },
+  { text: "Oiseaux", path: "#breadcrumbs" }
+];
+const paginationItems = [1, 2, 3, 4, 5].map(page => ({ text: String(page), path: `#pagination-page-${page}` }));
+const footerGroups = NavigationItems
+  .filter(item => item.subMenuLinks)
+  .map(item => ({ title: item.text, links: item.subMenuLinks! }));
+const footerSocial = [
+  { icon: "instagram", text: "Instagram", path: "#footer" },
+  { icon: "facebook", text: "Facebook", path: "#footer" },
+  { icon: "x-twitter", text: "X", path: "#footer" }
+];
 
 ---
 
@@ -305,8 +331,81 @@ const imageRatios = ["1:1", "3:2", "16:9"] as const;
         </Pane>
       </Row>
     </section>
+
+    <section id="alert" class="flow">
+      <h2 class="numbered-title"><span>06</span> Alert</h2>
+
+      <h3 class="numbered-title">Variants</h3>
+
+      {
+        alerts.map(({ variant, icon, title, message }) => (
+          <Alert variant={variant} icon={icon} title={title} id={`alert-${variant}`}>{message}</Alert>
+        ))
+      }
+
+      <h3 class="numbered-title">Without icon or title</h3>
+
+      <Alert>info and success use role="status"; warning and danger use role="alert".</Alert>
+    </section>
+
+    <section id="toast" class="flow">
+      <h2 class="numbered-title"><span>07</span> Toast</h2>
+
+      <p>One Toast region sits in the layout. Any script queues a message in it with <code>toast(message, &#123; variant, duration &#125;)</code>.</p>
+
+      <div class="flex flex-row" style="flex-wrap: wrap;">
+        <Button id="toast-info" variant="muted" data-toast="Prints ship within five business days." data-toast-variant="info">info</Button>
+        <Button id="toast-success" variant="muted" data-toast="Added to cart" data-toast-variant="success">success</Button>
+        <Button id="toast-warning" variant="muted" data-toast="Only three prints remain" data-toast-variant="warning">warning</Button>
+        <Button id="toast-danger" variant="muted" data-toast="Payment declined" data-toast-variant="danger">danger</Button>
+        <Button id="toast-short" variant="secondary" data-toast="Saved for two seconds" data-toast-variant="success" data-toast-duration="2000">2 second toast</Button>
+      </div>
+    </section>
+
+    <section id="tabs" class="flow">
+      <h2 class="numbered-title"><span>08</span> Tabs</h2>
+
+      <p>Without JavaScript every panel shows under its heading.</p>
+
+      <Tabs label="Print formats" id="tabs-print-formats">
+        <TabPanel label="Small"><p>20 × 30 cm, printed on matte paper.</p></TabPanel>
+        <TabPanel label="Medium"><p>40 × 60 cm, printed on fine-art paper.</p></TabPanel>
+        <TabPanel label="Large"><p>60 × 90 cm, mounted on aluminium.</p></TabPanel>
+      </Tabs>
+    </section>
+
+    <section id="breadcrumbs" class="flow">
+      <h2 class="numbered-title"><span>09</span> Breadcrumbs</h2>
+
+      <Breadcrumbs items={breadcrumbItems} aria-label="Fil d'Ariane" />
+    </section>
+
+    <section id="pagination" class="flow">
+      <h2 class="numbered-title"><span>10</span> Pagination</h2>
+
+      <Pagination items={paginationItems} current={3} />
+      <Pagination items={paginationItems} current={1} aria-label="First page" />
+      <Pagination items={paginationItems} current={5} aria-label="Last page" previousLabel="Précédent" nextLabel="Suivant" />
+    </section>
+
+    <section id="footer" class="flow">
+      <h2 class="numbered-title"><span>11</span> Footer</h2>
+
+      <Footer groups={footerGroups} social={footerSocial} copyright="Kevin Verreault 2024" />
+    </section>
   </div>
 </Layout>
+
+<script>
+  import { toast, type ToastVariant } from '../components/feedback/toast';
+
+  document.querySelectorAll<HTMLElement>('[data-toast]').forEach(trigger => {
+    trigger.addEventListener('click', () => toast(trigger.dataset.toast!, {
+      variant: trigger.dataset.toastVariant as ToastVariant | undefined,
+      duration: Number(trigger.dataset.toastDuration) || undefined
+    }));
+  });
+</script>
 
 <style>
 

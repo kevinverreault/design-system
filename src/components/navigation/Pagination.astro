@@ -1,0 +1,117 @@
+---
+import '../../styles/global.css'
+import type { HTMLAttributes } from "astro/types";
+import type { NavigationMenuLink } from '../../data/navigation';
+import Icon from '../ui/Icon.astro';
+
+export interface Props extends HTMLAttributes<"nav"> {
+  /** One item per page, in order. */
+  items: NavigationMenuLink[];
+  /** The current page number, from 1 to the number of items. */
+  current: number;
+  previousLabel?: string;
+  nextLabel?: string;
+}
+
+const {
+  items,
+  current,
+  previousLabel = "Previous",
+  nextLabel = "Next",
+  "aria-label": label = "Pagination",
+  class: className,
+  ...attributes
+} = Astro.props;
+
+if (!Number.isInteger(current) || current < 1 || current > items.length) {
+  throw new Error(`Pagination current page must be between 1 and ${items.length}, received '${current}'.`);
+}
+
+const previous = items[current - 2];
+const next = items[current];
+---
+
+<nav aria-label={label} {...attributes} class:list={["pagination", "text-sm", className]}>
+  <ul>
+    <li>
+      {
+        previous
+          ? <a class="pagination-step pagination-previous" href={previous.path} rel="prev"><Icon icon="chrevron-left" aria-hidden="true" />{previousLabel}</a>
+          : <a class="pagination-step pagination-previous" role="link" aria-disabled="true"><Icon icon="chrevron-left" aria-hidden="true" />{previousLabel}</a>
+      }
+    </li>
+    {
+      items.map(({ text, path }, index) => (
+        <li>
+          <a class="pagination-page" href={path} aria-current={index + 1 === current ? "page" : undefined}>{text}</a>
+        </li>
+      ))
+    }
+    <li>
+      {
+        next
+          ? <a class="pagination-step pagination-next" href={next.path} rel="next">{nextLabel}<Icon icon="chrevron-right" aria-hidden="true" /></a>
+          : <a class="pagination-step pagination-next" role="link" aria-disabled="true">{nextLabel}<Icon icon="chrevron-right" aria-hidden="true" /></a>
+      }
+    </li>
+  </ul>
+</nav>
+
+<style>
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25em;
+    min-width: 2.5em;
+    min-height: 2.5em;
+    padding: 0.25em 0.75em;
+    border: 1px solid transparent;
+    border-radius: var(--border);
+    color: hsl(var(--color-on-background));
+    transition: background-color 200ms, border-color 200ms;
+  }
+
+  a[href]:hover,
+  a[href]:focus-visible {
+    background-color: hsl(var(--color-surface) / .6);
+  }
+
+  a[aria-current="page"],
+  a[aria-current="page"]:hover,
+  a[aria-current="page"]:focus-visible {
+    background-color: hsl(var(--color-primary));
+    color: hsl(var(--color-on-primary));
+    font-weight: 700;
+  }
+
+  a[aria-disabled="true"] {
+    color: hsl(var(--color-on-background) / .45);
+    cursor: not-allowed;
+  }
+
+  a :global(svg) {
+    width: 1em;
+    height: 1em;
+  }
+
+  @media (forced-colors: active) {
+    a[aria-current="page"] {
+      border-color: Highlight;
+    }
+
+    a[aria-disabled="true"] {
+      color: GrayText;
+    }
+  }
+</style>

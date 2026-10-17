@@ -1,0 +1,24 @@
+---
+import '../../styles/global.css'
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props extends HTMLAttributes<"section"> {
+  /** The panel's heading without JavaScript, and its tab's label with it. */
+  label: string;
+  /** Level of the heading shown when JavaScript is unavailable. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
+}
+
+const { label, headingLevel = 3, class: className, ...attributes } = Astro.props;
+
+if (![2, 3, 4, 5, 6].includes(headingLevel)) {
+  throw new Error(`TabPanel heading level must be 2 to 6, received '${headingLevel}'.`);
+}
+
+const Heading = `h${headingLevel}` as const;
+---
+
+<section {...attributes} class:list={["tab-panel", className]}>
+  <Heading class="tab-panel-heading">{label}</Heading>
+  <slot />
+</section>
