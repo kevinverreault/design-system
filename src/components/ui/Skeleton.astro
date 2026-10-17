@@ -1,0 +1,71 @@
+---
+import '../../styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const skeleton = cva("skeleton", {
+  variants: {
+    shape: {
+      line: "shape-line",
+      block: "shape-block",
+      circle: "shape-circle"
+    }
+  }
+});
+
+/**
+ * A placeholder for content that loads later. It is hidden from assistive
+ * technology; mark the region that is loading with aria-busy="true" instead.
+ * Size it with a class or style.
+ */
+export interface Props
+  extends HTMLAttributes<"div">,
+    VariantProps<typeof skeleton> {
+}
+
+const { shape = "block", class: className, ...attributes } = Astro.props;
+---
+
+<div {...attributes} aria-hidden="true" class:list={[skeleton({ shape }), className]}></div>
+
+<style>
+  /* The transparent border keeps the shape visible in forced-colours mode. */
+  .skeleton {
+    border: 1px solid transparent;
+    background-color: hsl(var(--color-surface));
+  }
+
+  .shape-line {
+    width: 100%;
+    height: 1em;
+    border-radius: calc(var(--border) / 2);
+  }
+
+  .shape-block {
+    width: 100%;
+    min-height: 6rem;
+    border-radius: var(--border);
+  }
+
+  .shape-circle {
+    width: 3rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton {
+      animation: skeleton-pulse 1.5s ease-in-out infinite;
+    }
+  }
+
+  @keyframes skeleton-pulse {
+    50% { opacity: 0.5; }
+  }
+
+  @media (forced-colors: active) {
+    .skeleton {
+      border-color: GrayText;
+    }
+  }
+</style>

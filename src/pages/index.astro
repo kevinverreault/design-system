@@ -12,6 +12,13 @@ import Row from '../components/layout/Row.astro';
 import Pane from '../components/layout/Pane.astro';
 import Image from '../components/media/Image.astro';
 import dusk from '../assets/showcase/dusk.jpg';
+import Card from '../components/ui/Card.astro';
+import Badge from '../components/ui/Badge.astro';
+import Avatar from '../components/ui/Avatar.astro';
+import Separator from '../components/ui/Separator.astro';
+import Table from '../components/ui/Table.astro';
+import Skeleton from '../components/ui/Skeleton.astro';
+import Gallery from '../components/media/Gallery.astro';
 
 const buttonVariants = ["primary", "secondary", "muted", "danger"] as const;
 const buttonTypes = ["outline", "ghost", "underline"] as const;
@@ -21,6 +28,28 @@ const rowBackgrounds = ["background", "surface", "primary", "secondary"] as cons
 const rowGaps = ["small", "medium", "large"] as const;
 const paneAlignments = ["start", "center", "end"] as const;
 const imageRatios = ["1:1", "3:2", "16:9"] as const;
+const badgeVariants = ["primary", "secondary", "muted", "danger", "outline"] as const;
+const avatarSizes = ["small", "medium", "large"] as const;
+const printColumns = [
+  { key: "size", label: "Size" },
+  { key: "paper", label: "Paper" },
+  { key: "edition", label: "Edition", align: "center" },
+  { key: "price", label: "Price", align: "end" }
+] as const;
+const printRows = [
+  { size: "20 × 30 cm", paper: "Matte", edition: "Open", price: "45 $" },
+  { size: "30 × 45 cm", paper: "Lustre", edition: "Open", price: "75 $" },
+  { size: "40 × 60 cm", paper: "Fine art", edition: "25", price: "120 $" },
+  { size: "60 × 90 cm", paper: "Fine art", edition: "10", price: "240 $" }
+];
+const galleryImages = [
+  { src: dusk, alt: "Mountains at dusk", credit: "Kevin Verreault 2024" },
+  { src: "/images/snow.jpg", alt: "Snowfield under a white sky", credit: "Kevin Verreault 2023", width: 1200, height: 800 },
+  { src: dusk, alt: "Ridge line at dusk" },
+  { src: "/images/snow.jpg", alt: "Tracks in the snow", credit: "Kevin Verreault 2022", width: 1200, height: 800 },
+  { src: dusk, alt: "Last light over the hills", credit: "Kevin Verreault 2024" },
+  { src: "/images/snow.jpg", alt: "Fresh snow", width: 1200, height: 800 }
+];
 
 ---
 
@@ -304,6 +333,120 @@ const imageRatios = ["1:1", "3:2", "16:9"] as const;
           <Image src={dusk} alt="Mountains at dusk, square contain" ratio="1:1" fit="contain" credit='fit="contain"' class="demo-contain" />
         </Pane>
       </Row>
+    </section>
+
+    <section id="card" class="flow">
+      <h2 class="numbered-title"><span>06</span> Card</h2>
+
+      <Row columns={3}>
+        <Pane>
+          <Card href="#card" id="card-linked">
+            <Image slot="media" src={dusk} alt="Mountains at dusk" ratio="3:2" credit="Kevin Verreault 2024" />
+            <h3 slot="header" class="text-lg">Dusk over the hills</h3>
+            <p>The whole card is one link; the image keeps its credit footer.</p>
+            <Fragment slot="footer"><Badge>New</Badge> <span>From 45 $</span></Fragment>
+          </Card>
+        </Pane>
+        <Pane>
+          <Card id="card-actions">
+            <h3 slot="header" class="text-lg">Calendar 2025</h3>
+            <p>A card that doesn't link can hold its own actions.</p>
+            <Fragment slot="footer"><Button size="small">Add to cart</Button><Button size="small" variant="muted">Details</Button></Fragment>
+          </Card>
+        </Pane>
+        <Pane>
+          <Card id="card-body-only" as="div">
+            <p>Only the body is given, so only the body renders.</p>
+          </Card>
+        </Pane>
+      </Row>
+    </section>
+
+    <section id="badge" class="flow">
+      <h2 class="numbered-title"><span>07</span> Badge</h2>
+
+      <div class="flex flex-row items-center">
+        {badgeVariants.map(variant => <Badge variant={variant}>{variant}</Badge>)}
+      </div>
+
+      <p>Heron at dawn <Badge variant="secondary">New</Badge> <Badge variant="danger">Sold out</Badge></p>
+    </section>
+
+    <section id="avatar" class="flow">
+      <h2 class="numbered-title"><span>08</span> Avatar</h2>
+
+      <h3 class="numbered-title">Image</h3>
+
+      <div class="flex flex-row items-center">
+        {avatarSizes.map(size => <Avatar src={dusk} name="Kevin Verreault" size={size} />)}
+        <Avatar src="/images/snow.jpg" name="Remote source" />
+      </div>
+
+      <h3 class="numbered-title">Initials fallback</h3>
+
+      <div class="flex flex-row items-center" id="avatar-initials">
+        {avatarSizes.map(size => <Avatar name="Kevin Verreault" size={size} />)}
+        <Avatar name="Élodie" />
+      </div>
+
+      <div class="flex flex-row items-center">
+        <Avatar name="Kevin Verreault" alt="" />
+        <span>Kevin Verreault (decorative avatar next to the name)</span>
+      </div>
+    </section>
+
+    <section id="separator" class="flow">
+      <h2 class="numbered-title"><span>09</span> Separator</h2>
+
+      <p>Decorative (role="none"), the default:</p>
+      <Separator />
+      <p>Semantic (role="separator"), when the division matters to screen-reader users:</p>
+      <Separator decorative={false} id="separator-semantic" />
+
+      <div class="flex flex-row items-center">
+        <span>Oiseaux</span>
+        <Separator orientation="vertical" />
+        <span>Mammifères</span>
+        <Separator orientation="vertical" decorative={false} />
+        <span>Paysages</span>
+      </div>
+    </section>
+
+    <section id="table" class="flow">
+      <h2 class="numbered-title"><span>10</span> Table</h2>
+
+      <Table caption="Print sizes and prices" columns={printColumns} rows={printRows} rowHeader="size" />
+
+      <Table caption="Striped and hover" columns={printColumns} rows={printRows} rowHeader="size" striped hover id="table-striped" />
+    </section>
+
+    <section id="skeleton" class="flow">
+      <h2 class="numbered-title"><span>11</span> Skeleton</h2>
+
+      <Row columns={3}>
+        <Pane>
+          <div class="flow" aria-busy="true" aria-label="Loading a product" id="skeleton-demo" style="width: 100%;">
+            <Skeleton style="aspect-ratio: 3 / 2" />
+            <div class="flex flex-row items-center">
+              <Skeleton shape="circle" />
+              <div class="flow" style="flex: 1; --flow-space: .5rem;">
+                <Skeleton shape="line" />
+                <Skeleton shape="line" style="width: 60%" />
+              </div>
+            </div>
+          </div>
+        </Pane>
+      </Row>
+    </section>
+
+    <section id="gallery" class="flow">
+      <h2 class="numbered-title"><span>12</span> Gallery</h2>
+
+      <Gallery images={galleryImages} id="gallery-default" aria-label="Paysages" />
+
+      <h3 class="numbered-title">Small square thumbnails</h3>
+
+      <Gallery images={galleryImages} ratio="1:1" columnWidth="small" gap="small" aria-label="Paysages, small" />
     </section>
   </div>
 </Layout>
