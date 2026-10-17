@@ -280,30 +280,113 @@ const variants = [
     box-shadow: 0 0 0 1px hsl(var(--color-error-text));
   }
 
-  /* Pill select with an accent tint and the chevron in a filled circle. */
+  /*
+   * Pill select on the plain background, same border as Input, with the
+   * chevron in a filled primary circle. The chevron is one SVG drawn on the
+   * same 1.6em box as the circle, so the two stay concentric at every size.
+   * The chevron is white, which is --color-on-primary in both themes.
+   */
   html[data-proto="C"] .select {
-    padding-inline-end: calc(var(--control-padding-inline) + 1.75em);
-    border-color: hsl(var(--color-accent) / .45);
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 10l4 4 4-4'/%3E%3C/svg%3E");
+    --circle: 1.6em;
+    --circle-color: var(--color-primary);
+    padding-inline-end: calc(var(--control-padding-inline) + var(--circle));
     border-radius: 9999px;
     font-weight: 600;
-    background-color: hsl(var(--color-accent) / .07);
     background-image:
-      linear-gradient(45deg, transparent 50%, hsl(var(--color-on-primary)) 50%),
-      linear-gradient(135deg, hsl(var(--color-on-primary)) 50%, transparent 50%),
-      radial-gradient(circle closest-side, hsl(var(--color-primary)) 96%, transparent);
-    background-position:
-      calc(100% - 1.3em) 58%,
-      calc(100% - .95em) 58%,
-      calc(100% - .4em) 50%;
-    background-size: .35em .35em, .35em .35em, 1.6em 1.6em;
+      var(--chevron),
+      radial-gradient(circle closest-side, hsl(var(--circle-color)) 96%, transparent);
+    background-position: calc(100% - .4em) 50%;
+    background-size: var(--circle) var(--circle);
   }
 
-  html[data-proto="C"] .select:hover:not(:disabled, :focus-visible) {
-    background-color: hsl(var(--color-accent) / .13);
+  html[data-proto="C"] .select:hover:not(:disabled) {
+    --circle-color: var(--color-primary-variant);
   }
 
-  html[data-proto="C"] .select:focus-visible {
-    border-color: hsl(var(--color-accent));
+  /*
+   * Customisable select (Chromium): the popup itself takes the theme tokens.
+   * Other browsers keep the native popup, which follows color-scheme.
+   */
+  @supports (appearance: base-select) {
+    html[data-proto="C"] .select,
+    html[data-proto="C"] .select::picker(select) {
+      appearance: base-select;
+    }
+
+    html[data-proto="C"] .select {
+      display: flex;
+      align-items: center;
+      padding-inline-end: calc(.4em - 2px);
+      background-image: none;
+    }
+
+    /* The circle and chevron move onto the picker icon, which can turn. */
+    html[data-proto="C"] .select::picker-icon {
+      content: "";
+      flex: none;
+      width: var(--circle);
+      height: var(--circle);
+      margin-inline-start: auto;
+      border-radius: 50%;
+      background: hsl(var(--circle-color)) var(--chevron) center / 100% no-repeat;
+      transition: rotate .15s ease-in-out, background-color .15s;
+    }
+
+    html[data-proto="C"] .select:open::picker-icon {
+      rotate: 180deg;
+    }
+
+    html[data-proto="C"] .select::picker(select) {
+      margin-block: .375rem;
+      padding: .25rem;
+      color: hsl(var(--color-on-background));
+      background-color: hsl(var(--color-background));
+      border: 2px solid hsl(var(--color-on-background) / .28);
+      border-radius: .75rem;
+      box-shadow: 0 10px 30px rgb(0 0 0 / .18);
+      font-weight: 400;
+    }
+
+    html[data-proto="C"] .select option {
+      gap: .5em;
+      padding: .5em .75em;
+      border-radius: .5rem;
+      cursor: pointer;
+    }
+
+    html[data-proto="C"] .select option:hover,
+    html[data-proto="C"] .select option:focus-visible {
+      outline: none;
+      background-color: hsl(var(--color-on-background) / .08);
+    }
+
+    html[data-proto="C"] .select option:checked {
+      font-weight: 600;
+      color: hsl(var(--color-accent));
+      background-color: hsl(var(--color-accent) / .1);
+    }
+
+    html[data-proto="C"] .select option::checkmark {
+      color: hsl(var(--color-accent));
+    }
+
+    html[data-proto="C"] .select option:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    html[data-proto="C"] .select optgroup {
+      padding-block-start: .25em;
+      font-weight: 600;
+      color: hsl(var(--color-on-background) / .6);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html[data-proto="C"] .select::picker-icon {
+        transition: none;
+      }
+    }
   }
 
   /* Thin track, oversized thumb that overhangs it, with a shadow so it
