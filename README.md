@@ -7,6 +7,8 @@
 ├── public/
 ├── src/
 │   ├── components/
+│   │   ├── feedback/
+│   │   ├── form/
 │   │   ├── layout/
 │   │   ├── media/
 │   │   ├── navigation/
@@ -33,6 +35,18 @@
 ## Layout
 
 `Row` stacks its panes into one column when the Row itself is narrower than **40rem** (a container query on the Row, not a media query). Container query conditions can't read custom properties, so this value lives in `src/components/layout/Row.astro`.
+
+## Feedback
+
+`Toast` is placed once in `src/layouts/Layout.astro`. Queue a message from any script:
+
+```ts
+import { toast } from '../components/feedback/toast';
+
+toast('Added to cart', { variant: 'success', duration: 5000 });
+```
+
+Info and success toasts are announced politely; warning and danger toasts interrupt, matching `Alert`'s `role="status"` / `role="alert"`.
 
 ## Testing
 

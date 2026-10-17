@@ -19,6 +19,10 @@
   --color-on-surface: 160 0% 20%;
   --color-error: 0 74% 40%;
   --color-on-error: 0 0% 100%;
+  --color-success: 142 60% 26%;
+  --color-on-success: 0 0% 100%;
+  --color-warning: 30 100% 33%;
+  --color-on-warning: 0 0% 100%;
 
   --ff-sans-normal: "Noto Sans", sans-serif;
   --ff-serif: "DM Serif Text", serif;
@@ -52,6 +56,30 @@
   --color-on-surface: 0 0% 100%;
   --color-error: 0 74% 40%;
   --color-on-error: 0 0% 100%;
+  --color-success: 142 50% 55%;
+  --color-on-success: 160 0% 10%;
+  --color-warning: 38 95% 60%;
+  --color-on-warning: 160 0% 10%;
+}
+
+/*
+ * Form controls: Input, Select and Button share padding, line height and border, so they line up on one row.
+ * --color-accent is the primary tone that stands out on the background in both themes (focus rings, checked controls);
+ * --color-error-text is the error tone that stays readable on the background in both themes.
+ */
+:root {
+  --control-padding-block: 0.75em;
+  --control-padding-inline: 1.5em;
+  --control-line-height: 1.25;
+  --control-border-width: 1px;
+
+  --color-accent: var(--color-primary);
+  --color-error-text: var(--color-error);
+}
+
+:root.theme-dark {
+  --color-accent: var(--color-primary-h) 45% 65%;
+  --color-error-text: 0 80% 70%;
 }
 
 /* ------------------------------ */

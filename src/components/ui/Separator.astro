@@ -1,0 +1,53 @@
+---
+import '../../styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const separator = cva("separator", {
+  variants: {
+    orientation: {
+      horizontal: "horizontal",
+      vertical: "vertical"
+    }
+  }
+});
+
+export interface Props
+  extends HTMLAttributes<"div">,
+    VariantProps<typeof separator> {
+  /**
+   * A decorative separator (the default) is hidden from assistive technology
+   * with role="none". Set it to false when the separator divides content in a
+   * way a screen-reader user should know about.
+   */
+  decorative?: boolean;
+}
+
+const { orientation = "horizontal", decorative = true, class: className, ...attributes } = Astro.props;
+---
+
+<div {...attributes} role={decorative ? "none" : "separator"} aria-orientation={decorative ? undefined : orientation} class:list={[separator({ orientation }), className]}></div>
+
+<style>
+  /* A vertical separator stretches to the height of its flex or grid row. */
+  .separator {
+    flex-shrink: 0;
+    background-color: hsl(var(--color-on-background) / .2);
+  }
+
+  .horizontal {
+    width: 100%;
+    height: 1px;
+  }
+
+  .vertical {
+    width: 1px;
+    align-self: stretch;
+  }
+
+  @media (forced-colors: active) {
+    .separator {
+      background-color: CanvasText;
+    }
+  }
+</style>

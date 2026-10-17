@@ -1,0 +1,84 @@
+---
+import '../../styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+import Icon from '../ui/Icon.astro';
+import { isStatusVariant, statusVariants } from './variants';
+
+const alert = cva("alert", {
+  variants: {
+    variant: {
+      info: "info",
+      success: "success",
+      warning: "warning",
+      danger: "danger"
+    }
+  }
+});
+
+export interface Props
+  extends Omit<HTMLAttributes<"div">, "title">,
+    VariantProps<typeof alert> {
+  /** A bold first line above the message. */
+  title?: string;
+  /** Name of a leading icon from the icon set, e.g. "info" or "circle-check". */
+  icon?: string;
+}
+
+const { variant = "info", title, icon, class: className, ...attributes } = Astro.props;
+
+if (!isStatusVariant(variant)) {
+  throw new Error(`Alert variant must be info, success, warning or danger, received '${variant}'.`);
+}
+---
+
+<div role={statusVariants[variant].role} {...attributes} class:list={[alert({ variant }), className]}>
+  {icon && <Icon icon={icon} class="alert-icon" aria-hidden="true" />}
+  <div class="alert-content">
+    {title && <p class="alert-title">{title}</p>}
+    <div class="alert-message"><slot /></div>
+  </div>
+</div>
+
+<style>
+  .alert {
+    display: flex;
+    gap: 0.75em;
+    align-items: flex-start;
+    padding: 1em 1.25em;
+    border: 1px solid hsl(var(--alert-color) / .5);
+    border-inline-start-width: 0.25em;
+    border-inline-start-color: hsl(var(--alert-color));
+    border-radius: var(--border);
+    background-color: hsl(var(--alert-color) / .08);
+    color: hsl(var(--color-on-background));
+    font-size: var(--fs-md);
+  }
+
+  .info { --alert-color: var(--color-secondary); }
+  .success { --alert-color: var(--color-success); }
+  .warning { --alert-color: var(--color-warning); }
+  .danger { --alert-color: var(--color-error); }
+
+  .alert :global(.alert-icon) {
+    flex-shrink: 0;
+    width: 1.25em;
+    height: 1.25em;
+    margin-top: 0.125em;
+    color: hsl(var(--alert-color));
+  }
+
+  .alert-title {
+    font-weight: 700;
+  }
+
+  @media (forced-colors: active) {
+    .alert {
+      border-color: CanvasText;
+    }
+
+    .alert :global(.alert-icon) {
+      color: CanvasText;
+    }
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+import '../../styles/global.css'
+import type { HTMLAttributes } from "astro/types";
+import type { NavigationMenuLink } from '../../data/navigation';
+
+export interface Props extends HTMLAttributes<"nav"> {
+  /** The trail from the home page to the current page; the last item is the current page. */
+  items: NavigationMenuLink[];
+}
+
+const { items, "aria-label": label = "Breadcrumb", class: className, ...attributes } = Astro.props;
+
+if (!items || items.length === 0) {
+  throw new Error("Breadcrumbs require at least one item.");
+}
+
+const lastIndex = items.length - 1;
+---
+
+<nav aria-label={label} {...attributes} class:list={["breadcrumbs", "text-sm", className]}>
+  <ol>
+    {
+      items.map(({ text, path }, index) => (
+        <li>
+          <a href={path} aria-current={index === lastIndex ? "page" : undefined}>{text}</a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  /* The separator is drawn in CSS so screen readers don't announce it. */
+  li + li::before {
+    content: "";
+    width: 0.4em;
+    height: 0.4em;
+    border: solid hsl(var(--color-on-background) / .5);
+    border-width: 1px 1px 0 0;
+    transform: rotate(45deg);
+  }
+
+  a {
+    color: hsl(var(--color-on-background) / .75);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.25em;
+    transition: color 200ms, text-decoration-color 200ms;
+  }
+
+  a:hover,
+  a:focus-visible {
+    color: hsl(var(--color-on-background));
+    text-decoration-color: currentColor;
+  }
+
+  a[aria-current="page"] {
+    color: hsl(var(--color-on-background));
+    font-weight: 700;
+  }
+
+  @media (forced-colors: active) {
+    li + li::before {
+      border-color: CanvasText;
+    }
+  }
+</style>

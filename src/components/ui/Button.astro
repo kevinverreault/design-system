@@ -58,14 +58,22 @@ const {
 
 <style>
 
+  /*
+   * Padding, line height and border come from the --control-* tokens shared
+   * with Input and Select, so a Button lines up with them on one row. Every
+   * decoration has the same border width (transparent unless outlined), so
+   * all buttons of a size are the same height, and the border shows in
+   * forced-colours mode.
+   */
   .button {
     --border-radius: var(--border);
-    padding: 0.75em 1.5em;
+    padding: calc(var(--control-padding-block) - var(--control-border-width)) calc(var(--control-padding-inline) - var(--control-border-width));
+    line-height: var(--control-line-height);
     border-radius: var(--border-radius);
     position: relative;
     display: inline-grid;
     place-items: center;
-    border: none;
+    border: var(--control-border-width) solid transparent;
     margin: 0;
     text-decoration: none;
     cursor: pointer;
@@ -126,7 +134,7 @@ const {
 
   .outline {
     background-color: hsl(var(--color-background));
-    border: 1px solid var(--main-color);
+    border-color: var(--main-color);
     color: hsl(var(--color-on-background));
   }
 

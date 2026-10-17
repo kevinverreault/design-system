@@ -1,0 +1,144 @@
+---
+import '../../styles/global.css'
+import { getImage } from 'astro:assets';
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+import Image, { type Props as ImageProps } from './Image.astro';
+
+const gallery = cva("gallery", {
+  variants: {
+    columnWidth: {
+      small: "column-width-small",
+      medium: "column-width-medium",
+      large: "column-width-large"
+    },
+    gap: {
+      small: "gap-small",
+      medium: "gap-medium",
+      large: "gap-large"
+    }
+  }
+});
+
+/**
+ * One Gallery image, with the Image props of the same name. Its alt must not
+ * be empty: every image is a link to its full-size version.
+ */
+export type GalleryImage = Pick<ImageProps, "src" | "alt" | "credit" | "width" | "height">;
+
+/**
+ * A responsive grid of Images. Columns are as many as fit at the chosen
+ * minimum column width, down to one on narrow screens.
+ *
+ * Each image links to its full-size version and can be opened by a Lightbox
+ * through the `gallery-open` event; see `gallery-open.ts`.
+ */
+export interface Props
+  extends HTMLAttributes<"ul">,
+    VariantProps<typeof gallery>,
+    Pick<ImageProps, "ratio" | "fit"> {
+  images: readonly GalleryImage[];
+}
+
+/** Largest width of a full-size local image, the target of each link. */
+const FULL_SIZE_MAX_WIDTH = 2400;
+
+/**
+ * A column is at most twice its minimum width (the grid adds a column as soon
+ * as two fit), so thumbnails never need more than that. Keep these in step
+ * with the --gallery-column-width values below.
+ */
+const THUMBNAIL_SIZES = {
+  small: "(max-width: 24rem) 100vw, 24rem",
+  medium: "(max-width: 36rem) 100vw, 36rem",
+  large: "(max-width: 48rem) 100vw, 48rem"
+} as const;
+
+const {
+  images,
+  ratio = "3:2",
+  fit = "cover",
+  columnWidth = "medium",
+  gap = "small",
+  class: className,
+  ...attributes
+} = Astro.props;
+
+const unlabelled = images.findIndex(image => typeof image.alt !== "string" || image.alt.trim() === "");
+
+if (unlabelled !== -1) {
+  throw new Error(`Gallery image ${unlabelled + 1} needs a non-empty alt: each image is a link to its full-size version.`);
+}
+
+const items = await Promise.all(images.map(async image => {
+  if (typeof image.src === "string") {
+    return { image, href: image.src, width: image.width, height: image.height };
+  }
+
+  const fullSize = await getImage({ src: image.src, width: Math.min(image.src.width, FULL_SIZE_MAX_WIDTH) });
+  return { image, href: fullSize.src, width: fullSize.attributes.width, height: fullSize.attributes.height };
+}));
+---
+
+<ul {...attributes} role="list" data-gallery class:list={[gallery({ columnWidth, gap }), className]}>
+  {
+    items.map(({ image, href, width, height }) => (
+      <li>
+        <a href={href} class="gallery-link" data-gallery-link data-credit={image.credit} data-width={width} data-height={height}>
+          <Image src={image.src} alt={image.alt} credit={image.credit} width={image.width} height={image.height} ratio={ratio} fit={fit} sizes={THUMBNAIL_SIZES[columnWidth ?? "medium"]} />
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  import { handleGalleryClick } from './gallery-open';
+
+  document.addEventListener('click', handleGalleryClick);
+</script>
+
+<style>
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--gallery-column-width), 100%), 1fr));
+    gap: var(--gallery-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .column-width-small { --gallery-column-width: 12rem; }
+  .column-width-medium { --gallery-column-width: 18rem; }
+  .column-width-large { --gallery-column-width: 24rem; }
+
+  .gap-small { --gallery-gap: var(--space-sm); }
+  .gap-medium { --gallery-gap: var(--space-md); }
+  .gap-large { --gallery-gap: var(--space-lg); }
+
+  .gallery-link {
+    display: block;
+    overflow: hidden;
+    border-radius: calc(var(--border) / 2);
+    color: inherit;
+  }
+
+  .gallery-link :global(img) {
+    transition: transform 300ms ease-in-out;
+  }
+
+  .gallery-link:hover :global(img) {
+    transform: scale(1.03);
+  }
+
+  .gallery-link:focus-visible {
+    outline: 2px solid hsl(var(--color-primary));
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-link:hover :global(img) {
+      transform: none;
+    }
+  }
+</style>
