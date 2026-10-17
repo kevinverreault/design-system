@@ -23,6 +23,11 @@ const image = cva("image", {
   }
 });
 
+/**
+ * Unknown attributes (id, aria-*, data-*, loading, …) go on the img, not the
+ * figure root: the Image-specific rule wins over the general convention.
+ * Only `class` is applied to the figure.
+ */
 export interface Props
   extends Omit<HTMLAttributes<"img">, "src" | "alt" | "width" | "height">,
     VariantProps<typeof image> {
