@@ -1,0 +1,142 @@
+---
+import '../../styles/global.css'
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props extends HTMLAttributes<"div"> {
+  /** Accessible name of the tab list. */
+  label: string;
+}
+
+const { label, class: className, ...attributes } = Astro.props;
+---
+
+<!--
+  Without JavaScript every TabPanel shows with its heading. The script turns
+  the headings into a tab list and applies the ARIA tabs pattern.
+-->
+<tab-group {...attributes} data-label={label} class:list={["tabs", className]}>
+  <slot />
+</tab-group>
+
+<style>
+  .tabs {
+    display: grid;
+    gap: var(--space-sm);
+  }
+
+  .tabs :global([role="tablist"]) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25em;
+    border-bottom: 1px solid hsl(var(--color-surface));
+  }
+
+  .tabs :global([role="tab"]) {
+    margin-bottom: -1px;
+    padding: 0.5em 1em;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: hsl(var(--color-on-background) / .75);
+    font-size: var(--fs-md);
+    cursor: pointer;
+    transition: color 200ms, border-color 200ms;
+  }
+
+  .tabs :global([role="tab"]:hover) {
+    color: hsl(var(--color-on-background));
+  }
+
+  .tabs :global([role="tab"][aria-selected="true"]) {
+    border-bottom-color: hsl(var(--color-primary));
+    color: hsl(var(--color-on-background));
+    font-weight: 700;
+  }
+
+  .tabs :global([role="tab"]:focus-visible),
+  .tabs :global([role="tabpanel"]:focus-visible) {
+    outline: 2px solid hsl(var(--color-primary));
+    outline-offset: 2px;
+  }
+
+  @media (forced-colors: active) {
+    .tabs :global([role="tab"][aria-selected="true"]) {
+      border-bottom-color: Highlight;
+    }
+  }
+</style>
+
+<script>
+  let groupCount = 0;
+
+  class TabGroup extends HTMLElement {
+    tabs: HTMLButtonElement[] = [];
+    panels: HTMLElement[] = [];
+
+    connectedCallback() {
+      if (this.tabs.length > 0) return;
+
+      const prefix = this.id || `tab-group-${++groupCount}`;
+      this.panels = [...this.querySelectorAll<HTMLElement>(':scope > .tab-panel')];
+      if (this.panels.length === 0) return;
+
+      const tablist = document.createElement('div');
+      tablist.setAttribute('role', 'tablist');
+      tablist.setAttribute('aria-label', this.dataset.label ?? '');
+
+      this.tabs = this.panels.map((panel, index) => {
+        panel.id ||= `${prefix}-panel-${index + 1}`;
+        const heading = panel.querySelector<HTMLElement>('.tab-panel-heading')!;
+
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.id = `${panel.id}-tab`;
+        tab.textContent = heading.textContent;
+        tab.setAttribute('role', 'tab');
+        tab.setAttribute('aria-controls', panel.id);
+        tab.addEventListener('click', () => this.select(index));
+
+        heading.hidden = true;
+        panel.setAttribute('role', 'tabpanel');
+        panel.setAttribute('aria-labelledby', tab.id);
+        panel.tabIndex = 0;
+
+        tablist.append(tab);
+        return tab;
+      });
+
+      tablist.addEventListener('keydown', event => this.onKeydown(event));
+      this.panels[0].before(tablist);
+      this.select(0);
+    }
+
+    select(selected: number, focus = false) {
+      this.tabs.forEach((tab, index) => {
+        const isSelected = index === selected;
+        tab.setAttribute('aria-selected', String(isSelected));
+        tab.tabIndex = isSelected ? 0 : -1;
+        this.panels[index].hidden = !isSelected;
+      });
+
+      if (focus) this.tabs[selected].focus();
+    }
+
+    onKeydown(event: KeyboardEvent) {
+      const current = this.tabs.indexOf(event.target as HTMLButtonElement);
+      const last = this.tabs.length - 1;
+      const next = {
+        ArrowRight: current === last ? 0 : current + 1,
+        ArrowLeft: current === 0 ? last : current - 1,
+        Home: 0,
+        End: last,
+      }[event.key];
+
+      if (current === -1 || next === undefined) return;
+
+      event.preventDefault();
+      this.select(next, true);
+    }
+  }
+
+  customElements.define('tab-group', TabGroup);
+</script>
