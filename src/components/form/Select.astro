@@ -31,29 +31,127 @@ const { size = "medium", class: className, ...attributes } = Astro.props;
 </select>
 
 <style>
-  /* The chevron is drawn with gradients in the text colour, so it follows the theme. */
+  /*
+   * A pill with the chevron in a filled primary circle. The chevron is one
+   * SVG drawn on the circle's own box, so the two stay concentric at every
+   * size; it is white, which is --color-on-primary in both themes.
+   */
   .select {
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 10l4 4 4-4'/%3E%3C/svg%3E");
+    --circle-size: 1.6em;
+    --circle-inset: 0.4em;
+    --circle-color: var(--color-primary);
     appearance: none;
-    padding-inline-end: calc(var(--control-padding-inline) + 1em);
+    padding-inline-end: calc(var(--control-padding-inline) + var(--circle-size));
+    border-radius: 9999px;
+    font-weight: 600;
     background-image:
-      linear-gradient(45deg, transparent 50%, currentColor 50%),
-      linear-gradient(135deg, currentColor 50%, transparent 50%);
-    background-position:
-      calc(100% - var(--control-padding-inline) + 0.1em) 50%,
-      calc(100% - var(--control-padding-inline) + 0.45em) 50%;
-    background-size: 0.35em 0.35em;
+      var(--chevron),
+      radial-gradient(circle closest-side, hsl(var(--circle-color)) 96%, transparent);
+    background-position: calc(100% - var(--circle-inset)) 50%;
+    background-size: var(--circle-size) var(--circle-size);
     background-repeat: no-repeat;
     cursor: pointer;
+  }
+
+  .select:hover:not(:disabled) {
+    --circle-color: var(--color-primary-variant);
   }
 
   .select:disabled {
     cursor: not-allowed;
   }
 
+  /*
+   * Customisable select: where supported, the popup itself takes the theme
+   * tokens. Elsewhere the native popup follows color-scheme (see control.css).
+   */
+  @supports (appearance: base-select) {
+    .select,
+    .select::picker(select) {
+      appearance: base-select;
+    }
+
+    .select {
+      display: flex;
+      align-items: center;
+      padding-inline-end: calc(var(--circle-inset) - var(--form-border-width));
+      background-image: none;
+    }
+
+    /* The circle and chevron move onto the picker icon, which turns when open. */
+    .select::picker-icon {
+      content: "";
+      flex: none;
+      width: var(--circle-size);
+      height: var(--circle-size);
+      margin-inline-start: auto;
+      border-radius: 50%;
+      background: hsl(var(--circle-color)) var(--chevron) center / 100% no-repeat;
+      transition: rotate 150ms ease-in-out, background-color 150ms;
+    }
+
+    .select:open::picker-icon {
+      rotate: 180deg;
+    }
+
+    .select::picker(select) {
+      margin-block: 0.375rem;
+      padding: 0.25rem;
+      color: hsl(var(--color-on-background));
+      background-color: hsl(var(--color-background));
+      border: var(--form-border-width) solid hsl(var(--color-on-background) / .28);
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 30px rgb(0 0 0 / .18);
+      font-weight: 400;
+    }
+
+    .select :global(option) {
+      gap: 0.5em;
+      padding: 0.5em 0.75em;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    .select :global(option:hover),
+    .select :global(option:focus-visible) {
+      outline: none;
+      background-color: hsl(var(--color-on-background) / .08);
+    }
+
+    .select :global(option:checked) {
+      font-weight: 600;
+      color: hsl(var(--color-accent));
+      background-color: hsl(var(--color-accent) / .1);
+    }
+
+    .select :global(option::checkmark) {
+      color: hsl(var(--color-accent));
+    }
+
+    .select :global(option:disabled) {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .select :global(optgroup) {
+      padding-block-start: 0.25em;
+      font-weight: 600;
+      color: hsl(var(--color-on-background) / .6);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .select::picker-icon {
+        transition: none;
+      }
+    }
+  }
+
   @media (forced-colors: active) {
     .select {
       appearance: auto;
-      padding-inline-end: calc(var(--control-padding-inline) - var(--control-border-width));
+      padding-inline-end: calc(var(--control-padding-inline) - var(--form-border-width));
+      background-image: none;
     }
   }
 </style>

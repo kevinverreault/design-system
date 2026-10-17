@@ -1,20 +1,24 @@
 /*
  * Shared look of the boxed form controls (Input, Textarea, Select): border,
- * focus ring, error, disabled and read-only states. Padding and line height
+ * focus, error, disabled and read-only states. Padding and line height
  * come from the --control-* tokens that Button uses too, so an Input, a
  * Select and a Button of the same size are the same height.
+ *
+ * Focus is the border itself turning the accent colour: one edge, never a
+ * second ring around it.
  */
 .form-control {
+  --form-border-width: 2px;
   display: block;
   width: 100%;
   margin: 0;
-  padding: calc(var(--control-padding-block) - var(--control-border-width)) calc(var(--control-padding-inline) - var(--control-border-width));
+  padding: calc(var(--control-padding-block) - var(--form-border-width)) calc(var(--control-padding-inline) - var(--form-border-width));
   line-height: var(--control-line-height);
   color: hsl(var(--color-on-background));
   background-color: hsl(var(--color-background));
-  border: var(--control-border-width) solid hsl(var(--color-on-background) / .5);
-  border-radius: var(--border);
-  transition: border-color var(--theme-transition), background-color var(--theme-transition);
+  border: var(--form-border-width) solid hsl(var(--color-on-background) / .28);
+  border-radius: .75rem;
+  transition: border-color .15s, background-color var(--theme-transition);
 }
 
 /*
@@ -36,12 +40,22 @@ select.form-control {
   opacity: 1;
 }
 
-.form-control:hover:not(:disabled, [readonly]) {
-  border-color: hsl(var(--color-on-background) / .8);
+.form-control:hover:not(:disabled, [readonly], :focus-visible) {
+  border-color: hsl(var(--color-on-background) / .55);
+}
+
+.form-control:focus-visible {
+  outline: none;
+  border-color: hsl(var(--color-accent));
 }
 
 .form-control[aria-invalid="true"] {
   border-color: hsl(var(--color-error-text));
+}
+
+/* An error field is already red, so focus thickens the same red edge. */
+.form-control[aria-invalid="true"]:focus-visible {
+  box-shadow: 0 0 0 1px hsl(var(--color-error-text));
 }
 
 .form-control[readonly] {
@@ -89,14 +103,19 @@ select.form-control {
   cursor: not-allowed;
 }
 
-/* Shared by every form control, boxed or not. */
-.form-control:focus-visible,
+/* Check-style controls have no box to recolour, so they get a focus ring. */
 .form-check:focus-visible {
   outline: 2px solid hsl(var(--color-accent));
   outline-offset: 2px;
 }
 
 @media (forced-colors: active) {
+  /* Border colours are forced, so focus needs a real outline here. */
+  .form-control:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 2px;
+  }
+
   .form-control[aria-invalid="true"] {
     border-width: calc(var(--control-border-width) * 2);
   }
