@@ -163,139 +163,6 @@ const imageRatios = ["1:1", "3:2", "16:9"] as const;
       
     </section>
 
-    <section id="form-controls" class="flow">
-      <h2 class="numbered-title"><span>06</span> Form controls</h2>
-
-      <p>Every control wraps a native element, so submission and validation work without JavaScript. Tab through the fields to see the focus ring.</p>
-
-      <div id="form-alignment" class="flow">
-        <h3 class="numbered-title">Sizes</h3>
-
-        <p>An Input, a Select and a Button of the same size are the same height.</p>
-
-        {
-          controlSizes.map(size => (
-            <div class="demo-control-row">
-              <Input size={size} id={`align-input-${size}`} aria-label={`${size} input`} placeholder={`size="${size}"`} />
-              <Select size={size} id={`align-select-${size}`} aria-label={`${size} select`}><option>{size}</option></Select>
-              <Button size={size} id={`align-button-${size}`}>{size}</Button>
-              <Button size={size} decoration="outline">outline</Button>
-            </div>
-          ))
-        }
-      </div>
-
-      <div id="label" class="flow">
-        <h3 class="numbered-title">Label</h3>
-
-        <div class="demo-form-grid">
-          <div class="demo-stack">
-            <Label for="label-standalone">A standalone Label</Label>
-            <Input id="label-standalone" name="standalone" />
-          </div>
-        </div>
-      </div>
-
-      <div id="input" class="flow">
-        <h3 class="numbered-title">Input</h3>
-
-        <div class="demo-form-grid">
-          <FormField id="input-default" label="Name"><Input name="name" autocomplete="name" placeholder="Jane Doe" /></FormField>
-          <FormField id="input-hint" label="Email" hint="We only use it to answer you."><Input type="email" name="email" autocomplete="email" placeholder="you@example.com" /></FormField>
-          <FormField id="input-error" label="Postal code" error="Enter a postal code such as H2X 1Y4."><Input name="postal-code" value="H2X" pattern="[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d" /></FormField>
-          <FormField id="input-disabled" label="Disabled"><Input name="disabled" value="Can't touch this" disabled /></FormField>
-          <FormField id="input-readonly" label="Read-only"><Input name="readonly" value="Order #1024" readonly /></FormField>
-        </div>
-      </div>
-
-      <div id="textarea" class="flow">
-        <h3 class="numbered-title">Textarea</h3>
-
-        <div class="demo-form-grid">
-          <FormField id="textarea-default" label="Message" hint="A few words about the print you want."><Textarea name="message" placeholder="Hello…" /></FormField>
-          <FormField id="textarea-error" label="Message" error="The message can't be empty."><Textarea name="message-error" required /></FormField>
-          <FormField id="textarea-disabled" label="Disabled"><Textarea name="message-disabled" value="Disabled" disabled /></FormField>
-          <FormField id="textarea-readonly" label="Read-only"><Textarea name="message-readonly" value="Sent on 12 May." readonly /></FormField>
-        </div>
-      </div>
-
-      <div id="select" class="flow">
-        <h3 class="numbered-title">Select</h3>
-
-        <div class="demo-form-grid">
-          <FormField id="select-default" label="Category">
-            <Select name="category">
-              <option value="birds">Oiseaux</option>
-              <option value="mammals">Mammifères</option>
-              <option value="landscapes">Paysages</option>
-            </Select>
-          </FormField>
-          <FormField id="select-error" label="Format" error="Pick a format.">
-            <Select name="format" required>
-              <option value="">Choose…</option>
-              <option value="a4">A4</option>
-            </Select>
-          </FormField>
-          <FormField id="select-disabled" label="Disabled">
-            <Select name="select-disabled" disabled><option>Unavailable</option></Select>
-          </FormField>
-        </div>
-
-        <p>A native select has no read-only state; use a read-only Input instead.</p>
-      </div>
-
-      <div id="checkbox" class="flow">
-        <h3 class="numbered-title">Checkbox</h3>
-
-        <div class="demo-form-grid">
-          <FormField id="checkbox-default" label="Subscribe to the newsletter"><Checkbox name="newsletter" /></FormField>
-          <FormField id="checkbox-checked" label="Checked" hint="One email a month."><Checkbox name="checked" checked /></FormField>
-          <FormField id="checkbox-error" label="I accept the terms" error="You must accept the terms."><Checkbox name="terms" required /></FormField>
-          <FormField id="checkbox-disabled" label="Disabled"><Checkbox name="checkbox-disabled" disabled /></FormField>
-          <FormField id="checkbox-disabled-checked" label="Disabled and checked"><Checkbox name="checkbox-disabled-checked" checked disabled /></FormField>
-        </div>
-      </div>
-
-      <div id="radio-group" class="flow">
-        <h3 class="numbered-title">Radio group</h3>
-
-        <div class="demo-form-grid">
-          <RadioGroup id="radio-group-standalone" name="format-standalone" legend="Standalone, with a legend" options={printFormats} value="a4" />
-          <FormField id="radio-group-field" label="Print size" hint="Framing is quoted separately."><RadioGroup name="format-field" options={printFormats} /></FormField>
-          <FormField id="radio-group-error" label="Print size" error="Pick a print size."><RadioGroup name="format-error" options={printFormats} required /></FormField>
-          <FormField id="radio-group-disabled" label="Disabled"><RadioGroup name="format-disabled" options={printFormats} value="a3" disabled /></FormField>
-          <FormField id="radio-group-horizontal" label="Horizontal"><RadioGroup name="format-horizontal" orientation="horizontal" options={[{ value: "portrait", label: "Portrait" }, { value: "landscape", label: "Landscape" }]} value="landscape" /></FormField>
-        </div>
-      </div>
-
-      <div id="switch" class="flow">
-        <h3 class="numbered-title">Switch</h3>
-
-        <div class="demo-form-grid">
-          <FormField id="switch-default" label="Email me when new prints arrive"><Switch name="alerts" /></FormField>
-          <FormField id="switch-checked" label="On" hint="Checkbox semantics, toggle look."><Switch name="on" checked /></FormField>
-          <FormField id="switch-error" label="Required" error="Turn this on to continue."><Switch name="required-switch" required /></FormField>
-          <FormField id="switch-disabled" label="Disabled"><Switch name="switch-disabled" disabled /></FormField>
-          <FormField id="switch-disabled-checked" label="Disabled and on"><Switch name="switch-disabled-checked" checked disabled /></FormField>
-        </div>
-      </div>
-
-      <div id="form-field" class="flow">
-        <h3 class="numbered-title">Form field</h3>
-
-        <p>A contact form built from FormFields. Submitting it empty shows the browser's own validation.</p>
-
-        <form id="form-field-demo" class="demo-form flow" action="#form-field">
-          <FormField label="Name"><Input name="contact-name" autocomplete="name" required /></FormField>
-          <FormField label="Email" hint="We only use it to answer you."><Input type="email" name="contact-email" autocomplete="email" required /></FormField>
-          <FormField label="Print size"><RadioGroup name="contact-format" options={printFormats} required /></FormField>
-          <FormField label="Message"><Textarea name="contact-message" required /></FormField>
-          <FormField label="Subscribe to the newsletter"><Checkbox name="contact-newsletter" /></FormField>
-          <div><Button type="submit">Send</Button></div>
-        </form>
-      </div>
-    </section>
-
     <section id="row" class="flow">
       <h2 class="numbered-title"><span>04</span> Row &amp; Pane</h2>
 
@@ -451,6 +318,139 @@ const imageRatios = ["1:1", "3:2", "16:9"] as const;
           <Image src={dusk} alt="Mountains at dusk, square contain" ratio="1:1" fit="contain" credit='fit="contain"' class="demo-contain" />
         </Pane>
       </Row>
+    </section>
+
+    <section id="form-controls" class="flow">
+      <h2 class="numbered-title"><span>06</span> Form controls</h2>
+
+      <p>Every control wraps a native element, so submission and validation work without JavaScript. Tab through the fields to see the focus ring.</p>
+
+      <div id="form-alignment" class="flow">
+        <h3 class="numbered-title">Sizes</h3>
+
+        <p>An Input, a Select and a Button of the same size are the same height.</p>
+
+        {
+          controlSizes.map(size => (
+            <div class="demo-control-row">
+              <Input size={size} id={`align-input-${size}`} aria-label={`${size} input`} placeholder={`size="${size}"`} />
+              <Select size={size} id={`align-select-${size}`} aria-label={`${size} select`}><option>{size}</option></Select>
+              <Button size={size} id={`align-button-${size}`}>{size}</Button>
+              <Button size={size} decoration="outline">outline</Button>
+            </div>
+          ))
+        }
+      </div>
+
+      <div id="label" class="flow">
+        <h3 class="numbered-title">Label</h3>
+
+        <div class="demo-form-grid">
+          <div class="demo-stack">
+            <Label for="label-standalone">A standalone Label</Label>
+            <Input id="label-standalone" name="standalone" />
+          </div>
+        </div>
+      </div>
+
+      <div id="input" class="flow">
+        <h3 class="numbered-title">Input</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="input-default" label="Name"><Input name="name" autocomplete="name" placeholder="Jane Doe" /></FormField>
+          <FormField id="input-hint" label="Email" hint="We only use it to answer you."><Input type="email" name="email" autocomplete="email" placeholder="you@example.com" /></FormField>
+          <FormField id="input-error" label="Postal code" error="Enter a postal code such as H2X 1Y4."><Input name="postal-code" value="H2X" pattern="[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d" /></FormField>
+          <FormField id="input-disabled" label="Disabled"><Input name="disabled" value="Can't touch this" disabled /></FormField>
+          <FormField id="input-readonly" label="Read-only"><Input name="readonly" value="Order #1024" readonly /></FormField>
+        </div>
+      </div>
+
+      <div id="textarea" class="flow">
+        <h3 class="numbered-title">Textarea</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="textarea-default" label="Message" hint="A few words about the print you want."><Textarea name="message" placeholder="Hello…" /></FormField>
+          <FormField id="textarea-error" label="Message" error="The message can't be empty."><Textarea name="message-error" required /></FormField>
+          <FormField id="textarea-disabled" label="Disabled"><Textarea name="message-disabled" value="Disabled" disabled /></FormField>
+          <FormField id="textarea-readonly" label="Read-only"><Textarea name="message-readonly" value="Sent on 12 May." readonly /></FormField>
+        </div>
+      </div>
+
+      <div id="select" class="flow">
+        <h3 class="numbered-title">Select</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="select-default" label="Category">
+            <Select name="category">
+              <option value="birds">Oiseaux</option>
+              <option value="mammals">Mammifères</option>
+              <option value="landscapes">Paysages</option>
+            </Select>
+          </FormField>
+          <FormField id="select-error" label="Format" error="Pick a format.">
+            <Select name="format" required>
+              <option value="">Choose…</option>
+              <option value="a4">A4</option>
+            </Select>
+          </FormField>
+          <FormField id="select-disabled" label="Disabled">
+            <Select name="select-disabled" disabled><option>Unavailable</option></Select>
+          </FormField>
+        </div>
+
+        <p>A native select has no read-only state; use a read-only Input instead.</p>
+      </div>
+
+      <div id="checkbox" class="flow">
+        <h3 class="numbered-title">Checkbox</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="checkbox-default" label="Subscribe to the newsletter"><Checkbox name="newsletter" /></FormField>
+          <FormField id="checkbox-checked" label="Checked" hint="One email a month."><Checkbox name="checked" checked /></FormField>
+          <FormField id="checkbox-error" label="I accept the terms" error="You must accept the terms."><Checkbox name="terms" required /></FormField>
+          <FormField id="checkbox-disabled" label="Disabled"><Checkbox name="checkbox-disabled" disabled /></FormField>
+          <FormField id="checkbox-disabled-checked" label="Disabled and checked"><Checkbox name="checkbox-disabled-checked" checked disabled /></FormField>
+        </div>
+      </div>
+
+      <div id="radio-group" class="flow">
+        <h3 class="numbered-title">Radio group</h3>
+
+        <div class="demo-form-grid">
+          <RadioGroup id="radio-group-standalone" name="format-standalone" legend="Standalone, with a legend" options={printFormats} value="a4" />
+          <FormField id="radio-group-field" label="Print size" hint="Framing is quoted separately."><RadioGroup name="format-field" options={printFormats} /></FormField>
+          <FormField id="radio-group-error" label="Print size" error="Pick a print size."><RadioGroup name="format-error" options={printFormats} required /></FormField>
+          <FormField id="radio-group-disabled" label="Disabled"><RadioGroup name="format-disabled" options={printFormats} value="a3" disabled /></FormField>
+          <FormField id="radio-group-horizontal" label="Horizontal"><RadioGroup name="format-horizontal" orientation="horizontal" options={[{ value: "portrait", label: "Portrait" }, { value: "landscape", label: "Landscape" }]} value="landscape" /></FormField>
+        </div>
+      </div>
+
+      <div id="switch" class="flow">
+        <h3 class="numbered-title">Switch</h3>
+
+        <div class="demo-form-grid">
+          <FormField id="switch-default" label="Email me when new prints arrive"><Switch name="alerts" /></FormField>
+          <FormField id="switch-checked" label="On" hint="Checkbox semantics, toggle look."><Switch name="on" checked /></FormField>
+          <FormField id="switch-error" label="Required" error="Turn this on to continue."><Switch name="required-switch" required /></FormField>
+          <FormField id="switch-disabled" label="Disabled"><Switch name="switch-disabled" disabled /></FormField>
+          <FormField id="switch-disabled-checked" label="Disabled and on"><Switch name="switch-disabled-checked" checked disabled /></FormField>
+        </div>
+      </div>
+
+      <div id="form-field" class="flow">
+        <h3 class="numbered-title">Form field</h3>
+
+        <p>A contact form built from FormFields. Submitting it empty shows the browser's own validation.</p>
+
+        <form id="form-field-demo" class="demo-form flow" action="#form-field">
+          <FormField label="Name"><Input name="contact-name" autocomplete="name" required /></FormField>
+          <FormField label="Email" hint="We only use it to answer you."><Input type="email" name="contact-email" autocomplete="email" required /></FormField>
+          <FormField label="Print size"><RadioGroup name="contact-format" options={printFormats} required /></FormField>
+          <FormField label="Message"><Textarea name="contact-message" required /></FormField>
+          <FormField label="Subscribe to the newsletter"><Checkbox name="contact-newsletter" /></FormField>
+          <div><Button type="submit">Send</Button></div>
+        </form>
+      </div>
     </section>
   </div>
 </Layout>

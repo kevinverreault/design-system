@@ -7,10 +7,9 @@ async function renderTextarea(props: Record<string, unknown> = {}) {
 }
 
 describe('Textarea', () => {
-  test('renders a native textarea at the medium size by default', async () => {
+  test('renders an empty native textarea by default', async () => {
     const textarea = await renderTextarea();
 
-    expect(textarea.classList.contains('text-md')).toBe(true);
     expect(textarea.textContent).toBe('');
   });
 
@@ -19,12 +18,6 @@ describe('Textarea', () => {
 
     expect(textarea.textContent).toBe('Hello <there>');
     expect(textarea.hasAttribute('value')).toBe(false);
-  });
-
-  test('applies the large size', async () => {
-    const textarea = await renderTextarea({ size: 'large' });
-
-    expect(textarea.classList.contains('text-xl')).toBe(true);
   });
 
   test('passes through native attributes', async () => {

@@ -7,10 +7,8 @@ import { nextFieldId, wireControl } from './wire-control';
 
 const formField = cva("form-field", {
   variants: {
-    kind: {
-      field: "stacked",
-      check: "inline",
-      group: "stacked"
+    inline: {
+      true: "inline"
     },
     invalid: {
       true: "invalid"
@@ -49,7 +47,7 @@ if (!control) {
 }
 ---
 
-<div {...attributes} class:list={[formField({ kind: control.kind, invalid: Boolean(error) }), "ff-sans-normal", className]}>
+<div {...attributes} class:list={[formField({ inline: control.kind === "check", invalid: Boolean(error) }), "ff-sans-normal", className]}>
   {
     control.kind === "group"
       ? <span id={ids.label} class="group-label">{label}</span>

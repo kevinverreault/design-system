@@ -59,8 +59,10 @@ describe('FormField', () => {
     const first = await renderField({ label: 'A', hint: 'a' }, '<input>');
     const second = await renderField({ label: 'B', hint: 'b' }, '<input>');
 
-    expect(first.querySelector('input')!.id).not.toBe(second.querySelector('input')!.id);
-    expect(first.querySelector('.hint')!.id).not.toBe(second.querySelector('.hint')!.id);
+    const [firstInput, secondInput] = [first.querySelector('input')!, second.querySelector('input')!];
+
+    expect(firstInput.id).not.toBe(secondInput.id);
+    expect(firstInput.getAttribute('aria-describedby')).not.toBe(secondInput.getAttribute('aria-describedby'));
   });
 
   test('describes the control with its hint', async () => {
@@ -91,8 +93,7 @@ describe('FormField', () => {
 
     expect(input.hasAttribute('aria-describedby')).toBe(false);
     expect(input.hasAttribute('aria-invalid')).toBe(false);
-    expect(field.querySelector('.hint')).toBeNull();
-    expect(field.querySelector('.error')).toBeNull();
+    expect(field.textContent.trim()).toBe('Email');
   });
 
   test('keeps an existing aria-describedby and adds its own ids after it', async () => {
