@@ -8,11 +8,19 @@ import { NavigationItems } from '../data/navigation';
 import Icon from '../components/ui/Icon.astro';
 import Accordion from '../components/navigation/Accordion.astro';
 import ThemeToggle from '../components/ui/ThemeToggle.astro'
+import Row from '../components/layout/Row.astro';
+import Pane from '../components/layout/Pane.astro';
+import Image from '../components/media/Image.astro';
+import dusk from '../assets/showcase/dusk.jpg';
 
 const buttonVariants = ["primary", "secondary", "muted", "danger"] as const;
 const buttonTypes = ["outline", "ghost", "underline"] as const;
 const buttonSizes = ["icon", "small", "medium", "large", "extra-large"] as const;
 const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
+const rowBackgrounds = ["background", "surface", "primary", "secondary"] as const;
+const rowGaps = ["small", "medium", "large"] as const;
+const paneAlignments = ["start", "center", "end"] as const;
+const imageRatios = ["1:1", "3:2", "16:9"] as const;
 
 ---
 
@@ -140,6 +148,163 @@ const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
       </div>
       
     </section>
+
+    <section id="row" class="flow">
+      <h2 class="numbered-title"><span>04</span> Row &amp; Pane</h2>
+
+      <h3 class="numbered-title">Columns</h3>
+
+      <Row>
+        <Pane class="demo-pane">One column</Pane>
+      </Row>
+
+      <Row columns={2} id="row-two-columns">
+        <Pane class="demo-pane">Two columns</Pane>
+        <Pane class="demo-pane">1:1 by default</Pane>
+      </Row>
+
+      <Row columns={3} id="row-three-columns">
+        <Pane class="demo-pane">Three</Pane>
+        <Pane class="demo-pane">equal</Pane>
+        <Pane class="demo-pane">columns</Pane>
+      </Row>
+
+      <h3 class="numbered-title">Ratio</h3>
+
+      <Row columns={2} ratio="2:1">
+        <Pane class="demo-pane">2:1 — the wide side</Pane>
+        <Pane class="demo-pane">narrow side</Pane>
+      </Row>
+
+      <Row columns={2} ratio="1:2">
+        <Pane class="demo-pane">1:2 — narrow side</Pane>
+        <Pane class="demo-pane">the wide side</Pane>
+      </Row>
+
+      <h3 class="numbered-title">Gap</h3>
+
+      {
+        rowGaps.map(gap => (
+          <Row columns={3} gap={gap}>
+            <Pane class="demo-pane">gap</Pane>
+            <Pane class="demo-pane">{gap}</Pane>
+            <Pane class="demo-pane">gap</Pane>
+          </Row>
+        ))
+      }
+
+      <h3 class="numbered-title">Background</h3>
+
+      {
+        rowBackgrounds.map(background => (
+          <Row columns={2} background={background} id={`row-${background}`} aria-label={`${background} background`}>
+            <Pane>background="{background}"</Pane>
+            <Pane align="end">Switches with the theme</Pane>
+          </Row>
+        ))
+      }
+
+      <h3 class="numbered-title">Width</h3>
+
+      <Row columns={2} background="surface" width="full">
+        <Pane>width="full"</Pane>
+        <Pane align="end">Spans the whole parent</Pane>
+      </Row>
+
+      <Row columns={2} background="surface" width="contained">
+        <Pane>width="contained"</Pane>
+        <Pane align="end">Content stays within the site container</Pane>
+      </Row>
+
+      <h3 class="numbered-title">Pane alignment</h3>
+
+      <Row columns={3}>
+        {
+          paneAlignments.map(align => (
+            <Pane align={align} class="demo-pane demo-tall"><span>align="{align}"</span></Pane>
+          ))
+        }
+      </Row>
+
+      <Row columns={3}>
+        {
+          paneAlignments.map(valign => (
+            <Pane valign={valign} class="demo-pane demo-tall"><span>valign="{valign}"</span></Pane>
+          ))
+        }
+      </Row>
+
+      <Row columns={2} ratio="2:1">
+        <Pane>
+          <Image src={dusk} alt="Mountains at dusk" ratio="3:2" />
+        </Pane>
+        <Pane center>
+          <p>center</p>
+          <p>Text sits in the middle of the taller image beside it, on both axes.</p>
+        </Pane>
+      </Row>
+
+      <h3 class="numbered-title">Stacking</h3>
+
+      <p>A Row stacks to one column when the Row itself is narrower than 40rem, whatever the viewport.</p>
+
+      <div class="demo-narrow-container">
+        <Row columns={3} id="row-in-narrow-container">
+          <Pane class="demo-pane">Inside</Pane>
+          <Pane class="demo-pane">a narrow</Pane>
+          <Pane class="demo-pane">container</Pane>
+        </Row>
+      </div>
+    </section>
+
+    <section id="image" class="flow">
+      <h2 class="numbered-title"><span>05</span> Image</h2>
+
+      <h3 class="numbered-title">Sources and credit</h3>
+
+      <Row columns={3}>
+        <Pane>
+          <Image id="image-local" src={dusk} alt="Mountains at dusk, local asset" credit="Kevin Verreault 2024" />
+        </Pane>
+        <Pane>
+          <Image id="image-remote" src="/images/snow.jpg" alt="Snowfield, URL source" credit="Credit on a white photo" width={1200} height={800} />
+        </Pane>
+        <Pane>
+          <Image src={dusk} alt="Mountains at dusk, no credit" />
+        </Pane>
+      </Row>
+
+      <h3 class="numbered-title">Credit slot</h3>
+
+      <Row columns={2}>
+        <Pane>
+          <Image src={dusk} alt="Mountains at dusk, custom credit" credit="Replaced by the slot">
+            <Fragment slot="credit">© <a href="#image">Kevin Verreault</a> · Prints available</Fragment>
+          </Image>
+        </Pane>
+      </Row>
+
+      <h3 class="numbered-title">Ratio and fit</h3>
+
+      <Row columns={3}>
+        {
+          imageRatios.map(ratio => (
+            <Pane>
+              <Image src={dusk} alt={`Mountains at dusk, ${ratio} cover`} ratio={ratio} credit={`ratio="${ratio}"`} />
+            </Pane>
+          ))
+        }
+      </Row>
+
+      <Row columns={2}>
+        <Pane>
+          <Image src={dusk} alt="Mountains at dusk, square cover" ratio="1:1" fit="cover" credit='fit="cover"' />
+        </Pane>
+        <Pane>
+          <Image src={dusk} alt="Mountains at dusk, square contain" ratio="1:1" fit="contain" credit='fit="contain"' class="demo-contain" />
+        </Pane>
+      </Row>
+    </section>
   </div>
 </Layout>
 
@@ -191,6 +356,23 @@ const buttonShapes = ["rectangle", "square", "circle", "rounded"] as const;
 
   #interactive-elements > h4 {
     margin-left: 1rem;
+  }
+
+  .demo-pane {
+    padding: 1rem;
+    border: 1px dashed hsl(var(--color-on-background) / .4);
+  }
+
+  .demo-tall {
+    min-height: 10rem;
+  }
+
+  .demo-narrow-container {
+    max-width: 30rem;
+  }
+
+  :global(.demo-contain) {
+    background-color: hsl(var(--color-surface));
   }
 
 </style>

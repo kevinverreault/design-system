@@ -1,0 +1,144 @@
+---
+import '../../styles/global.css'
+import { Image as OptimizedImage } from 'astro:assets';
+import { cva, type VariantProps } from 'cva';
+import type { ImageMetadata } from 'astro';
+import type { HTMLAttributes } from "astro/types";
+
+const image = cva("image", {
+  variants: {
+    ratio: {
+      auto: "ratio-auto",
+      "1:1": "ratio-1-1",
+      "3:2": "ratio-3-2",
+      "2:3": "ratio-2-3",
+      "4:3": "ratio-4-3",
+      "3:4": "ratio-3-4",
+      "16:9": "ratio-16-9"
+    },
+    fit: {
+      cover: "fit-cover",
+      contain: "fit-contain"
+    }
+  }
+});
+
+/** Attributes that belong to the image itself; they go on the img. */
+type ImageElementAttributes = Pick<HTMLAttributes<"img">, "loading" | "decoding" | "fetchpriority" | "sizes">;
+
+/**
+ * Unknown attributes (id, class, aria-*, data-*, …) go on the root figure, as
+ * for every component. The image attributes above, plus width and height, go
+ * on the img.
+ */
+export interface Props
+  extends HTMLAttributes<"figure">,
+    ImageElementAttributes,
+    VariantProps<typeof image> {
+  /** An imported local asset (optimised by Astro) or a remote URL string. */
+  src: ImageMetadata | string;
+  /** Required. Use an empty string for decorative images. */
+  alt: string;
+  width?: number;
+  height?: number;
+  /** Owner of the photo; rendered as "© {credit}". The `credit` slot replaces it. */
+  credit?: string;
+}
+
+const RESPONSIVE_WIDTHS = [480, 800, 1200, 1600, 2400];
+
+const {
+  src,
+  alt,
+  credit,
+  ratio = "auto",
+  fit = "cover",
+  width,
+  height,
+  loading,
+  decoding,
+  fetchpriority,
+  sizes,
+  class: className,
+  ...attributes
+} = Astro.props;
+
+const isRemote = typeof src === "string";
+
+if (typeof alt !== "string") {
+  throw new Error(`Image '${isRemote ? src : src.src}' requires an alt attribute (use alt="" for decorative images).`);
+}
+
+const hasCreditSlot = Astro.slots.has("credit");
+const hasCredit = hasCreditSlot || Boolean(credit);
+
+const widths = isRemote
+  ? []
+  : [...RESPONSIVE_WIDTHS.filter(width => width < src.width), src.width];
+---
+
+<figure {...attributes} class:list={[image({ ratio, fit }), className]}>
+  {
+    isRemote
+      ? <img src={src} alt={alt} width={width} height={height} sizes={sizes} loading={loading ?? "lazy"} decoding={decoding ?? "async"} fetchpriority={fetchpriority} />
+      : <OptimizedImage src={src} alt={alt} width={width} height={height} widths={widths} sizes={sizes ?? "100vw"} loading={loading} decoding={decoding} fetchpriority={fetchpriority} />
+  }
+  {
+    hasCredit &&
+    <figcaption class="credit">
+      {hasCreditSlot ? <slot name="credit" /> : `© ${credit}`}
+    </figcaption>
+  }
+</figure>
+
+<style>
+  .image {
+    position: relative;
+    width: 100%;
+  }
+
+  .image img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--image-ratio, auto);
+    object-fit: var(--image-fit);
+  }
+
+  .ratio-1-1 { --image-ratio: 1 / 1; }
+  .ratio-3-2 { --image-ratio: 3 / 2; }
+  .ratio-2-3 { --image-ratio: 2 / 3; }
+  .ratio-4-3 { --image-ratio: 4 / 3; }
+  .ratio-3-4 { --image-ratio: 3 / 4; }
+  .ratio-16-9 { --image-ratio: 16 / 9; }
+
+  .fit-cover { --image-fit: cover; }
+  .fit-contain { --image-fit: contain; }
+
+  /*
+   * The credit band is the one deliberate exception to theme tokens: it reads
+   * against the photo, not the page, so it stays the same in both themes.
+   * White text over 60% black on a pure-white photo gives about 5.7:1 contrast.
+   */
+  .credit {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    padding: 0.375em 0.75em;
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+    color: hsl(0 0% 100%);
+    background-color: hsl(0 0% 0% / 0.6);
+  }
+
+  .credit :global(a) {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  @media (forced-colors: active) {
+    .credit {
+      color: CanvasText;
+      background-color: Canvas;
+    }
+  }
+</style>

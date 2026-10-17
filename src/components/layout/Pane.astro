@@ -1,0 +1,51 @@
+---
+import '../../styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const pane = cva("pane", {
+  variants: {
+    align: {
+      start: "align-start",
+      center: "align-center",
+      end: "align-end"
+    },
+    valign: {
+      start: "valign-start",
+      center: "valign-center",
+      end: "valign-end"
+    }
+  }
+});
+
+export interface Props
+  extends HTMLAttributes<"div">,
+    VariantProps<typeof pane> {
+  /** Shorthand for `align="center"` and `valign="center"`; an explicit axis wins. */
+  center?: boolean;
+}
+
+const { center = false, align, valign, class: className, ...attributes } = Astro.props;
+
+const defaultAlignment = center ? "center" : "start";
+---
+
+<div {...attributes} class:list={[pane({ align: align ?? defaultAlignment, valign: valign ?? defaultAlignment }), className]}>
+  <slot />
+</div>
+
+<style>
+  .pane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .align-start { align-items: flex-start; text-align: start; }
+  .align-center { align-items: center; text-align: center; }
+  .align-end { align-items: flex-end; text-align: end; }
+
+  .valign-start { justify-content: flex-start; }
+  .valign-center { justify-content: center; }
+  .valign-end { justify-content: flex-end; }
+</style>

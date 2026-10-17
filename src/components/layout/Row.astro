@@ -1,0 +1,139 @@
+---
+import '../../styles/global.css'
+import { cva, type VariantProps } from 'cva';
+import type { HTMLAttributes } from "astro/types";
+
+const row = cva("row", {
+  variants: {
+    columns: {
+      1: "columns-1",
+      2: "columns-2",
+      3: "columns-3"
+    },
+    ratio: {
+      "1:1": "ratio-1-1",
+      "2:1": "ratio-2-1",
+      "1:2": "ratio-1-2"
+    },
+    gap: {
+      small: "gap-small",
+      medium: "gap-medium",
+      large: "gap-large"
+    },
+    background: {
+      none: "background-none",
+      background: "background-background",
+      surface: "background-surface",
+      primary: "background-primary",
+      secondary: "background-secondary"
+    },
+    width: {
+      contained: "width-contained",
+      full: "width-full"
+    }
+  }
+});
+
+export interface Props
+  extends HTMLAttributes<"section">,
+    VariantProps<typeof row> {
+  as?: "section" | "div" | "article";
+}
+
+const {
+  as: Element = "section",
+  columns = 1,
+  ratio,
+  gap = "medium",
+  background = "none",
+  width = "contained",
+  class: className,
+  ...attributes
+} = Astro.props;
+
+if (![1, 2, 3].includes(columns as number)) {
+  throw new Error(`Row supports 1, 2 or 3 columns, received '${columns}'.`);
+}
+
+if (ratio && columns !== 2) {
+  throw new Error(`Row ratio '${ratio}' only applies to 2 columns, received ${columns} column(s).`);
+}
+
+const columnRatio = columns === 2 ? ratio ?? "1:1" : undefined;
+---
+
+<Element {...attributes} class:list={[row({ columns, ratio: columnRatio, gap, background, width }), className]}>
+  <div class="row-grid">
+    <slot />
+  </div>
+</Element>
+
+<style>
+  /*
+   * The Row is a container-query container: its panes stack into one column
+   * when the Row itself is narrower than 40rem, wherever it is placed.
+   * Container query conditions can't read custom properties, so the
+   * threshold is written in the @container rule below.
+   */
+  .row {
+    container: row / inline-size;
+  }
+
+  .row-grid {
+    display: grid;
+    gap: var(--row-gap);
+    grid-template-columns: var(--row-columns);
+  }
+
+  .columns-1 { --row-columns: minmax(0, 1fr); }
+  .columns-2 { --row-columns: repeat(2, minmax(0, 1fr)); }
+  .columns-3 { --row-columns: repeat(3, minmax(0, 1fr)); }
+
+  .ratio-2-1 { --row-columns: minmax(0, 2fr) minmax(0, 1fr); }
+  .ratio-1-2 { --row-columns: minmax(0, 1fr) minmax(0, 2fr); }
+
+  .gap-small { --row-gap: var(--space-sm); }
+  .gap-medium { --row-gap: var(--space-md); }
+  .gap-large { --row-gap: var(--space-lg); }
+
+  .width-contained > .row-grid {
+    max-width: var(--container-max-width);
+    margin-inline: auto;
+  }
+
+  .background-background {
+    background-color: hsl(var(--color-background));
+    color: hsl(var(--color-on-background));
+  }
+
+  .background-surface {
+    background-color: hsl(var(--color-surface));
+    color: hsl(var(--color-on-surface));
+  }
+
+  .background-primary {
+    background-color: hsl(var(--color-primary));
+    color: hsl(var(--color-on-primary));
+  }
+
+  .background-secondary {
+    background-color: hsl(var(--color-secondary));
+    color: hsl(var(--color-on-secondary));
+  }
+
+  .row:not(.background-none) {
+    padding: var(--row-gap);
+  }
+
+  @media (forced-colors: active) {
+    .row:not(.background-none) {
+      border: 1px solid CanvasText;
+    }
+  }
+
+  @container row (width < 40rem) {
+    .row-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
