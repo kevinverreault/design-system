@@ -1,10 +1,13 @@
 ---
 import '../../styles/global.css'
+import './credit.css'
 import type { HTMLAttributes } from "astro/types";
 import Icon from '../ui/Icon.astro';
+import DialogClose from '../overlay/DialogClose.astro';
 
 /**
- * A full-size photo viewer for Galleries, on the native `dialog` element.
+ * A full-size photo viewer for Galleries: a modal native `dialog`, with the
+ * same close button, light dismiss and focus return as Dialog.
  * Place one on a page that has Galleries: it opens when a Gallery image is
  * clicked (through the `gallery-open` event), shows the full-size image with
  * its credit footer, moves to the previous or next image with its buttons or
@@ -34,9 +37,7 @@ const {
 
 <light-box>
   <dialog {...attributes} aria-label={label} closedby="any" class:list={["lightbox", className]}>
-    <form method="dialog">
-      <button class="lightbox-control lightbox-close" aria-label={closeLabel}><Icon icon="x" aria-hidden="true" /></button>
-    </form>
+    <DialogClose label={closeLabel} class="lightbox-control lightbox-close" />
     <figure class="lightbox-figure" data-lightbox-figure></figure>
     <p class="lightbox-counter" aria-live="polite" data-lightbox-counter></p>
     <button type="button" class="lightbox-control lightbox-previous" aria-label={previousLabel} data-lightbox-step="-1"><Icon icon="chrevron-left" aria-hidden="true" /></button>
@@ -46,8 +47,8 @@ const {
 
 <style>
   /*
-   * Like the Image credit band, the viewer reads against the photo, not the
-   * page, so it uses the theme-independent scrim tones in both themes.
+   * Like the Image credit band (credit.css), the viewer reads against the
+   * photo, not the page, so it uses the theme-independent scrim tones.
    */
   .lightbox {
     max-width: 100vw;
@@ -158,16 +159,14 @@ const {
 </style>
 
 <script>
-  import { installLightDismissFallback } from '../overlay/dialog';
+  import { installLightDismissFallback, returnFocusOnClose } from '../overlay/dialog';
+  import { creditText } from './credit';
   import { GALLERY_OPEN_EVENT, type GalleryImageDetail, type GalleryOpenEvent } from './gallery-open';
 
   class LightBox extends HTMLElement {
     dialog!: HTMLDialogElement;
     images: GalleryImageDetail[] = [];
-    /** The thumbnails' credit footers, cloned under the full-size image. */
-    credits: (HTMLElement | null)[] = [];
     index = 0;
-    trigger?: HTMLElement;
 
     connectedCallback() {
       this.dialog = this.querySelector('dialog')!;
@@ -184,7 +183,6 @@ const {
         button.addEventListener('click', () => this.show(this.index + Number(button.dataset.lightboxStep)));
       });
 
-      this.dialog.addEventListener('close', () => this.trigger?.focus());
       document.addEventListener(GALLERY_OPEN_EVENT, this.onGalleryOpen);
     }
 
@@ -197,11 +195,7 @@ const {
       event.preventDefault();
 
       const { index, images, trigger } = event.detail;
-      const links = trigger.closest('[data-gallery]')!.querySelectorAll('a[data-gallery-link]');
-
       this.images = images;
-      this.credits = Array.from(links, link => link.querySelector('figcaption'));
-      this.trigger = trigger;
 
       this.querySelectorAll<HTMLElement>('[data-lightbox-step]').forEach(button => {
         button.hidden = images.length < 2;
@@ -209,13 +203,14 @@ const {
 
       this.show(index);
       this.dialog.showModal();
+      returnFocusOnClose(this.dialog, trigger);
     };
 
     show(index: number) {
       const count = this.images.length;
       this.index = (index + count) % count;
 
-      const { src, alt, width, height } = this.images[this.index];
+      const { src, alt, width, height, credit } = this.images[this.index];
       const image = document.createElement('img');
       image.src = src;
       image.alt = alt;
@@ -224,8 +219,15 @@ const {
         image.height = height;
       }
 
-      const credit = this.credits[this.index]?.cloneNode(true);
-      this.querySelector('[data-lightbox-figure]')!.replaceChildren(image, ...(credit ? [credit] : []));
+      const figure = this.querySelector('[data-lightbox-figure]')!;
+      figure.replaceChildren(image);
+
+      if (credit) {
+        const caption = document.createElement('figcaption');
+        caption.className = 'image-credit';
+        caption.textContent = creditText(credit);
+        figure.append(caption);
+      }
       this.querySelector('[data-lightbox-counter]')!.textContent = count > 1 ? `${this.index + 1} / ${count}` : '';
     }
   }

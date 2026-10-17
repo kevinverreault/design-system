@@ -36,6 +36,7 @@ import Footer from '../components/navigation/Footer.astro';
 import Dialog from '../components/overlay/Dialog.astro';
 import AlertDialog from '../components/overlay/AlertDialog.astro';
 import Sheet from '../components/overlay/Sheet.astro';
+import { sheetSides, type SheetSide } from '../components/overlay/dialog-variants';
 import Lightbox from '../components/media/Lightbox.astro';
 import Popover from '../components/overlay/Popover.astro';
 import DropdownMenu from '../components/overlay/DropdownMenu.astro';
@@ -93,7 +94,8 @@ const paginationItems = [1, 2, 3, 4, 5].map(page => ({ text: String(page), path:
 const footerGroups = NavigationItems
   .filter(item => item.subMenuLinks)
   .map(item => ({ title: item.text, links: item.subMenuLinks! }));
-const sheetSides = ["left", "right", "top", "bottom"] as const;
+const sheetSideNames = Object.keys(sheetSides) as SheetSide[];
+const dialogSizes = ["small", "medium", "large"] as const;
 const printActions = [
   { text: "View the photo", path: "#dropdown-menu" },
   { text: "Add to cart", value: "add" },
@@ -712,6 +714,19 @@ const footerSocial = [
           <Button value="order">Add to cart</Button>
         </Fragment>
       </Dialog>
+
+      <h3 class="numbered-title">Sizes</h3>
+
+      <div class="flex flex-row" style="flex-wrap: wrap;">
+        {
+          dialogSizes.map(size => (
+            <Dialog id={`dialog-${size}`} size={size} title={`size="${size}"`}>
+              <Button slot="trigger" variant="muted">{size}</Button>
+              <p>A {size} dialog. Its width shrinks to fit narrow screens.</p>
+            </Dialog>
+          ))
+        }
+      </div>
     </section>
 
     <section id="alert-dialog" class="flow">
@@ -722,6 +737,9 @@ const footerSocial = [
       <AlertDialog id="alert-dialog-demo" title="Delete this print?" description="It will be removed from your cart. This cannot be undone." actionLabel="Delete">
         <Button slot="trigger" id="alert-dialog-demo-trigger" variant="danger">Delete print</Button>
       </AlertDialog>
+      <AlertDialog id="alert-dialog-primary" title="Publish this gallery?" description="Visitors will see it on the portfolio page." actionLabel="Publish" actionVariant="primary">
+        <Button slot="trigger" variant="muted">Publish gallery</Button>
+      </AlertDialog>
       <p>Last choice: <output id="alert-dialog-result">none</output></p>
     </section>
 
@@ -730,7 +748,7 @@ const footerSocial = [
 
       <div class="flex flex-row" style="flex-wrap: wrap;">
         {
-          sheetSides.map(side => (
+          sheetSideNames.map(side => (
             <Sheet id={`sheet-${side}`} side={side} title={`side="${side}"`} description="A dialog attached to one edge of the viewport.">
               <Button slot="trigger" id={`sheet-${side}-trigger`} variant="secondary">{side}</Button>
               <p>Use it for a mobile menu or a cart panel.</p>
@@ -776,12 +794,12 @@ const footerSocial = [
     <section id="tooltip" class="flow">
       <h2 class="numbered-title"><span>26</span> Tooltip</h2>
 
-      <p>Shows on hover and on keyboard focus, and describes its trigger.</p>
+      <p>Shows on hover and on keyboard focus, and describes its trigger. It sits above, or below when there is no room above.</p>
 
       <div class="flex flex-row items-center">
         {
-          footerSocial.map(({ icon, text }, index) => (
-            <Tooltip text={`Follow on ${text}`} id={`tooltip-${icon}`} placement={index === 2 ? "bottom" : "top"}>
+          footerSocial.map(({ icon, text }) => (
+            <Tooltip text={`Follow on ${text}`} id={`tooltip-${icon}`}>
               <Button size="icon" shape="circle" variant="muted" aria-label={text} id={`tooltip-${icon}-trigger`}>
                 <Icon icon={icon} width="1.5rem" height="1.5rem" color="inherit" aria-hidden="true" />
               </Button>

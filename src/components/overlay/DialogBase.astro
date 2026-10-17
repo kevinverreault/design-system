@@ -1,26 +1,10 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
 import type { HTMLAttributes } from "astro/types";
-import Icon from '../ui/Icon.astro';
-import { nextOverlayId, wireTrigger } from './wire-trigger';
-
-const dialog = cva("dialog", {
-  variants: {
-    size: {
-      small: "size-small",
-      medium: "size-medium",
-      large: "size-large"
-    },
-    side: {
-      none: "",
-      left: "sheet side-left",
-      right: "sheet side-right",
-      top: "sheet side-top",
-      bottom: "sheet side-bottom"
-    }
-  }
-});
+import DialogClose from './DialogClose.astro';
+import { dialog, type DialogVariants } from './dialog-variants';
+import { uniqueId } from '../../lib/unique-id';
+import { wireTrigger } from './wire-trigger';
 
 /**
  * The shell Dialog, AlertDialog and Sheet share; use those instead. It renders
@@ -32,7 +16,7 @@ const dialog = cva("dialog", {
  * The `footer` slot sits in a `form method="dialog"`, so a submit button there
  * closes the dialog and leaves its `value` in the dialog's `returnValue`.
  */
-export interface Props extends HTMLAttributes<"dialog">, VariantProps<typeof dialog> {
+export interface Props extends HTMLAttributes<"dialog">, DialogVariants {
   /** The dialog's accessible name, shown as its heading. */
   title: string;
   /** Supporting text, linked through aria-describedby. */
@@ -55,7 +39,7 @@ const {
   ...attributes
 } = Astro.props;
 
-const id = givenId || nextOverlayId("dialog");
+const id = givenId || uniqueId("dialog");
 
 if (typeof title !== "string" || title.trim() === "") {
   throw new Error(`Dialog '${id}' needs a non-empty title: it is the dialog's accessible name.`);
@@ -63,7 +47,7 @@ if (typeof title !== "string" || title.trim() === "") {
 
 const ids = { title: `${id}-title`, description: `${id}-description` };
 
-/** A slot's HTML, or undefined when it is empty (wrappers forward every slot). */
+/** A slot's HTML, or undefined when it is empty: the wrappers forward every slot, given or not. */
 async function renderSlot(name: string) {
   const html = Astro.slots.has(name) ? await Astro.slots.render(name) : "";
   return html.trim() === "" ? undefined : html;
@@ -90,12 +74,7 @@ if (triggerHtml && !trigger) {
     <h2 id={ids.title} class="dialog-title">{title}</h2>
     {description && <p id={ids.description} class="dialog-description">{description}</p>}
   </header>
-  {
-    closeLabel &&
-    <form method="dialog" class="dialog-close-form">
-      <button class="dialog-close" aria-label={closeLabel}><Icon icon="x" aria-hidden="true" /></button>
-    </form>
-  }
+  {closeLabel && <DialogClose label={closeLabel} class="dialog-close" />}
   {body && <div class="dialog-body"><Fragment set:html={body} /></div>}
   {footer && <form method="dialog" class="dialog-footer"><Fragment set:html={footer} /></form>}
 </dialog>

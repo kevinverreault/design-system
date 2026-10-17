@@ -23,7 +23,7 @@ describe('AlertDialog', () => {
     const dialog = (await renderAlertDialog()).querySelector('dialog')!;
 
     expect(dialog.getAttribute('closedby')).toBe('closerequest');
-    expect(dialog.querySelector('.dialog-close')).toBeNull();
+    expect(dialog.querySelectorAll('button').map(button => button.getAttribute('value'))).toEqual(['cancel', 'confirm']);
   });
 
   test('offers a cancel and an action button that close it with their value', async () => {

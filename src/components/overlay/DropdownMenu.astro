@@ -1,7 +1,9 @@
 ---
 import '../../styles/global.css'
+import './popover.css'
 import type { HTMLAttributes } from "astro/types";
-import { nextOverlayId, wireTrigger } from './wire-trigger';
+import { uniqueId } from '../../lib/unique-id';
+import { wireTrigger } from './wire-trigger';
 
 /**
  * One menu item: a link when it has a `path` (the `{ text, path }` shape of
@@ -19,9 +21,9 @@ export interface DropdownMenuItem {
  * A compact list of actions that opens from its trigger, on the `popover`
  * attribute, with the ARIA menu button keyboard pattern: Enter, Space or
  * ArrowDown open it on the first item and ArrowUp on the last; the arrow keys,
- * Home and End move between items; Escape and Tab close it and return focus to
- * the trigger. Choosing an item closes the menu; listen for `click` on the
- * menu and read the item's `value`.
+ * Home and End move between items; Escape closes it and returns focus to the
+ * trigger, and Tab closes it and moves on from the trigger. Choosing an item
+ * closes the menu; listen for `click` on the menu and read the item's `value`.
  *
  * Slot: `trigger` (a Button). Unknown attributes go on the menu.
  */
@@ -33,7 +35,7 @@ export interface Props extends HTMLAttributes<"div"> {
 
 const { label, items, id: givenId, class: className, ...attributes } = Astro.props;
 
-const id = givenId || nextOverlayId("menu");
+const id = givenId || uniqueId("menu");
 
 if (!Array.isArray(items) || items.length === 0) {
   throw new Error(`DropdownMenu '${label}' needs at least one item.`);
@@ -56,7 +58,7 @@ if (!trigger) {
 
 <dropdown-menu>
   <Fragment set:html={trigger} />
-  <div {...attributes} id={id} popover="auto" role="menu" aria-label={label} class:list={["menu", className]}>
+  <div {...attributes} id={id} popover="auto" role="menu" aria-label={label} class:list={["menu", "popover-panel", className]}>
     {
       items.map(({ text, path, value, disabled }) => {
         const Item = path === undefined ? "button" : "a";
@@ -85,24 +87,10 @@ if (!trigger) {
     min-width: 12rem;
     max-width: calc(100vw - 2 * var(--space-sm));
     padding: 0.25rem;
-    border: 1px solid hsl(var(--color-on-background) / .15);
-    border-radius: var(--border);
-    background-color: hsl(var(--color-background));
-    color: hsl(var(--color-on-background));
-    box-shadow: 0 0.5rem 1.5rem hsl(var(--color-scrim) / .15);
   }
 
   .menu:popover-open {
     display: grid;
-  }
-
-  @supports (position-area: block-end) {
-    .menu {
-      inset: auto;
-      margin: 0.5rem 0;
-      position-area: block-end span-inline-end;
-      position-try-fallbacks: flip-block, flip-inline;
-    }
   }
 
   .menu-item {
@@ -130,24 +118,7 @@ if (!trigger) {
     cursor: not-allowed;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .menu:popover-open {
-      animation: menu-in 150ms ease-out;
-    }
-  }
-
-  @keyframes menu-in {
-    from {
-      opacity: 0;
-      transform: translateY(-0.25rem);
-    }
-  }
-
   @media (forced-colors: active) {
-    .menu {
-      border-color: CanvasText;
-    }
-
     .menu-item:focus-visible,
     .menu-item:hover {
       outline: 2px solid Highlight;
@@ -156,14 +127,14 @@ if (!trigger) {
 </style>
 
 <script>
-  import { anchorPopover, syncExpanded } from './popover';
+  import { connectPanel } from './popover';
 
   class DropdownMenu extends HTMLElement {
     connectedCallback() {
-      const menu = this.querySelector<HTMLElement>('[role="menu"]');
-      const trigger = menu && this.querySelector<HTMLElement>(`[popovertarget="${menu.id}"]`);
+      const connected = connectPanel(this, '[role="menu"]');
+      if (!connected) return;
 
-      if (!menu || !trigger) return;
+      const { panel: menu, trigger } = connected;
 
       const items = [...menu.querySelectorAll<HTMLElement>('[role="menuitem"]')];
 
@@ -172,9 +143,6 @@ if (!trigger) {
         menu.hidePopover();
         trigger.focus();
       };
-
-      anchorPopover(menu, trigger, 'bottom');
-      syncExpanded(menu, trigger);
 
       // Opening from the keyboard focuses at once: the toggle event comes later, after the next key may have moved focus.
       trigger.addEventListener('keydown', event => {
@@ -206,8 +174,11 @@ if (!trigger) {
         if (next !== undefined) {
           event.preventDefault();
           focusItem(next);
-        } else if (event.key === 'Tab' || event.key === 'Escape') {
+        } else if (event.key === 'Escape') {
           event.preventDefault();
+          close();
+        } else if (event.key === 'Tab') {
+          // Closes the menu and lets Tab move on from the trigger, to the next or previous element.
           close();
         } else if (event.key === ' ' && document.activeElement instanceof HTMLAnchorElement) {
           event.preventDefault();

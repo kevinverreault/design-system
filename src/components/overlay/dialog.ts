@@ -22,9 +22,14 @@ export class DialogTrigger extends HTMLElement {
     button.addEventListener('click', () => {
       if (dialog.open) return;
       if (!supportsCommands()) dialog.showModal();
-      dialog.addEventListener('close', () => button.focus(), { once: true });
+      returnFocusOnClose(dialog, button);
     });
   }
+}
+
+/** Moves focus back to `opener` when `dialog` next closes. */
+export function returnFocusOnClose(dialog: HTMLDialogElement, opener: HTMLElement) {
+  dialog.addEventListener('close', () => opener.focus(), { once: true });
 }
 
 let lightDismissInstalled = false;

@@ -3,7 +3,8 @@ import '../../styles/global.css'
 import { cva } from 'cva';
 import type { HTMLAttributes } from "astro/types";
 import Label from './Label.astro';
-import { nextFieldId, wireControl } from './wire-control';
+import { uniqueId } from '../../lib/unique-id';
+import { wireControl } from './wire-control';
 
 const formField = cva("form-field", {
   variants: {
@@ -32,7 +33,7 @@ export interface Props extends HTMLAttributes<"div"> {
 
 const { label, hint, error, class: className, ...attributes } = Astro.props;
 
-const base = nextFieldId();
+const base = uniqueId("field");
 const ids = { control: `${base}-control`, label: `${base}-label`, hint: `${base}-hint`, error: `${base}-error` };
 
 const control = wireControl(await Astro.slots.render("default"), {

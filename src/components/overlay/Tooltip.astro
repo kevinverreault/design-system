@@ -1,33 +1,25 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
 import type { HTMLAttributes } from "astro/types";
-import { nextOverlayId, wireTrigger } from './wire-trigger';
-
-const tooltip = cva("tooltip", {
-  variants: {
-    placement: {
-      top: "placement-top",
-      bottom: "placement-bottom"
-    }
-  }
-});
+import { uniqueId } from '../../lib/unique-id';
+import { wireTrigger } from './wire-trigger';
 
 /**
  * A short label that shows on hover and on keyboard focus, so that an
  * icon-only Button can explain itself. The trigger (the default slot) is
  * described by the tooltip through aria-describedby; the tooltip is a
- * `role="tooltip"` popover. Escape hides it, and it stays open while hovered.
+ * `role="tooltip"` popover. It sits above the trigger, or below when there is
+ * no room above. Escape hides it, and it stays open while hovered.
  *
  * Unknown attributes go on the tooltip.
  */
-export interface Props extends HTMLAttributes<"div">, VariantProps<typeof tooltip> {
+export interface Props extends HTMLAttributes<"div"> {
   text: string;
 }
 
-const { text, placement = "top", id: givenId, class: className, ...attributes } = Astro.props;
+const { text, id: givenId, class: className, ...attributes } = Astro.props;
 
-const id = givenId || nextOverlayId("tooltip");
+const id = givenId || uniqueId("tooltip");
 
 if (typeof text !== "string" || text.trim() === "") {
   throw new Error(`Tooltip '${id}' needs non-empty text.`);
@@ -42,9 +34,9 @@ if (!trigger) {
 }
 ---
 
-<tool-tip data-placement={placement}>
+<tool-tip>
   <Fragment set:html={trigger} />
-  <div {...attributes} id={id} popover="manual" role="tooltip" class:list={[tooltip({ placement }), className]}>{text}</div>
+  <div {...attributes} id={id} popover="manual" role="tooltip" class:list={["tooltip", className]}>{text}</div>
 </tool-tip>
 
 <style>
@@ -54,6 +46,7 @@ if (!trigger) {
 
   .tooltip {
     max-width: min(16rem, calc(100vw - 2 * var(--space-sm)));
+    margin: var(--space-xs) 0;
     padding: 0.375em 0.625em;
     border: 0;
     border-radius: calc(var(--border) / 2);
@@ -66,17 +59,8 @@ if (!trigger) {
   @supports (position-area: block-start) {
     .tooltip {
       inset: auto;
-      position-try-fallbacks: flip-block;
-    }
-
-    .placement-top {
-      margin: 0 0 0.5rem;
       position-area: block-start;
-    }
-
-    .placement-bottom {
-      margin: 0.5rem 0 0;
-      position-area: block-end;
+      position-try-fallbacks: flip-block;
     }
   }
 
@@ -98,7 +82,7 @@ if (!trigger) {
 </style>
 
 <script>
-  import { anchorPopover, type Placement } from './popover';
+  import { anchorPopover } from './popover';
 
   /** Delay before hiding, so the pointer can cross from the trigger to the tooltip. */
   const HIDE_DELAY = 100;
@@ -128,7 +112,7 @@ if (!trigger) {
         if (event.key === 'Escape') hide();
       };
 
-      anchorPopover(tip, trigger, (this.dataset.placement ?? 'top') as Placement);
+      anchorPopover(tip, trigger, 'top');
 
       trigger.addEventListener('pointerenter', show);
       trigger.addEventListener('pointerleave', hideSoon);

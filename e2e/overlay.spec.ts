@@ -1,16 +1,5 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
-
-/** Opens a dialog from its trigger and checks it is shown as a modal. */
-async function openFrom(page: Page, triggerId: string, dialogId: string) {
-  const trigger = page.locator(`#${triggerId}`);
-  const dialog = page.locator(`#${dialogId}`);
-
-  await trigger.click();
-  await expect(dialog).toBeVisible();
-  expect(await dialog.evaluate(element => element.matches(':modal'))).toBe(true);
-
-  return { trigger, dialog };
-}
+import { expect, test, type Page } from '@playwright/test';
+import { centre, expectAnchored, scrollToTop, openFrom } from './overlay-helpers';
 
 test.describe('Dialog', () => {
   test('opens from its trigger, closes on Escape and returns focus to the trigger', async ({ page }) => {
@@ -45,6 +34,25 @@ test.describe('Dialog', () => {
     await dialog.getByRole('button', { name: 'Add to cart' }).click();
     await expect(dialog).toBeHidden();
     expect(await dialog.evaluate((element: HTMLDialogElement) => element.returnValue)).toBe('order');
+  });
+});
+
+test.describe('Dialog sizes', () => {
+  test('grow from small to large', async ({ page }) => {
+    await page.goto('/#dialog');
+
+    const widths: number[] = [];
+    for (const size of ['small', 'medium', 'large']) {
+      const dialog = page.locator(`#dialog-${size}`);
+      await page.locator(`[commandfor="dialog-${size}"]`).click();
+      await expect(dialog).toBeVisible();
+      widths.push((await dialog.boundingBox())!.width);
+      await page.keyboard.press('Escape');
+      await expect(dialog).toBeHidden();
+    }
+
+    expect(widths[0]).toBeLessThan(widths[1]);
+    expect(widths[1]).toBeLessThan(widths[2]);
   });
 });
 
@@ -160,24 +168,6 @@ test.describe('Lightbox', () => {
   });
 });
 
-/** Scrolls `trigger` to the middle of the viewport, so that its popover has room on both sides and doesn't flip. */
-async function centre(trigger: Locator) {
-  await trigger.evaluate(element => element.scrollIntoView({ block: 'center' }));
-}
-
-/** Checks that `popover` sits just below (or above) `trigger` and overlaps it horizontally. */
-async function expectAnchored(trigger: Locator, popover: Locator, side: 'below' | 'above') {
-  await popover.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)));
-  const anchor = (await trigger.boundingBox())!;
-  const box = (await popover.boundingBox())!;
-  const gap = side === 'below' ? box.y - (anchor.y + anchor.height) : anchor.y - (box.y + box.height);
-
-  expect(gap).toBeGreaterThanOrEqual(0);
-  expect(gap).toBeLessThan(16);
-  expect(box.x).toBeLessThanOrEqual(anchor.x + anchor.width);
-  expect(box.x + box.width).toBeGreaterThanOrEqual(anchor.x);
-}
-
 test.describe('Popover', () => {
   test('opens below its trigger and closes on a second click', async ({ page }) => {
     await page.goto('/#popover');
@@ -286,6 +276,21 @@ test.describe('DropdownMenu', () => {
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
+  test('closes on Tab and moves focus on from its trigger', async ({ page }) => {
+    const { trigger, menu, items } = await setUp(page);
+
+    await trigger.click();
+    await expect(items.first()).toBeFocused();
+    await page.keyboard.press('Tab');
+
+    await expect(menu).toBeHidden();
+    await expect(trigger).not.toBeFocused();
+    expect(await trigger.evaluate(element => {
+      const focused = document.activeElement!;
+      return focused !== document.body && Boolean(element.compareDocumentPosition(focused) & Node.DOCUMENT_POSITION_FOLLOWING);
+    })).toBe(true);
+  });
+
   test('runs an item with Enter, then closes', async ({ page }) => {
     const { trigger, menu } = await setUp(page);
 
@@ -351,11 +356,11 @@ test.describe('Tooltip', () => {
     await expect(tooltip).toBeHidden();
   });
 
-  test('can sit below its trigger', async ({ page }) => {
+  test('flips below its trigger when there is no room above', async ({ page }) => {
     await page.goto('/#tooltip');
 
     const trigger = page.locator('#tooltip-x-twitter-trigger');
-    await centre(trigger);
+    await scrollToTop(trigger);
     await trigger.hover();
 
     await expectAnchored(trigger, page.locator('#tooltip-x-twitter'), 'below');

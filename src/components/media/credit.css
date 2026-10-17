@@ -1,0 +1,28 @@
+/*
+ * The credit band across the bottom edge of a photo, shared by Image and
+ * Lightbox; its figure must be positioned. It reads against the photo, not
+ * the page, so it uses the theme-independent scrim tones in both themes.
+ * Light text over a 60% scrim on a pure-white photo gives about 5.7:1 contrast.
+ */
+.image-credit {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 0.375em 0.75em;
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  color: hsl(var(--color-on-scrim));
+  background-color: hsl(var(--color-scrim) / 0.6);
+}
+
+.image-credit a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+@media (forced-colors: active) {
+  .image-credit {
+    color: CanvasText;
+    background-color: Canvas;
+  }
+}

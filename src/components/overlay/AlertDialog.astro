@@ -30,8 +30,8 @@ if (typeof actionLabel !== "string" || actionLabel.trim() === "") {
 ---
 
 <DialogBase {...attributes} role="alertdialog" lightDismiss={false} closeLabel={false}>
-  {Astro.slots.has("trigger") && <slot name="trigger" slot="trigger" />}
-  {Astro.slots.has("default") && <slot />}
+  <slot name="trigger" slot="trigger" />
+  <slot />
   <Fragment slot="footer">
     <Button variant="muted" value="cancel" autofocus>{cancelLabel}</Button>
     <Button variant={actionVariant} value="confirm">{actionLabel}</Button>

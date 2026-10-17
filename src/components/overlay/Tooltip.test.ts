@@ -30,14 +30,6 @@ describe('Tooltip', () => {
     expect(root.querySelector('button')?.getAttribute('aria-describedby')).toBe('hint tip');
   });
 
-  test('sits above its trigger by default, or below', async () => {
-    const above = (await renderTooltip()).querySelector('[role="tooltip"]')!;
-    const below = (await renderTooltip({ placement: 'bottom' })).querySelector('[role="tooltip"]')!;
-
-    expect(above.classList.contains('placement-top')).toBe(true);
-    expect(below.classList.contains('placement-bottom')).toBe(true);
-  });
-
   test('fails without a trigger element', async () => {
     await expect(renderTooltip({}, 'Just text')).rejects.toThrow(/element/);
   });

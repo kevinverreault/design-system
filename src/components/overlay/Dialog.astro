@@ -16,7 +16,7 @@ export interface Props extends Omit<DialogBaseProps, "lightDismiss" | "side" | "
 ---
 
 <DialogBase {...Astro.props} lightDismiss>
-  {Astro.slots.has("trigger") && <slot name="trigger" slot="trigger" />}
-  {Astro.slots.has("default") && <slot />}
-  {Astro.slots.has("footer") && <slot name="footer" slot="footer" />}
+  <slot name="trigger" slot="trigger" />
+  <slot />
+  <slot name="footer" slot="footer" />
 </DialogBase>

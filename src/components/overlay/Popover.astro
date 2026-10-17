@@ -1,7 +1,9 @@
 ---
 import '../../styles/global.css'
+import './popover.css'
 import type { HTMLAttributes } from "astro/types";
-import { nextOverlayId, wireTrigger } from './wire-trigger';
+import { uniqueId } from '../../lib/unique-id';
+import { wireTrigger } from './wire-trigger';
 
 /**
  * A small panel of extra content, anchored below its trigger. It uses the
@@ -19,7 +21,7 @@ export interface Props extends HTMLAttributes<"div"> {
 
 const { label, id: givenId, class: className, ...attributes } = Astro.props;
 
-const id = givenId || nextOverlayId("popover");
+const id = givenId || uniqueId("popover");
 
 if (typeof label !== "string" || label.trim() === "") {
   throw new Error(`Popover '${id}' needs a non-empty label: it is the panel's accessible name.`);
@@ -36,7 +38,7 @@ if (!trigger) {
 
 <popover-root>
   <Fragment set:html={trigger} />
-  <div {...attributes} id={id} popover="auto" role="dialog" aria-label={label} class:list={["popover", className]}>
+  <div {...attributes} id={id} popover="auto" role="dialog" aria-label={label} class:list={["popover", "popover-panel", className]}>
     <slot />
   </div>
 </popover-root>
@@ -50,54 +52,15 @@ if (!trigger) {
     width: max-content;
     max-width: min(20rem, calc(100vw - 2 * var(--space-sm)));
     padding: var(--space-sm);
-    border: 1px solid hsl(var(--color-on-background) / .15);
-    border-radius: var(--border);
-    background-color: hsl(var(--color-background));
-    color: hsl(var(--color-on-background));
-    box-shadow: 0 0.5rem 1.5rem hsl(var(--color-scrim) / .15);
-  }
-
-  @supports (position-area: block-end) {
-    .popover {
-      inset: auto;
-      margin: 0.5rem 0;
-      position-area: block-end span-inline-end;
-      position-try-fallbacks: flip-block, flip-inline;
-    }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .popover:popover-open {
-      animation: popover-in 150ms ease-out;
-    }
-  }
-
-  @keyframes popover-in {
-    from {
-      opacity: 0;
-      transform: translateY(-0.25rem);
-    }
-  }
-
-  @media (forced-colors: active) {
-    .popover {
-      border-color: CanvasText;
-    }
   }
 </style>
 
 <script>
-  import { anchorPopover, syncExpanded } from './popover';
+  import { connectPanel } from './popover';
 
   class PopoverRoot extends HTMLElement {
     connectedCallback() {
-      const panel = this.querySelector<HTMLElement>('[popover]');
-      const trigger = panel && this.querySelector<HTMLElement>(`[popovertarget="${panel.id}"]`);
-
-      if (!panel || !trigger) return;
-
-      anchorPopover(panel, trigger, 'bottom');
-      syncExpanded(panel, trigger);
+      connectPanel(this, '[popover]');
     }
   }
 
