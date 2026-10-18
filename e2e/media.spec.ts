@@ -11,6 +11,23 @@ test.describe('Image', () => {
     }
   });
 
+  test('reserves the height of an image without a ratio before its file loads', async ({ page }) => {
+    // Stall every image request, so that the layout is the one before any file arrives.
+    await page.route('**/*', route => route.request().resourceType() === 'image' ? new Promise(() => {}) : route.continue());
+    await page.goto('/#image');
+
+    for (const id of ['#image-local', '#image-remote']) {
+      const img = page.locator(`${id} img`);
+      const { width, height, ratio } = await img.evaluate((element: HTMLImageElement) => ({
+        ...element.getBoundingClientRect().toJSON(),
+        ratio: Number(element.getAttribute('width')) / Number(element.getAttribute('height')),
+      }));
+
+      expect(await img.evaluate((element: HTMLImageElement) => element.complete)).toBe(false);
+      expect(height).toBeCloseTo(width / ratio, 0);
+    }
+  });
+
   test('lays the credit band across the bottom edge of the image', async ({ page }) => {
     await page.goto('/#image');
 
