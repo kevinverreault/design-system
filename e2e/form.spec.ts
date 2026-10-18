@@ -1,5 +1,6 @@
 import { expect, test, type Locator } from '@playwright/test';
 import { chevron } from './form-helpers';
+import { useTheme } from './page-helpers';
 
 const height = (locator: Locator) => locator.evaluate(element => element.getBoundingClientRect().height);
 
@@ -197,8 +198,7 @@ test.describe('Form controls', () => {
     await page.goto('/#select');
     test.skip(!(await page.evaluate(() => CSS.supports('appearance', 'base-select'))), 'no customisable select: the native popup follows color-scheme');
 
-    await page.locator('theme-toggle button').click();
-    await expect(page.locator('html')).toHaveClass(/theme-dark/);
+    await useTheme(page, 'dark');
 
     const select = page.locator('#select-default select');
     await select.click();
@@ -217,6 +217,7 @@ test.describe('Form controls', () => {
 
   test('controls switch colours with the theme', async ({ page }) => {
     await page.goto('/#input');
+    await useTheme(page, 'light');
 
     const input = page.locator('#input-default').getByRole('textbox', { name: 'Name' });
     const colours = () => input.evaluate(element => {
@@ -226,8 +227,7 @@ test.describe('Form controls', () => {
 
     const light = await colours();
 
-    await page.locator('theme-toggle button').click();
-    await expect(page.locator('html')).toHaveClass(/theme-dark/);
+    await useTheme(page, 'dark');
 
     await expect.poll(colours).not.toBe(light);
   });
