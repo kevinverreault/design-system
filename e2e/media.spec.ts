@@ -14,10 +14,14 @@ test.describe('Image', () => {
   test('reserves the height of an image without a ratio before its file loads', async ({ page }) => {
     // Stall every image request, so that the layout is the one before any file arrives.
     await page.route('**/*', route => route.request().resourceType() === 'image' ? new Promise(() => {}) : route.continue());
-    await page.goto('/#image');
+    // Stalled images can hold back the load event (WebKit does), so wait for the document only.
+    await page.goto('/#image', { waitUntil: 'domcontentloaded' });
 
     for (const id of ['#image-local', '#image-remote']) {
       const img = page.locator(`${id} img`);
+      // The Image styles apply: the img fills its figure instead of taking its width attribute.
+      await expect.poll(() => img.evaluate(element => element.getBoundingClientRect().width === element.parentElement!.getBoundingClientRect().width)).toBe(true);
+
       const { width, height, ratio } = await img.evaluate((element: HTMLImageElement) => ({
         ...element.getBoundingClientRect().toJSON(),
         ratio: Number(element.getAttribute('width')) / Number(element.getAttribute('height')),
