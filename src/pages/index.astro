@@ -85,7 +85,8 @@ const responsiveDusk = { thumbnail: dusk, href: duskFullSize.src, srcset: duskFu
 const captionedPhotos: { thumbnail: typeof dusk | string, href: string, srcset?: string, sizes?: string, alt: string, caption?: string, credit?: string }[] = [
   { ...responsiveDusk, alt: "Hills under an orange sky", caption: "The last light over the hills, an hour after sunset.", credit: "Kevin Verreault 2024" },
   { thumbnail: "/images/snow.jpg", href: "/images/snow.jpg", alt: "A snowfield", caption: "Fresh snow under a white winter sky." },
-  { ...responsiveDusk, alt: "A ridge line at dusk", credit: "Kevin Verreault 2023" }
+  { ...responsiveDusk, alt: "A ridge line at dusk", credit: "Kevin Verreault 2023" },
+  { thumbnail: "/images/snow.jpg", href: "/images/snow.jpg", alt: "Tracks across a snowfield", credit: "Kevin Verreault 2022", caption: "A morning after the first big storm of the winter. The wind had packed the snow hard enough to walk on, and a fox had crossed the field before dawn, its tracks running straight to the treeline and back. I waited for the clouds to thin so the light would lift the edges of each print without casting hard shadows, then took a few frames before the sun came through and flattened everything again. By noon the field was soft, the tracks had blurred into shallow dips, and the snow had the same dull white as the sky. This frame is the second of five; the others are a little too early, when the field was still blue, or a little too late, when the first shadows came in from the treeline. It hangs in the hallway at home, printed on matte cotton paper that keeps the whites from glaring." }
 ];
 
 const alerts = [
@@ -776,7 +777,7 @@ const footerSocial = [
 
       <h3 class="numbered-title">Captioned, responsive photos</h3>
 
-      <p>A site gallery with its own layout opens in the same Lightbox through the <code>gallery-open</code> contract. Its links can also carry a <code>srcset</code> and <code>sizes</code> for the full-size photo, and a caption that shows under it.</p>
+      <p>A site gallery with its own layout opens in the same Lightbox through the <code>gallery-open</code> contract. Its links can also carry a <code>srcset</code> and <code>sizes</code> for the full-size photo, and a caption that shows under it. A caption longer than three lines scrolls, and Tab reaches it to scroll it with the keyboard.</p>
 
       <ul data-gallery id="lightbox-captioned" class="demo-host-gallery" role="list" aria-label="Paysages légendés">
         {

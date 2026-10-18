@@ -220,6 +220,11 @@ test.describe('Lightbox', () => {
     await expect(lightbox.locator('figcaption')).toHaveText('© Kevin Verreault 2023');
 
     await page.keyboard.press('ArrowRight');
+    await expect(image).toHaveAttribute('alt', 'Tracks across a snowfield');
+    await expect(caption).toHaveText(/^A morning after the first big storm/);
+    await expect(credit).toHaveText('© Kevin Verreault 2022');
+
+    await page.keyboard.press('ArrowRight');
     await expect(image).toHaveAttribute('alt', 'Hills under an orange sky');
     await expect(caption).toHaveText('The last light over the hills, an hour after sunset.');
     await expect(credit).toHaveText('© Kevin Verreault 2024');
@@ -250,6 +255,98 @@ test.describe('Lightbox', () => {
       expect(Math.round(dialog.y + dialog.height)).toBeLessThanOrEqual(viewport.height);
     });
   }
+
+  test('gives a caption that overflows a tab stop, to scroll it with the keyboard', async ({ page }) => {
+    await page.goto('/#lightbox');
+
+    const lightbox = page.locator('#lightbox-demo');
+    const image = lightbox.locator('figure img');
+    const caption = lightbox.locator('.lightbox-caption');
+
+    await page.locator('#lightbox-captioned a').nth(3).click();
+    await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth)).toBeGreaterThan(0);
+    expect(await caption.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true);
+    await expect(caption).toHaveAttribute('tabindex', '0');
+
+    await expect(lightbox.getByRole('button', { name: 'Close' })).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(caption).toBeFocused();
+    await expect(caption).toHaveCSS('outline-style', 'solid');
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await expect.poll(() => caption.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+    await expect(image).toHaveAttribute('alt', 'Tracks across a snowfield');
+  });
+
+  test('leaves a caption that fits out of the tab order', async ({ page }) => {
+    await page.goto('/#lightbox');
+
+    const lightbox = page.locator('#lightbox-demo');
+    const image = lightbox.locator('figure img');
+    const caption = lightbox.locator('.lightbox-caption');
+
+    await page.locator('#lightbox-captioned a').nth(0).click();
+    await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth)).toBeGreaterThan(0);
+    await expect(caption).not.toHaveAttribute('tabindex');
+
+    await expect(lightbox.getByRole('button', { name: 'Close' })).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(lightbox.getByRole('button', { name: 'Previous photo' })).toBeFocused();
+  });
+
+  test('re-checks whether a caption overflows when the viewport resizes', async ({ page }) => {
+    await page.goto('/#lightbox');
+
+    const lightbox = page.locator('#lightbox-demo');
+    const image = lightbox.locator('figure img');
+    const caption = lightbox.locator('.lightbox-caption');
+
+    await page.locator('#lightbox-captioned a').nth(0).click();
+    await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth)).toBeGreaterThan(0);
+    await expect(caption).not.toHaveAttribute('tabindex');
+
+    // A photo narrowed to a few words a line pushes the caption past three lines.
+    const viewport = page.viewportSize()!;
+    await page.setViewportSize({ width: 120, height: viewport.height });
+    await expect(caption).toHaveAttribute('tabindex', '0');
+
+    await page.setViewportSize(viewport);
+    await expect(caption).not.toHaveAttribute('tabindex');
+  });
+
+  test('keeps focus in the viewer when moving from a focused caption', async ({ page }) => {
+    await page.goto('/#lightbox');
+
+    const lightbox = page.locator('#lightbox-demo');
+    const image = lightbox.locator('figure img');
+    const caption = lightbox.locator('.lightbox-caption');
+
+    await page.locator('#lightbox-captioned a').nth(3).click();
+    await expect(caption).toHaveAttribute('tabindex', '0');
+    await page.keyboard.press('Tab');
+    await expect(caption).toBeFocused();
+
+    // The next photo's caption fits: it holds focus until Tab moves on, then leaves the tab order.
+    await page.keyboard.press('ArrowRight');
+    await expect(image).toHaveAttribute('alt', 'Hills under an orange sky');
+    await expect(caption).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(lightbox.getByRole('button', { name: 'Previous photo' })).toBeFocused();
+    await expect(caption).not.toHaveAttribute('tabindex');
+
+    // A photo without a caption hands focus to the close button, where it starts when the viewer opens.
+    await page.keyboard.press('Shift+Tab');
+    await expect(lightbox.getByRole('button', { name: 'Close' })).toBeFocused();
+    await page.keyboard.press('ArrowLeft');
+    await expect(image).toHaveAttribute('alt', 'Tracks across a snowfield');
+    await expect(caption).toHaveAttribute('tabindex', '0');
+    await page.keyboard.press('Tab');
+    await expect(caption).toBeFocused();
+    await page.keyboard.press('ArrowLeft');
+    await expect(image).toHaveAttribute('alt', 'A ridge line at dusk');
+    await expect(lightbox.getByRole('button', { name: 'Close' })).toBeFocused();
+  });
 
   test('closes on Escape and returns focus to the image that opened it', async ({ page }) => {
     await page.goto('/#gallery');

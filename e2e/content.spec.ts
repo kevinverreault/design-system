@@ -102,7 +102,7 @@ test.describe('Gallery', () => {
     await link.click();
 
     const images = await page.evaluate(() => (window as any).opened);
-    expect(images).toHaveLength(3);
+    expect(images).toHaveLength(4);
     expect(images[0]).toMatchObject({
       alt: 'Hills under an orange sky',
       srcset: await link.getAttribute('data-srcset'),

@@ -15,7 +15,9 @@ import DialogClose from '../overlay/DialogClose.astro';
  * a click outside close it.
  * An image whose detail has a `srcset` and `sizes` loads the width the
  * browser picks; one with a `caption` shows it under the photo, below the
- * credit. A caption longer than three lines scrolls.
+ * credit. A caption longer than three lines scrolls, and takes a tab stop
+ * so a keyboard can scroll it: Safari does not focus scroll containers, and
+ * the left and right arrows belong to the viewer.
  *
  * Without JavaScript, or without a Lightbox, a Gallery image is a plain link
  * to the full-size photo.
@@ -102,6 +104,11 @@ const {
     padding-top: var(--space-xs);
     font-size: var(--fs-sm);
     line-height: 1.4;
+  }
+
+  .lightbox-figure :global(.lightbox-caption:focus-visible) {
+    outline: 2px solid hsl(var(--color-on-scrim));
+    outline-offset: 2px;
   }
 
   .lightbox-control,
@@ -196,6 +203,8 @@ const {
     dialog!: HTMLDialogElement;
     images: GalleryImageDetail[] = [];
     index = 0;
+    // The caption's width follows the photo's, so it can start or stop overflowing when the photo loads or the viewport resizes.
+    captionObserver = new ResizeObserver(entries => entries.forEach(entry => this.fitCaption(entry.target as HTMLElement)));
 
     connectedCallback() {
       this.dialog = this.querySelector('dialog')!;
@@ -217,6 +226,7 @@ const {
 
     disconnectedCallback() {
       document.removeEventListener(GALLERY_OPEN_EVENT, this.onGalleryOpen);
+      this.captionObserver.disconnect();
     }
 
     onGalleryOpen = (event: GalleryOpenEvent) => {
@@ -251,6 +261,8 @@ const {
       }
 
       const figure = this.querySelector('[data-lightbox-figure]')!;
+      const hadFocus = figure.contains(document.activeElement);
+      this.captionObserver.disconnect();
       figure.replaceChildren(image);
 
       // A figure has one figcaption: the caption when there is one, otherwise the credit.
@@ -265,9 +277,29 @@ const {
         const captionElement = document.createElement('figcaption');
         captionElement.className = 'lightbox-caption';
         captionElement.textContent = caption;
+        captionElement.addEventListener('blur', () => this.fitCaption(captionElement));
         figure.append(captionElement);
+        this.captionObserver.observe(captionElement);
+      }
+
+      // Stepping from a focused caption keeps focus on the new caption, or else where it starts when the viewer opens.
+      if (hadFocus) {
+        const captionElement = figure.querySelector<HTMLElement>('.lightbox-caption');
+        if (captionElement) captionElement.tabIndex = 0;
+        (captionElement ?? this.querySelector<HTMLElement>('.lightbox-close')!).focus();
       }
       this.querySelector('[data-lightbox-counter]')!.textContent = count > 1 ? `${this.index + 1} / ${count}` : '';
+    }
+
+    /**
+     * Gives a caption a tab stop only while it overflows. A focused caption
+     * keeps it until blur, so focus never drops out of the viewer.
+     */
+    fitCaption(caption: HTMLElement) {
+      if (caption === document.activeElement) return;
+
+      if (caption.scrollHeight > caption.clientHeight) caption.tabIndex = 0;
+      else caption.removeAttribute('tabindex');
     }
   }
 
