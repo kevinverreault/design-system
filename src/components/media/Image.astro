@@ -102,16 +102,21 @@ const widths = isRemote
   .image img {
     width: 100%;
     height: auto;
-    aspect-ratio: var(--image-ratio, auto);
     object-fit: var(--image-fit);
   }
 
-  .ratio-1-1 { --image-ratio: 1 / 1; }
-  .ratio-3-2 { --image-ratio: 3 / 2; }
-  .ratio-2-3 { --image-ratio: 2 / 3; }
-  .ratio-4-3 { --image-ratio: 4 / 3; }
-  .ratio-3-4 { --image-ratio: 3 / 4; }
-  .ratio-16-9 { --image-ratio: 16 / 9; }
+  /*
+   * Only a set ratio declares aspect-ratio. Without one, the img keeps the
+   * `auto W / H` ratio the browser maps from its width and height attributes,
+   * so it holds its height before the file loads; a plain `auto` would leave
+   * it 0px tall until then.
+   */
+  .ratio-1-1 img { aspect-ratio: 1 / 1; }
+  .ratio-3-2 img { aspect-ratio: 3 / 2; }
+  .ratio-2-3 img { aspect-ratio: 2 / 3; }
+  .ratio-4-3 img { aspect-ratio: 4 / 3; }
+  .ratio-3-4 img { aspect-ratio: 3 / 4; }
+  .ratio-16-9 img { aspect-ratio: 16 / 9; }
 
   .fit-cover { --image-fit: cover; }
   .fit-contain { --image-fit: contain; }
