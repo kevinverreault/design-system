@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { centre, expectAnchored, scrollToTop, openFrom } from './overlay-helpers';
+import { centre, clickInPlace, expectAnchored, hoverInPlace, scrollToTop, openFrom } from './overlay-helpers';
 
 /*
  * The browsers under test support invoker commands, `closedby` and CSS anchor
@@ -92,7 +92,7 @@ test.describe('Without CSS anchor positioning', () => {
 
     await page.keyboard.press('Escape');
     await trigger.evaluate(element => element.scrollIntoView({ block: 'end' }));
-    await trigger.click();
+    await clickInPlace(trigger);
     await expectAnchored(trigger, menu, 'above');
   });
 
@@ -108,7 +108,7 @@ test.describe('Without CSS anchor positioning', () => {
     await page.mouse.move(5, 5);
     await expect(tooltip).toBeHidden();
     await scrollToTop(trigger);
-    await trigger.hover();
+    await hoverInPlace(trigger);
     await expectAnchored(trigger, tooltip, 'below');
   });
 });

@@ -50,7 +50,9 @@ Info and success toasts are announced politely; warning and danger toasts interr
 
 ## Testing
 
-Before the first browser test run, install the browsers with `npx playwright install chromium webkit`.
+The browser tests run in Chromium, WebKit and Firefox. Before the first run, install Playwright's Chromium and WebKit with `npx playwright install chromium webkit`.
+
+Firefox is the one installed on the machine, driven over WebDriver BiDi (Playwright's `moz-firefox` channel), as Playwright's own Firefox build does not run everywhere. Install a current Firefox; to run without it, pass `--project=chromium --project=webkit`.
 
 ## Dependencies
 

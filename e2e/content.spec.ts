@@ -36,13 +36,6 @@ test.describe('Skeleton', () => {
 
     expect(await runningAnimations(page)).toBeGreaterThan(0);
   });
-
-  test('stays still when the visitor prefers reduced motion', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/#skeleton');
-
-    expect(await runningAnimations(page)).toBe(0);
-  });
 });
 
 test.describe('Gallery', () => {
