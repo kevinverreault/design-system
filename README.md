@@ -54,9 +54,16 @@ The browser tests run in Chromium, WebKit and Firefox. Before the first run, ins
 
 Firefox is the one installed on the machine, driven over WebDriver BiDi (Playwright's `moz-firefox` channel), as Playwright's own Firefox build does not run everywhere. Install a current Firefox; to run without it, pass `--project=chromium --project=webkit`.
 
-## Dependencies
+## Using as a git submodule
+
+The host Astro project imports components from source and compiles them, so their imports resolve from the host's `node_modules`. Install these in the host:
 
 ```bash
-npm i cva@npm:class-variance-authority
-npm install --save-dev node-html-parser
+npm i cva@npm:class-variance-authority node-html-parser
 ```
+
+- `cva` must be this alias: components import `'cva'` but use class-variance-authority's API. The npm package actually named `cva` has a different, incompatible API.
+- `node-html-parser` is used by `Icon` at build time.
+- `Icon` loads SVGs from the host's `src/svg/` (the glob is root-relative).
+
+Working on the design system itself needs only `npm install`.
