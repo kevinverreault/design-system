@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { settleLayout } from './page-helpers';
+import { settleLayout, useTheme } from './page-helpers';
 
 /** The showcase container's flow spacing between its sections, in pixels: --flow-space: 2rem. */
 const FLOW_SPACE = 32;
@@ -11,10 +11,7 @@ const themes = ['light', 'dark'] as const;
 async function open(page: Page, viewport: { width: number, height: number }, theme: typeof themes[number]) {
   await page.setViewportSize(viewport);
   await page.goto('/');
-  if (theme === 'dark') {
-    await page.locator('theme-toggle button').click();
-    await expect(page.locator('html')).toHaveClass(/theme-dark/);
-  }
+  await useTheme(page, theme);
   await settleLayout(page);
 }
 

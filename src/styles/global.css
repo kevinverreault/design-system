@@ -1,14 +1,16 @@
 :root {
-  --color-primary-h: 356;
-  --color-primary-s: 29%;
-  --color-primary-l: 35%;
+  /* Sauge */
+  --color-primary-h: 95;
+  --color-primary-s: 20%;
+  --color-primary-l: 38%;
   --color-primary: var(--color-primary-h) var(--color-primary-s) var(--color-primary-l);
   --color-primary-variant: var(--color-primary-h) var(--color-primary-s) calc(var(--color-primary-l) - 10%);
   --color-on-primary: 0 0% 100%;
 
-  --color-secondary-h: 177;
-  --color-secondary-s: 28%;
-  --color-secondary-l: 37%;
+  /* Terracotta */
+  --color-secondary-h: 13;
+  --color-secondary-s: 50%;
+  --color-secondary-l: 45%;
   --color-secondary: var(--color-secondary-h) var(--color-secondary-s) var(--color-secondary-l);
   --color-secondary-variant: var(--color-secondary-h) var(--color-secondary-s) calc(var(--color-secondary-l) - 10%);
   --color-on-secondary: 0 0% 100%;

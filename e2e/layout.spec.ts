@@ -1,4 +1,5 @@
 import { expect, test, type Locator } from '@playwright/test';
+import { useTheme } from './page-helpers';
 
 async function columnsOf(row: Locator) {
   const boxes = await row.locator('.pane').evaluateAll(panes =>
@@ -35,6 +36,7 @@ test.describe('Row', () => {
 test.describe('Theme', () => {
   test('switches Row backgrounds but keeps the Image credit band', async ({ page }) => {
     await page.goto('/');
+    await useTheme(page, 'light');
 
     const band = page.locator('#row-surface');
     const credit = page.locator('#image figcaption').first();
@@ -43,8 +45,7 @@ test.describe('Theme', () => {
     const lightBand = await background(band);
     const lightCredit = await background(credit);
 
-    await page.locator('theme-toggle button').click();
-    await expect(page.locator('html')).toHaveClass(/theme-dark/);
+    await useTheme(page, 'dark');
 
     await expect.poll(() => background(band)).not.toBe(lightBand);
     expect(await background(credit)).toBe(lightCredit);
