@@ -20,6 +20,32 @@ const thumbPosition = (locator: Locator) => locator.evaluate(element => {
   return { start: start / width, centre: (start + thumbWidth / 2) / width, end: (start + thumbWidth) / width };
 });
 
+/**
+ * A Select's chevron: how far it has turned, in degrees, how the turn is
+ * animated, and whether it is drawn at all. It is the picker icon of a
+ * customisable select and the wrapper's ::after elsewhere.
+ */
+const chevron = (select: Locator) => select.evaluate(element => {
+  const customisable = CSS.supports('appearance', 'base-select');
+  const style = customisable
+    ? getComputedStyle(element, '::picker-icon')
+    : getComputedStyle(element.parentElement!, '::after');
+  // Transition lists repeat to the length of transition-property, so pick the entry for rotate.
+  const index = style.transitionProperty.split(', ').findIndex(property => property === 'rotate' || property === 'all');
+  const forRotate = (list: string) => {
+    const entries = list.split(', ');
+    return entries[index % entries.length];
+  };
+
+  return {
+    turn: style.rotate === 'none' ? 0 : parseFloat(style.rotate),
+    transition: index === -1 ? 'none' : `${forRotate(style.transitionDuration)} ${forRotate(style.transitionTimingFunction)}`,
+    drawn: customisable ? getComputedStyle(element).appearance === 'base-select' : style.content !== 'none',
+  };
+});
+
+const chevronTurn = async (select: Locator) => (await chevron(select)).turn;
+
 test.describe('Form controls', () => {
   for (const size of ['small', 'medium', 'large']) {
     test(`an Input, a Select and a Button of size ${size} are the same height`, async ({ page }) => {
@@ -122,6 +148,88 @@ test.describe('Form controls', () => {
 
     expect(await form.evaluate((element: HTMLFormElement) => element.checkValidity())).toBe(false);
     await expect(form.getByRole('textbox', { name: 'Name' })).toBeFocused();
+  });
+
+  test('a Select chevron turns over while the picker is open from a click, and back on a click outside', async ({ page }) => {
+    await page.goto('/#select');
+
+    const select = page.locator('#select-default select');
+    expect(await chevronTurn(select)).toBe(0);
+
+    await select.click();
+    await expect.poll(() => chevronTurn(select)).toBe(180);
+
+    await page.locator('#select > p').click();
+    await expect.poll(() => chevronTurn(select)).toBe(0);
+  });
+
+  test('a Select chevron turns over while the picker is open from the keyboard, and back on blur', async ({ page }) => {
+    await page.goto('/#select');
+
+    const select = page.locator('#select-default select');
+    await select.focus();
+    await page.keyboard.press('Space');
+    await expect.poll(() => chevronTurn(select)).toBe(180);
+
+    await page.keyboard.press('Tab');
+    await expect.poll(() => chevronTurn(select)).toBe(0);
+  });
+
+  for (const [close, how] of [['Escape', 'on Escape'], ['pick', 'on a pick']] as const) {
+    test(`a Select chevron turns back ${how}`, async ({ page, browserName }) => {
+      test.skip(browserName === 'firefox', "Firefox's picker is browser chrome, out of reach of synthetic input");
+      await page.goto('/#select');
+
+      const select = page.locator('#select-default select');
+      await select.click();
+      await expect.poll(() => chevronTurn(select)).toBe(180);
+
+      if (close === 'Escape') {
+        await page.keyboard.press('Escape');
+      } else {
+        await select.getByRole('option', { name: 'Paysages' }).click();
+        await expect(select).toHaveValue('landscapes');
+      }
+
+      await expect.poll(() => chevronTurn(select)).toBe(0);
+    });
+  }
+
+  test('a Select chevron turns in 150ms ease-in-out, and without a transition under reduced motion', async ({ page }) => {
+    await page.goto('/#select');
+
+    const select = page.locator('#select-default select');
+    expect((await chevron(select)).transition).toBe('0.15s ease-in-out');
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    test.skip(!(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)), 'the browser does not emulate reduced motion');
+    expect((await chevron(select)).transition).toBe('none');
+  });
+
+  test('a disabled Select chevron does not turn', async ({ page }) => {
+    await page.goto('/#select');
+
+    const disabled = page.locator('#select-disabled select');
+    const enabled = page.locator('#select-default select');
+    await disabled.click({ force: true });
+    // once an enabled Select has had time to turn, the disabled one would have too
+    await enabled.click();
+    await expect.poll(() => chevronTurn(enabled)).toBe(180);
+
+    expect(await chevronTurn(disabled)).toBe(0);
+  });
+
+  test('in forced colours a Select is the native control, with no custom chevron', async ({ page }) => {
+    await page.goto('/#select');
+
+    const select = page.locator('#select-default select');
+    expect((await chevron(select)).drawn).toBe(true);
+
+    await page.emulateMedia({ forcedColors: 'active' });
+    test.skip(!(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)), 'the browser does not emulate forced colours');
+
+    expect(await select.evaluate(element => getComputedStyle(element).appearance)).toBe('auto');
+    expect((await chevron(select)).drawn).toBe(false);
   });
 
   test('an open Select popup takes the theme colours', async ({ page }) => {
