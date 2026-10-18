@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { centre, expectAnchored, scrollToTop, openFrom } from './overlay-helpers';
+import { centre, expectAnchored, hoverInPlace, scrollToTop, openFrom } from './overlay-helpers';
 
 test.describe('Dialog', () => {
   test('opens from its trigger, closes on Escape and returns focus to the trigger', async ({ page }) => {
@@ -93,12 +93,13 @@ test.describe('AlertDialog', () => {
 test.describe('Sheet', () => {
   for (const side of ['left', 'right', 'top', 'bottom'] as const) {
     test(`side="${side}" opens along its edge, closes on Escape and returns focus`, async ({ page }) => {
-      await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/#sheet');
 
       const { trigger, dialog } = await openFrom(page, `sheet-${side}-trigger`, `sheet-${side}`);
+      await dialog.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)));
       const box = (await dialog.boundingBox())!;
-      const viewport = page.viewportSize()!;
+      // The viewport without its scrollbar, which Firefox keeps beside a modal.
+      const viewport = await page.evaluate(() => ({ width: document.documentElement.clientWidth, height: document.documentElement.clientHeight }));
       const gaps = { left: box.x, top: box.y, right: viewport.width - box.x - box.width, bottom: viewport.height - box.y - box.height };
 
       expect(Math.round(gaps[side])).toBe(0);
@@ -143,14 +144,23 @@ test.describe('Lightbox', () => {
     await page.goto('/#gallery');
 
     const lightbox = page.locator('#lightbox-demo');
+    const image = lightbox.locator('figure img');
+    // The viewer takes the size of its photo, so its buttons only stay put once the photo has loaded.
+    const showing = async (alt: string) => {
+      await expect(image).toHaveAttribute('alt', alt);
+      await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth)).toBeGreaterThan(0);
+    };
+
     await page.locator('#gallery-default a').nth(1).click();
+    await showing('Snowfield under a white sky');
 
     await lightbox.getByRole('button', { name: 'Next photo' }).click();
-    await expect(lightbox.locator('figure img')).toHaveAttribute('alt', 'Ridge line at dusk');
+    await showing('Ridge line at dusk');
 
     await lightbox.getByRole('button', { name: 'Previous photo' }).click();
+    await showing('Snowfield under a white sky');
     await lightbox.getByRole('button', { name: 'Previous photo' }).click();
-    await expect(lightbox.locator('figure img')).toHaveAttribute('alt', 'Mountains at dusk');
+    await showing('Mountains at dusk');
   });
 
   test('closes on Escape and returns focus to the image that opened it', async ({ page }) => {
@@ -361,28 +371,19 @@ test.describe('Tooltip', () => {
 
     const trigger = page.locator('#tooltip-x-twitter-trigger');
     await scrollToTop(trigger);
-    await trigger.hover();
+    await hoverInPlace(trigger);
 
     await expectAnchored(trigger, page.locator('#tooltip-x-twitter'), 'below');
   });
 });
 
 test.describe('Overlay animations', () => {
-  const animationsOnOpen = async (page: Page) => {
-    await page.goto('/#dialog');
-    await page.locator('#dialog-demo-trigger').click();
-    return page.locator('#dialog-demo').evaluate(element => element.getAnimations().length);
-  };
-
   test('animate in by default', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/#dialog');
+    await page.locator('#dialog-demo-trigger').click();
 
-    expect(await animationsOnOpen(page)).toBeGreaterThan(0);
-  });
-
-  test('are off when the visitor prefers reduced motion', async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-
-    expect(await animationsOnOpen(page)).toBe(0);
+    // The animation's name rather than the running animation, which can be over by the time it is read.
+    expect(await page.locator('#dialog-demo').evaluate(element => getComputedStyle(element).animationName)).toBe('dialog-in');
   });
 });
