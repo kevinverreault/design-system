@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { settleLayout } from './page-helpers';
 
 /** Gap between a popover and its trigger, in pixels: the --space-xs margin. */
 const POPOVER_GAP = 8;
@@ -16,17 +17,12 @@ export async function openFrom(page: Page, triggerId: string, dialogId: string) 
 }
 
 /**
- * Settles the page before a helper scrolls it: web fonts swapped in and every image loaded, since lazy images
- * would load once scrolled near and shift the layout. The page also gets room below, so that a trigger near
- * the end of the page can still be scrolled up.
+ * Settles the page before a helper scrolls it, so that nothing shifts the trigger afterwards. The page also gets
+ * room below, so that a trigger near the end of the page can still be scrolled up.
  */
 async function settle(page: Page) {
-  await page.evaluate(async () => {
-    await document.fonts.ready;
-    await Promise.all([...document.images].map(async image => {
-      image.loading = 'eager';
-      await image.decode().catch(() => {});
-    }));
+  await settleLayout(page);
+  await page.evaluate(() => {
     document.body.style.paddingBottom = '100vh';
   });
 }
