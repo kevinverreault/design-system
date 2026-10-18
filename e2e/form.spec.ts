@@ -128,6 +128,32 @@ test.describe('Form controls', () => {
     await expect(form.getByRole('textbox', { name: 'Name' })).toBeFocused();
   });
 
+  test('a script sets and clears a FormField error: its text, the invalid state and the description', async ({ page }) => {
+    await page.goto('/#form-field-script');
+
+    const field = page.locator('#form-field-script-demo');
+    const input = field.getByRole('textbox', { name: 'Email' });
+    const error = field.getByText('Enter an email such as you@example.com.');
+
+    await expect(input).not.toHaveAttribute('aria-invalid');
+    await expect(error).toBeHidden();
+
+    await input.fill('not an email');
+    await input.press('Tab');
+
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(input).toHaveAccessibleDescription('We only use it to answer you. Enter an email such as you@example.com.');
+    await expect(error).toBeVisible();
+
+    // Firefox over WebDriver BiDi appends on fill, so empty the field first.
+    await input.clear();
+    await input.fill('you@example.com');
+
+    await expect(input).not.toHaveAttribute('aria-invalid');
+    await expect(input).toHaveAccessibleDescription('We only use it to answer you.');
+    await expect(error).toBeHidden();
+  });
+
   test('a Select chevron turns over while the picker is open from a click, and back on a click outside', async ({ page }) => {
     await page.goto('/#select');
 

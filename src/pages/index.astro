@@ -534,6 +534,16 @@ const footerSocial = [
           <div><Button type="submit">Send</Button></div>
         </form>
       </div>
+
+      <div id="form-field-script" class="flow">
+        <h3 class="numbered-title">Errors from a script</h3>
+
+        <p>FormField's <code>error</code> is set when the page renders. Validation in the browser calls <code>setFieldError</code> instead: leave this field with an invalid email, then fix it.</p>
+
+        <div class="demo-form-grid">
+          <FormField id="form-field-script-demo" label="Email" hint="We only use it to answer you."><Input type="email" name="script-email" autocomplete="email" /></FormField>
+        </div>
+      </div>
     </section>
     <section id="card" class="flow">
       <h2 class="numbered-title"><span>07</span> Card</h2>
@@ -840,6 +850,7 @@ const footerSocial = [
 <script>
   import { toast, type ToastVariant } from '../components/feedback/toast';
   import { handleGalleryClick } from '../components/media/gallery-open';
+  import { setFieldError } from '../components/form/field-error';
 
   // What a host site does for its own galleries; the Gallery component installs the same listener.
   document.addEventListener('click', handleGalleryClick);
@@ -852,6 +863,18 @@ const footerSocial = [
   document.querySelector('#dropdown-menu-demo')!.addEventListener('click', event => {
     const item = (event.target as Element).closest<HTMLButtonElement>('button[role="menuitem"]');
     if (item) document.querySelector('#dropdown-menu-result')!.textContent = item.value;
+  });
+
+  const scriptEmail = document.querySelector<HTMLInputElement>('#form-field-script-demo input')!;
+  const checkScriptEmail = () => setFieldError(scriptEmail, scriptEmail.validity.valid ? null : 'Enter an email such as you@example.com.');
+  // Shown once the visitor has edited the field and left it, then kept current while they fix it.
+  let scriptEmailLeft = false;
+  scriptEmail.addEventListener('blur', () => {
+    if (scriptEmail.value) scriptEmailLeft = true;
+    if (scriptEmailLeft) checkScriptEmail();
+  });
+  scriptEmail.addEventListener('input', () => {
+    if (scriptEmailLeft) checkScriptEmail();
   });
 
   document.querySelectorAll<HTMLElement>('[data-toast]').forEach(trigger => {

@@ -96,6 +96,16 @@ describe('FormField', () => {
     expect(field.textContent.trim()).toBe('Email');
   });
 
+  test('without an error, holds a hidden, empty error out of the description, for a script to fill', async () => {
+    const field = await renderField({ label: 'Email', hint: 'We never share it.' }, await controlHtml(Input));
+    const input = field.querySelector('input')!;
+    const error = field.querySelector('.error')!;
+
+    expect(error.hasAttribute('hidden')).toBe(true);
+    expect(error.textContent.trim()).toBe('');
+    expect(describedBy(input, field)).toEqual(['We never share it.']);
+  });
+
   test('keeps an existing aria-describedby and adds its own ids after it', async () => {
     const field = await renderField({ label: 'Email', error: 'Required.' }, await controlHtml(Input, { 'aria-describedby': 'elsewhere' }));
     const ids = field.querySelector('input')!.getAttribute('aria-describedby')!.split(' ');
