@@ -1,5 +1,9 @@
 # Design system
 
+[![Showcase status](https://img.shields.io/website?url=https%3A%2F%2Fdesign-system-4rx.pages.dev%2F&label=showcase&up_message=online&down_message=offline&logo=cloudflare&logoColor=white)](https://design-system-4rx.pages.dev/)
+
+The showcase page is live on Cloudflare Pages: **<https://design-system-4rx.pages.dev/>**
+
 ## Project Structure
 
 ```text
