@@ -83,6 +83,37 @@ test.describe('Gallery', () => {
     expect(opened.images[1].src).toMatch(/\/images\/snow\.jpg$/);
     expect(opened.images[0].src).toMatch(/^http/);
     expect(opened.images[2].credit).toBeUndefined();
+    // Gallery links carry no srcset, sizes or caption, so the detail has none.
+    expect(opened.images.map(({ srcset, sizes, caption }: Record<string, unknown>) => ({ srcset, sizes, caption }))).toEqual(Array(6).fill({}));
     expect(page.url()).toBe(url);
+  });
+
+  test('adds a link\'s srcset, sizes and caption to gallery-open, when it carries them', async ({ page }) => {
+    await page.goto('/#lightbox');
+
+    await page.evaluate(() => {
+      document.addEventListener('gallery-open', event => {
+        event.preventDefault();
+        (window as any).opened = event.detail.images;
+      });
+    });
+
+    const link = page.locator('#lightbox-captioned a').nth(0);
+    await link.click();
+
+    const images = await page.evaluate(() => (window as any).opened);
+    expect(images).toHaveLength(3);
+    expect(images[0]).toMatchObject({
+      alt: 'Hills under an orange sky',
+      srcset: await link.getAttribute('data-srcset'),
+      sizes: 'calc(100vw - 4rem)',
+      caption: 'The last light over the hills, an hour after sunset.',
+      credit: 'Kevin Verreault 2024',
+      width: 1200,
+      height: 800,
+    });
+    expect(images[1].srcset).toBeUndefined();
+    expect(images[1].caption).toBe('Fresh snow under a white winter sky.');
+    expect(images[2].caption).toBeUndefined();
   });
 });

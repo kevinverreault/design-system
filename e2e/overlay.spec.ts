@@ -163,6 +163,94 @@ test.describe('Lightbox', () => {
     await showing('Mountains at dusk');
   });
 
+  test('shows a link\'s srcset, sizes and caption, under the photo', async ({ page }) => {
+    await page.goto('/#lightbox');
+
+    const lightbox = page.locator('#lightbox-demo');
+    const image = lightbox.locator('figure img');
+    const link = page.locator('#lightbox-captioned a').nth(0);
+
+    await link.click();
+    await expect(lightbox).toBeVisible();
+    await expect(image).toHaveAttribute('srcset', (await link.getAttribute('data-srcset'))!);
+    await expect(image).toHaveAttribute('sizes', 'calc(100vw - 4rem)');
+    await expect(lightbox.locator('figcaption')).toHaveText('The last light over the hills, an hour after sunset.');
+  });
+
+  test('loads a srcset candidate narrower than the fallback on a narrow screen', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/#lightbox');
+
+    const image = page.locator('#lightbox-demo figure img');
+    await page.locator('#lightbox-captioned a').nth(0).click();
+    await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth)).toBeGreaterThan(0);
+
+    const { currentSrc, candidates, fallback } = await image.evaluate((element: HTMLImageElement) => ({
+      currentSrc: element.currentSrc,
+      candidates: element.srcset.split(', ').map(candidate => new URL(candidate.split(' ')[0], location.href).href),
+      fallback: element.src,
+    }));
+
+    expect(candidates).toContain(currentSrc);
+    expect(currentSrc).not.toBe(fallback);
+  });
+
+  test('keeps each photo\'s own srcset, caption and credit when moving', async ({ page }) => {
+    await page.goto('/#lightbox');
+
+    const lightbox = page.locator('#lightbox-demo');
+    const image = lightbox.locator('figure img');
+    const caption = lightbox.locator('.lightbox-caption');
+    const credit = lightbox.locator('.image-credit');
+
+    await page.locator('#lightbox-captioned a').nth(0).click();
+    await expect(image).toHaveAttribute('alt', 'Hills under an orange sky');
+
+    await page.keyboard.press('ArrowRight');
+    await expect(image).toHaveAttribute('alt', 'A snowfield');
+    await expect(image).not.toHaveAttribute('srcset');
+    await expect(image).not.toHaveAttribute('sizes');
+    await expect(lightbox.locator('figcaption')).toHaveText('Fresh snow under a white winter sky.');
+    await expect(credit).toHaveCount(0);
+
+    await lightbox.getByRole('button', { name: 'Next photo' }).click();
+    await expect(image).toHaveAttribute('alt', 'A ridge line at dusk');
+    await expect(image).toHaveAttribute('srcset', /600w.*900w.*1200w/);
+    await expect(caption).toHaveCount(0);
+    await expect(lightbox.locator('figcaption')).toHaveText('© Kevin Verreault 2023');
+
+    await page.keyboard.press('ArrowRight');
+    await expect(image).toHaveAttribute('alt', 'Hills under an orange sky');
+    await expect(caption).toHaveText('The last light over the hills, an hour after sunset.');
+    await expect(credit).toHaveText('© Kevin Verreault 2024');
+  });
+
+  for (const viewport of [{ width: 1280, height: 768 }, { width: 375, height: 812 }]) {
+    test(`lays a credit across the photo and its caption under it, inside a ${viewport.width}px viewport`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto('/#lightbox');
+
+      const lightbox = page.locator('#lightbox-demo');
+      const image = lightbox.locator('figure img');
+
+      await page.locator('#lightbox-captioned a').nth(0).click();
+      await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth)).toBeGreaterThan(0);
+      await expect(lightbox.locator('.image-credit')).toHaveText('© Kevin Verreault 2024');
+
+      const photo = (await image.boundingBox())!;
+      const credit = (await lightbox.locator('.image-credit').boundingBox())!;
+      const caption = (await lightbox.locator('figcaption').boundingBox())!;
+      const dialog = (await lightbox.boundingBox())!;
+
+      expect(Math.round(credit.y + credit.height)).toBe(Math.round(photo.y + photo.height));
+      expect(Math.round(credit.width)).toBe(Math.round(photo.width));
+      expect(caption.y).toBeGreaterThanOrEqual(Math.floor(photo.y + photo.height));
+      expect(Math.round(caption.width)).toBeLessThanOrEqual(Math.round(photo.width));
+      expect(dialog.y).toBeGreaterThanOrEqual(0);
+      expect(Math.round(dialog.y + dialog.height)).toBeLessThanOrEqual(viewport.height);
+    });
+  }
+
   test('closes on Escape and returns focus to the image that opened it', async ({ page }) => {
     await page.goto('/#gallery');
 

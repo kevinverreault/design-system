@@ -13,6 +13,9 @@ import DialogClose from '../overlay/DialogClose.astro';
  * its credit footer, moves to the previous or next image with its buttons or
  * the arrow keys, and returns focus to the clicked image on close. Escape and
  * a click outside close it.
+ * An image whose detail has a `srcset` and `sizes` loads the width the
+ * browser picks; one with a `caption` shows it under the photo, below the
+ * credit. A caption longer than three lines scrolls.
  *
  * Without JavaScript, or without a Lightbox, a Gallery image is a plain link
  * to the full-size photo.
@@ -58,14 +61,27 @@ const {
     border: 0;
     background: none;
     color: hsl(var(--color-on-scrim));
+    --lightbox-caption-room: calc(var(--space-xs) + 3 * 1.4 * var(--fs-sm));
   }
 
   .lightbox::backdrop {
     background-color: hsl(var(--color-scrim) / .9);
   }
 
+  /*
+   * A grid as wide as its photo: a caption wraps under the photo instead of
+   * widening the viewer, and the credit band, placed in the photo's cell,
+   * sits across the photo's bottom edge rather than the caption's.
+   */
   .lightbox-figure {
     position: relative;
+    display: grid;
+    width: min-content;
+  }
+
+  /* Explicit end lines: on an absolutely positioned item, `auto` is the grid's padding edge. */
+  .lightbox-figure :global(.image-credit) {
+    grid-area: 1 / 1 / 2 / 2;
   }
 
   .lightbox-figure :global(img) {
@@ -73,6 +89,19 @@ const {
     height: auto;
     max-width: calc(100vw - 2 * var(--space-md));
     max-height: calc(100dvh - 2 * var(--space-md));
+  }
+
+  /* Up to three lines of caption fit under the photo; a longer one scrolls. */
+  .lightbox-figure:has(:global(.lightbox-caption)) :global(img) {
+    max-height: calc(100dvh - 2 * var(--space-md) - var(--lightbox-caption-room));
+  }
+
+  .lightbox-figure :global(.lightbox-caption) {
+    max-height: var(--lightbox-caption-room);
+    overflow-y: auto;
+    padding-top: var(--space-xs);
+    font-size: var(--fs-sm);
+    line-height: 1.4;
   }
 
   .lightbox-control,
@@ -210,8 +239,10 @@ const {
       const count = this.images.length;
       this.index = (index + count) % count;
 
-      const { src, alt, width, height, credit } = this.images[this.index];
+      const { src, srcset, sizes, alt, width, height, credit, caption } = this.images[this.index];
       const image = document.createElement('img');
+      if (srcset) image.srcset = srcset;
+      if (sizes) image.sizes = sizes;
       image.src = src;
       image.alt = alt;
       if (width && height) {
@@ -222,11 +253,19 @@ const {
       const figure = this.querySelector('[data-lightbox-figure]')!;
       figure.replaceChildren(image);
 
+      // A figure has one figcaption: the caption when there is one, otherwise the credit.
       if (credit) {
-        const caption = document.createElement('figcaption');
-        caption.className = 'image-credit';
-        caption.textContent = creditText(credit);
-        figure.append(caption);
+        const band = document.createElement(caption ? 'p' : 'figcaption');
+        band.className = 'image-credit';
+        band.textContent = creditText(credit);
+        figure.append(band);
+      }
+
+      if (caption) {
+        const captionElement = document.createElement('figcaption');
+        captionElement.className = 'lightbox-caption';
+        captionElement.textContent = caption;
+        figure.append(captionElement);
       }
       this.querySelector('[data-lightbox-counter]')!.textContent = count > 1 ? `${this.index + 1} / ${count}` : '';
     }

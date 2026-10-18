@@ -11,6 +11,13 @@
  * navigation. Modified clicks (new tab, new window, download) are left to the
  * browser and dispatch nothing.
  *
+ * A site gallery with its own layout can adopt the same contract: mark its
+ * root `data-gallery` and each link `data-gallery-link`, and install
+ * `handleGalleryClick` on the document. Each link's `href` is the full-size
+ * photo and its img's `alt` the alt; optional data attributes fill the rest
+ * of the detail: `data-credit`, `data-width` and `data-height`, and
+ * `data-srcset`, `data-sizes` and `data-caption`.
+ *
  * ```ts
  * document.addEventListener(GALLERY_OPEN_EVENT, event => {
  *   event.preventDefault();
@@ -31,6 +38,12 @@ export interface GalleryImageDetail {
   /** Intrinsic size of the full-size image, when known. */
   width?: number;
   height?: number;
+  /** Responsive candidates for the full-size image, as the img `srcset` attribute; `src` stays the fallback. */
+  srcset?: string;
+  /** The img `sizes` attribute that goes with `srcset`. */
+  sizes?: string;
+  /** Plain text shown under the full-size photo, such as the photo's description. */
+  caption?: string;
 }
 
 export interface GalleryOpenDetail {
@@ -58,7 +71,7 @@ const GALLERY = '[data-gallery]';
 const GALLERY_LINK = 'a[data-gallery-link]';
 
 function toImageDetail(link: HTMLAnchorElement): GalleryImageDetail {
-  const { credit, width, height } = link.dataset;
+  const { credit, width, height, srcset, sizes, caption } = link.dataset;
 
   return {
     src: link.href,
@@ -66,6 +79,9 @@ function toImageDetail(link: HTMLAnchorElement): GalleryImageDetail {
     credit,
     width: width ? Number(width) : undefined,
     height: height ? Number(height) : undefined,
+    srcset,
+    sizes,
+    caption,
   };
 }
 
