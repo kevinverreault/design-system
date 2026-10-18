@@ -1,8 +1,9 @@
 /**
  * Sets or clears a FormField's error from the browser, for validation that
  * runs after the page renders. It does what FormField's `error` prop does:
- * shows the message under the control, marks the control aria-invalid and
- * lists the message in its aria-describedby. An empty message clears all three.
+ * shows the message under the control, marks the control aria-invalid, lists
+ * the message in its aria-describedby and gives the field its error colour.
+ * An empty message undoes all of it.
  */
 export function setFieldError(control: HTMLElement, message?: string | null) {
   const field = control.closest<HTMLElement>('.form-field');
