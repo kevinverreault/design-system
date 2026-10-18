@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { settleLayout } from './page-helpers';
 
 /** Gap between a popover and its trigger, in pixels: the --space-xs margin. */
 const POPOVER_GAP = 8;
@@ -16,14 +17,25 @@ export async function openFrom(page: Page, triggerId: string, dialogId: string) 
 }
 
 /**
+ * Settles the page before a helper scrolls it, so that nothing shifts the trigger afterwards. The page also gets
+ * room below, so that a trigger near the end of the page can still be scrolled up.
+ */
+async function settle(page: Page) {
+  await settleLayout(page);
+  await page.evaluate(() => {
+    document.body.style.paddingBottom = '100vh';
+  });
+}
+
+/**
  * Scrolls `trigger` to the middle of the viewport, so that its popover has room on both sides and doesn't flip.
- * Late layout shifts (web fonts swapping in, images loading) can move it afterwards, so it scrolls again
- * until the trigger stays put for a couple of frames.
+ * Other late layout shifts can still move it afterwards, so it scrolls again until the trigger stays put for
+ * a couple of frames.
  */
 export async function centre(trigger: Locator) {
+  await settle(trigger.page());
   await trigger.evaluate(async element => {
     const frame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    await document.fonts.ready;
 
     for (let attempt = 0; attempt < 10; attempt++) {
       element.scrollIntoView({ block: 'center' });
@@ -34,13 +46,10 @@ export async function centre(trigger: Locator) {
   });
 }
 
-/** Scrolls `trigger` to the top of the viewport, leaving no room above it; the page gets room below to allow it. */
+/** Scrolls `trigger` to the top of the viewport, leaving no room above it. */
 export async function scrollToTop(trigger: Locator) {
-  await trigger.evaluate(async element => {
-    await document.fonts.ready;
-    document.body.style.paddingBottom = '100vh';
-    element.scrollIntoView({ block: 'start' });
-  });
+  await settle(trigger.page());
+  await trigger.evaluate(element => element.scrollIntoView({ block: 'start' }));
 }
 
 /** Checks that `popover` sits one gap below (or above) `trigger` and overlaps it horizontally. */
