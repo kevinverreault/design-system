@@ -63,3 +63,19 @@ export async function expectAnchored(trigger: Locator, popover: Locator, side: '
   expect(box.x).toBeLessThanOrEqual(anchor.x + anchor.width);
   expect(box.x + box.width).toBeGreaterThanOrEqual(anchor.x);
 }
+
+/*
+ * Pointer actions on `trigger` where it is. Playwright scrolls a target into
+ * view before acting on it, and over WebDriver BiDi Firefox centres it even
+ * when it is in view already, which would give its popover room on both sides.
+ */
+
+export async function hoverInPlace(trigger: Locator) {
+  const box = (await trigger.boundingBox())!;
+  await trigger.page().mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+}
+
+export async function clickInPlace(trigger: Locator) {
+  const box = (await trigger.boundingBox())!;
+  await trigger.page().mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+}
