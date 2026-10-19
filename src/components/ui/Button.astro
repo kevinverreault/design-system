@@ -2,6 +2,7 @@
 import '../../styles/global.css'
 import { cva, type VariantProps } from 'cva';
 import type { HTMLAttributes } from "astro/types";
+import { containsInteractiveContent } from '../../lib/interactive-content';
 
 const button = cva("button", {
   variants: {
@@ -37,8 +38,17 @@ const button = cva("button", {
   }
 });
 
+type LinkAttributes = Pick<HTMLAttributes<"a">, "href" | "target" | "rel" | "hreflang" | "referrerpolicy" | "download">;
+
+/**
+ * With `href`, the button is a link styled as a button: an anchor with the
+ * same classes, so every variant works on it. It then refuses the attributes
+ * that only work on a button, and, being a single anchor, any interactive
+ * element (link, button, form control, media controls, tabindex) in its slot.
+ */
 export interface Props
-  extends HTMLAttributes<"button">,
+  extends Omit<HTMLAttributes<"button">, keyof LinkAttributes>,
+    LinkAttributes,
     VariantProps<typeof button> {
     }
       
@@ -50,11 +60,37 @@ const {
   textVariant = "default", 
   ...attributes
   } = Astro.props;
+
+/** Attributes that do nothing on an anchor; `disabled` would leave a "disabled" link that still navigates. */
+const BUTTON_ONLY = new Set([
+  "type", "disabled", "name", "value",
+  "form", "formaction", "formenctype", "formmethod", "formnovalidate", "formtarget",
+  "popovertarget", "popovertargetaction", "command", "commandfor"
+]);
+
+// null, like undefined, renders no href: that is not a link.
+const linked = attributes.href != null;
+// false, null and undefined render no attribute, so they pass.
+const refusedAttribute = linked
+  ? Object.entries(attributes).find(([name, value]) => BUTTON_ONLY.has(name.toLowerCase()) && value != null && value !== false)?.[0]
+  : undefined;
+
+if (refusedAttribute) {
+  throw new Error(`A linked Button (href="${attributes.href}") is an anchor, where ${refusedAttribute} does nothing; remove ${refusedAttribute} or href.`);
+}
+
+const content = await Astro.slots.render("default");
+
+if (linked && containsInteractiveContent(content)) {
+  throw new Error(`A linked Button (href="${attributes.href}") is a single anchor and can't contain interactive elements; remove the nested link, button, form control or tabindex.`);
+}
+
+const Element = linked ? "a" : "button";
 ---
 
-<button {...attributes} class:list={[button({ variant, decoration, size,  shape, textVariant}), "button", "ff-sans-normal"]}>
-  <slot />
-</button>
+<Element {...attributes} class:list={[button({ variant, decoration, size,  shape, textVariant}), "button", "ff-sans-normal"]}>
+  <Fragment set:html={content} />
+</Element>
 
 <style>
 
@@ -64,8 +100,18 @@ const {
    * decoration has the same border width (transparent unless outlined), so
    * all buttons of a size are the same height, and the border shows in
    * forced-colours mode.
+   *
+   * A linked Button is an anchor, which inherits the text styles a button
+   * resets, so the button's defaults are set here for both.
    */
   .button {
+    font-style: normal;
+    font-weight: normal;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0;
+    text-shadow: none;
     --border-radius: var(--border);
     padding: calc(var(--control-padding-block) - var(--control-border-width)) calc(var(--control-padding-inline) - var(--control-border-width));
     line-height: var(--control-line-height);
@@ -196,5 +242,24 @@ const {
     --border-radius: 9999px;
     border-radius: 9999px;
   }
-  
+
+  /*
+   * Browsers force a button's colours to their own, and differently: an
+   * anchor would get the link colour, and only some keep the transparency of
+   * the danger and muted backgrounds or mark focus. So every Button, linked
+   * or not, gets the button system colours, and a Highlight border on focus.
+   */
+  @media (forced-colors: active) {
+    .button,
+    .button:is(:hover, :focus) {
+      color: ButtonText;
+      background-color: ButtonFace;
+      border-color: ButtonBorder;
+    }
+
+    .button:focus {
+      border-color: Highlight;
+    }
+  }
+
 </style>

@@ -551,6 +551,26 @@ test.describe('Tooltip', () => {
     await expect(tooltip).toBeHidden();
   });
 
+  test('shows on hover and on focus of a linked Button, which it describes', async ({ page }) => {
+    await page.goto('/#interactive-elements');
+
+    const trigger = page.locator('#button-link-instagram');
+    const tooltip = page.locator('#tooltip-button-link-instagram');
+
+    await expect(trigger).toHaveAttribute('href', 'https://www.instagram.com/');
+    await centre(trigger);
+    await trigger.hover();
+    await expect(tooltip).toBeVisible();
+    await expectAnchored(trigger, tooltip, 'above');
+
+    await page.mouse.move(5, 5);
+    await expect(tooltip).toBeHidden();
+
+    await trigger.focus();
+    await expect(tooltip).toBeVisible();
+    await expect(trigger).toHaveAccessibleDescription('Follow on Instagram');
+  });
+
   test('flips below its trigger when there is no room above', async ({ page }) => {
     await page.goto('/#tooltip');
 

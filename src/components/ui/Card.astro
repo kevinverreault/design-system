@@ -1,6 +1,7 @@
 ---
 import '../../styles/global.css'
 import type { HTMLAttributes } from "astro/types";
+import { containsInteractiveContent } from '../../lib/interactive-content';
 
 type LinkAttributes = Pick<HTMLAttributes<"a">, "href" | "target" | "rel" | "hreflang" | "referrerpolicy">;
 
@@ -21,7 +22,6 @@ export interface Props
 }
 
 const AREAS = ["media", "header", "default", "footer"] as const;
-const INTERACTIVE_CONTENT = /<(a|button|input|select|textarea|label|details|summary|iframe|embed|object)\b|<(audio|video)\b[^>]*\scontrols\b|\s(tabindex|contenteditable)\s*=/i;
 
 const { as, href, class: className, ...attributes } = Astro.props;
 
@@ -37,7 +37,7 @@ const areas = Object.fromEntries(
   )
 ) as Partial<Record<(typeof AREAS)[number], string>>;
 
-if (linked && Object.values(areas).some(html => INTERACTIVE_CONTENT.test(html))) {
+if (linked && Object.values(areas).some(containsInteractiveContent)) {
   throw new Error(`A linked Card (href="${href}") is a single anchor and can't contain interactive elements; remove the nested link, button, form control or tabindex.`);
 }
 

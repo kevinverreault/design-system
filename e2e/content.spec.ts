@@ -1,9 +1,30 @@
 import { expect, test, type Locator } from '@playwright/test';
+import { expectLinkedButtonsToMatch } from './button-helpers';
+import { useTheme } from './page-helpers';
 
 async function columnsOf(list: Locator) {
   const lefts = await list.locator(':scope > li').evaluateAll(items => items.map(item => Math.round(item.getBoundingClientRect().left)));
   return new Set(lefts).size;
 }
+
+test.describe('Button', () => {
+  for (const theme of ['light', 'dark'] as const) {
+    test(`a linked Button looks the same as a button, in every variant, in ${theme}`, async ({ page }) => {
+      await page.goto('/#interactive-elements');
+      await useTheme(page, theme);
+
+      await expectLinkedButtonsToMatch(page);
+    });
+  }
+
+  test('a linked Button follows its link', async ({ page }) => {
+    await page.goto('/#interactive-elements');
+
+    await page.locator('#button-link').click();
+
+    await expect(page).toHaveURL(/#card$/);
+  });
+});
 
 test.describe('Card', () => {
   test('a linked card follows its link when its media is clicked', async ({ page }) => {

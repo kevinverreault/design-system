@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectLinkedButtonsToMatch } from './button-helpers';
 import { chevron } from './form-helpers';
 
 /*
@@ -16,4 +17,10 @@ test('a Select is the native control, with no custom chevron', async ({ page }) 
   const select = page.locator('#select-default select');
   expect(await select.evaluate(element => getComputedStyle(element).appearance)).toBe('auto');
   expect((await chevron(select)).drawn).toBe(false);
+});
+
+test('a linked Button looks the same as a button, in every variant', async ({ page }) => {
+  await page.goto('/#interactive-elements');
+
+  await expectLinkedButtonsToMatch(page);
 });

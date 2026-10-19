@@ -243,7 +243,23 @@ const footerSocial = [
           ))
         }
       </div>
-      
+
+      <h4 class="numbered-title">Links</h4>
+
+      <p>With an href, a Button is a link that looks like a button, with every variant.</p>
+
+      <div class="flex flex-row items-center">
+        <Button href="#card" id="button-link">See the prints</Button>
+        <Button href="#card" variant="secondary" decoration="outline">outline</Button>
+        <Button href="#card" variant="muted" decoration="ghost" textVariant="colored">ghost</Button>
+        <Button href="#card" decoration="underline">underline</Button>
+        <Tooltip text="Follow on Instagram" id="tooltip-button-link-instagram">
+          <Button href="https://www.instagram.com/" size="icon" shape="circle" aria-label="Instagram" target="_blank" rel="noopener" id="button-link-instagram">
+            <Icon icon="instagram" width="1.5rem" height="1.5rem" color="inherit" aria-hidden="true" />
+          </Button>
+        </Tooltip>
+      </div>
+
     </section>
 
     <section id="row" class="flow">
