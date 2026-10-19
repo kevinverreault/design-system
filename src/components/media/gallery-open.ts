@@ -13,10 +13,23 @@
  *
  * A site gallery with its own layout can adopt the same contract: mark its
  * root `data-gallery` and each link `data-gallery-link`, and install
- * `handleGalleryClick` on the document. Each link's `href` is the full-size
- * photo and its img's `alt` the alt; optional data attributes fill the rest
- * of the detail: `data-credit`, `data-width` and `data-height`, and
- * `data-srcset`, `data-sizes` and `data-caption`.
+ * `handleGalleryClick` on the document in the capture phase, as the Gallery
+ * component does. Each link's `href` is the full-size photo and its img's
+ * `alt` the alt; optional data attributes fill the rest of the detail:
+ * `data-credit`, `data-width` and `data-height`, and `data-srcset`,
+ * `data-sizes` and `data-caption`.
+ *
+ * ```ts
+ * document.addEventListener('click', handleGalleryClick, { capture: true });
+ * ```
+ *
+ * The capture phase lets the Gallery claim a click before any bubbling
+ * listener: a client-side router such as Astro's `ClientRouter` cancels every
+ * same-origin link click from the document and would otherwise fetch the
+ * photo as a page. Installed in the same phase, the Gallery's listener and
+ * the site's are one listener, so each click dispatches at most once.
+ *
+ * A Lightbox listens for the event:
  *
  * ```ts
  * document.addEventListener(GALLERY_OPEN_EVENT, event => {
@@ -87,7 +100,10 @@ function toImageDetail(link: HTMLAnchorElement): GalleryImageDetail {
 
 /**
  * Turns plain clicks on Gallery links into `gallery-open` events. Installed
- * once per page by the Gallery component.
+ * once per page by the Gallery component, on the document in the capture
+ * phase. A click that something earlier already cancelled (a window capture
+ * listener, or this handler installed a second time in the other phase) is
+ * left alone.
  */
 export function handleGalleryClick(event: MouseEvent) {
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {

@@ -853,7 +853,7 @@ const footerSocial = [
   import { setFieldError } from '../components/form/field-error';
 
   // What a host site does for its own galleries; the Gallery component installs the same listener.
-  document.addEventListener('click', handleGalleryClick);
+  document.addEventListener('click', handleGalleryClick, { capture: true });
 
   const alertDialog = document.querySelector<HTMLDialogElement>('#alert-dialog-demo')!;
   alertDialog.addEventListener('close', () => {

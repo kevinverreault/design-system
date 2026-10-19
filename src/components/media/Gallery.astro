@@ -95,7 +95,8 @@ const items = await Promise.all(images.map(async image => {
 <script>
   import { handleGalleryClick } from './gallery-open';
 
-  document.addEventListener('click', handleGalleryClick);
+  // In the capture phase, ahead of a router's bubbling listener that claims every link click.
+  document.addEventListener('click', handleGalleryClick, { capture: true });
 </script>
 
 <style>
