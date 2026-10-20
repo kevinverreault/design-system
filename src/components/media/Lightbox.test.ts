@@ -36,6 +36,26 @@ describe('Lightbox', () => {
     expect(dialog.querySelector('button[aria-label="Close"]')?.closest('form')?.getAttribute('method')).toBe('dialog');
   });
 
+  test('preloads 2 neighbouring photos by default', async () => {
+    const viewer = (await render(Lightbox)).querySelector('light-box')!;
+
+    expect(viewer.getAttribute('data-preload')).toBe('2');
+  });
+
+  test('takes the number of neighbouring photos to preload, 0 turning it off', async () => {
+    for (const preload of [5, 0]) {
+      const viewer = (await render(Lightbox, { props: { preload } })).querySelector('light-box')!;
+
+      expect(viewer.getAttribute('data-preload')).toBe(String(preload));
+    }
+  });
+
+  test('rejects a preload count that is not a whole number of photos', async () => {
+    for (const preload of [-1, 1.5, Number.NaN]) {
+      await expect(render(Lightbox, { props: { preload } })).rejects.toThrow(new RegExp(`preload.*'${preload}'`));
+    }
+  });
+
   test('passes through native attributes', async () => {
     const dialog = await renderLightbox({ id: 'viewer', class: 'extra' });
 

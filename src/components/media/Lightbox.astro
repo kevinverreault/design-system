@@ -19,6 +19,12 @@ import DialogClose from '../overlay/DialogClose.astro';
  * so a keyboard can scroll it: Safari does not focus scroll containers, and
  * the left and right arrows belong to the viewer.
  *
+ * So that stepping shows a photo the browser already has, the viewer loads
+ * the photos next to the shown one ahead of time, with their `srcset` and
+ * `sizes`: `preload` of them, half after and half before, an odd one going
+ * after. They wrap around like stepping, and a Gallery smaller than the count
+ * preloads each of its other photos once.
+ *
  * Without JavaScript, or without a Lightbox, a Gallery image is a plain link
  * to the full-size photo.
  */
@@ -28,6 +34,8 @@ export interface Props extends HTMLAttributes<"dialog"> {
   closeLabel?: string;
   previousLabel?: string;
   nextLabel?: string;
+  /** How many neighbouring photos to load ahead, `2` by default; `0` turns preloading off. */
+  preload?: number;
 }
 
 const {
@@ -35,12 +43,17 @@ const {
   closeLabel = "Close",
   previousLabel = "Previous photo",
   nextLabel = "Next photo",
+  preload = 2,
   class: className,
   ...attributes
 } = Astro.props;
+
+if (!Number.isInteger(preload) || preload < 0) {
+  throw new Error(`Lightbox preload must be a whole number of photos, 0 or more, received '${preload}'.`);
+}
 ---
 
-<light-box>
+<light-box data-preload={preload}>
   <dialog {...attributes} aria-label={label} closedby="any" class:list={["lightbox", className]}>
     <DialogClose label={closeLabel} class="lightbox-control lightbox-close" />
     <figure class="lightbox-figure" data-lightbox-figure></figure>
@@ -198,11 +211,14 @@ const {
   import { installLightDismissFallback, returnFocusOnClose } from '../overlay/dialog';
   import { creditText } from './credit';
   import { GALLERY_OPEN_EVENT, type GalleryImageDetail, type GalleryOpenEvent } from './gallery-open';
+  import { neighbours } from './preload';
 
   class LightBox extends HTMLElement {
     dialog!: HTMLDialogElement;
     images: GalleryImageDetail[] = [];
     index = 0;
+    // The neighbouring photos loading ahead, held so that the browser keeps them until the viewer steps on.
+    preloaded: HTMLImageElement[] = [];
     // The caption's width follows the photo's, so it can start or stop overflowing when the photo loads or the viewport resizes.
     captionObserver = new ResizeObserver(entries => entries.forEach(entry => this.fitCaption(entry.target as HTMLElement)));
 
@@ -249,11 +265,8 @@ const {
       const count = this.images.length;
       this.index = (index + count) % count;
 
-      const { src, srcset, sizes, alt, width, height, credit, caption } = this.images[this.index];
-      const image = document.createElement('img');
-      if (srcset) image.srcset = srcset;
-      if (sizes) image.sizes = sizes;
-      image.src = src;
+      const { alt, width, height, credit, caption } = this.images[this.index];
+      const image = this.load(this.images[this.index]);
       image.alt = alt;
       if (width && height) {
         image.width = width;
@@ -289,6 +302,18 @@ const {
         (captionElement ?? this.querySelector<HTMLElement>('.lightbox-close')!).focus();
       }
       this.querySelector('[data-lightbox-counter]')!.textContent = count > 1 ? `${this.index + 1} / ${count}` : '';
+
+      this.preloaded = neighbours(this.index, count, Number(this.dataset.preload)).map(position => this.load(this.images[position]));
+    }
+
+    /** An img that loads a photo, picking from its `srcset` the way the shown photo does. */
+    load({ src, srcset, sizes }: GalleryImageDetail) {
+      const image = document.createElement('img');
+      if (srcset) image.srcset = srcset;
+      if (sizes) image.sizes = sizes;
+      image.src = src;
+
+      return image;
     }
 
     /**

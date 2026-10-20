@@ -1,0 +1,70 @@
+---
+import '../styles/global.css';
+import Image from '../components/media/Image.astro';
+import Lightbox from '../components/media/Lightbox.astro';
+
+// Each photo has URLs of its own, so a request names the photo it loads.
+const photos = [1, 2, 3, 4, 5].map(photo => ({
+  href: `/images/snow.jpg?photo=${photo}`,
+  srcset: [600, 1200].map(width => `/images/snow.jpg?photo=${photo}&w=${width} ${width}w`).join(", "),
+  alt: `Snowfield ${photo}`
+}));
+---
+
+<!doctype html>
+<html lang="en" class="theme-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lightbox preloading</title>
+  </head>
+  <body>
+    <main class="flow">
+      <h1>Lightbox preloading</h1>
+
+      <p>The Lightbox loads the photos before and after the shown one ahead of time, so stepping to them shows a photo the browser already has. Every photo here has its own URLs. <a href="/">Back to the showcase</a>.</p>
+
+      <Lightbox id="lightbox-preload" />
+
+      <ul data-gallery id="preload-gallery" class="host-gallery" role="list" aria-label="Snowfields">
+        {
+          photos.map(photo => (
+            <li>
+              <a href={photo.href} data-gallery-link data-srcset={photo.srcset} data-sizes="calc(100vw - 4rem)" data-width="1200" data-height="800">
+                <Image src="/images/snow.jpg" alt={photo.alt} width={1200} height={800} ratio="1:1" sizes="10rem" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
+  </body>
+</html>
+
+<script>
+  import { handleGalleryClick } from '../components/media/gallery-open';
+
+  document.addEventListener('click', handleGalleryClick, { capture: true });
+</script>
+
+<style>
+  main {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: var(--space-lg);
+  }
+
+  .host-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .host-gallery a {
+    display: block;
+    width: 10rem;
+  }
+</style>
