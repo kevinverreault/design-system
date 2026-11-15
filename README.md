@@ -60,7 +60,7 @@ Firefox is the one installed on the machine, driven over WebDriver BiDi (Playwri
 
 ## Using as a git submodule
 
-The host Astro project imports components from source and compiles them, so their imports resolve from the host's `node_modules`.
+The host Astro project imports components from source and compiles them, so their imports resolve from the host's `node_modules`. The components import nothing beyond Astro, so the host installs nothing extra.
 
 `Icon` loads SVGs from the host's `src/svg/` (the glob is root-relative).
 
