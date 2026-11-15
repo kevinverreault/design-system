@@ -60,13 +60,12 @@ Firefox is the one installed on the machine, driven over WebDriver BiDi (Playwri
 
 ## Using as a git submodule
 
-The host Astro project imports components from source and compiles them, so their imports resolve from the host's `node_modules`. Install these in the host:
+The host Astro project imports components from source and compiles them, so their imports resolve from the host's `node_modules`. Install this in the host:
 
 ```bash
-npm i cva@npm:class-variance-authority node-html-parser
+npm i node-html-parser
 ```
 
-- `cva` must be this alias: components import `'cva'` but use class-variance-authority's API. The npm package actually named `cva` has a different, incompatible API.
 - `node-html-parser` is used by `Icon` at build time.
 - `Icon` loads SVGs from the host's `src/svg/` (the glob is root-relative).
 

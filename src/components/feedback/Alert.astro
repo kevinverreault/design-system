@@ -1,18 +1,16 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 import Icon from '../ui/Icon.astro';
-import { isStatusVariant, statusVariants } from './variants';
+import { isStatusVariant, statusVariants } from './status-variants';
 
-const alert = cva("alert", {
-  variants: {
-    variant: {
-      info: "info",
-      success: "success",
-      warning: "warning",
-      danger: "danger"
-    }
+const alert = variants("alert", {
+  variant: {
+    info: "info",
+    success: "success",
+    warning: "warning",
+    danger: "danger"
   }
 });
 

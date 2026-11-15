@@ -1,22 +1,20 @@
 ---
 import '../../styles/global.css'
 import { getImage } from 'astro:assets';
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 import Image, { type Props as ImageProps } from './Image.astro';
 
-const gallery = cva("gallery", {
-  variants: {
-    columnWidth: {
-      small: "column-width-small",
-      medium: "column-width-medium",
-      large: "column-width-large"
-    },
-    gap: {
-      small: "gap-small",
-      medium: "gap-medium",
-      large: "gap-large"
-    }
+const gallery = variants("gallery", {
+  columnWidth: {
+    small: "column-width-small",
+    medium: "column-width-medium",
+    large: "column-width-large"
+  },
+  gap: {
+    small: "gap-small",
+    medium: "gap-medium",
+    large: "gap-large"
   }
 });
 

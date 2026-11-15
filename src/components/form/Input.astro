@@ -1,16 +1,14 @@
 ---
 import '../../styles/global.css'
 import './control.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 
-const input = cva("form-control input", {
-  variants: {
-    size: {
-      small: "text-sm",
-      medium: "text-md",
-      large: "text-xl"
-    }
+const input = variants("form-control input", {
+  size: {
+    small: "text-sm",
+    medium: "text-md",
+    large: "text-xl"
   }
 });
 

@@ -2,7 +2,7 @@
 import '../../styles/global.css'
 import type { HTMLAttributes } from "astro/types";
 import Icon from '../ui/Icon.astro';
-import { statusVariants } from './variants';
+import { statusVariants } from './status-variants';
 
 /**
  * The page's single Toast region. Place it once in the layout, then queue
@@ -131,7 +131,7 @@ const { label = "Notifications", dismissLabel = "Dismiss", class: className, ...
 
 <script>
   import { TOAST_EVENT, type ToastDetail } from './toast';
-  import { isStatusVariant, statusVariants } from './variants';
+  import { isStatusVariant, statusVariants } from './status-variants';
 
   class ToastRegion extends HTMLElement {
     connectedCallback() {

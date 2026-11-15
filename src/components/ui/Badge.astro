@@ -1,17 +1,15 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 
-const badge = cva("badge", {
-  variants: {
-    variant: {
-      primary: "primary",
-      secondary: "secondary",
-      muted: "muted",
-      danger: "danger",
-      outline: "outline"
-    }
+const badge = variants("badge", {
+  variant: {
+    primary: "primary",
+    secondary: "secondary",
+    muted: "muted",
+    danger: "danger",
+    outline: "outline"
   }
 });
 

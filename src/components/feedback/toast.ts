@@ -1,4 +1,4 @@
-import type { StatusVariant } from './variants';
+import type { StatusVariant } from './status-variants';
 
 export type ToastVariant = StatusVariant;
 

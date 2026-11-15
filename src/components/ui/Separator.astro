@@ -1,14 +1,12 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 
-const separator = cva("separator", {
-  variants: {
-    orientation: {
-      horizontal: "horizontal",
-      vertical: "vertical"
-    }
+const separator = variants("separator", {
+  orientation: {
+    horizontal: "horizontal",
+    vertical: "vertical"
   }
 });
 

@@ -1,15 +1,13 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 
-const skeleton = cva("skeleton", {
-  variants: {
-    shape: {
-      line: "shape-line",
-      block: "shape-block",
-      circle: "shape-circle"
-    }
+const skeleton = variants("skeleton", {
+  shape: {
+    line: "shape-line",
+    block: "shape-block",
+    circle: "shape-circle"
   }
 });
 

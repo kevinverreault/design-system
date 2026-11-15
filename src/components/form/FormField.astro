@@ -1,19 +1,17 @@
 ---
 import '../../styles/global.css'
-import { cva } from 'cva';
+import { variants } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 import Label from './Label.astro';
 import { uniqueId } from '../../lib/unique-id';
 import { wireControl } from './wire-control';
 
-const formField = cva("form-field", {
-  variants: {
-    inline: {
-      true: "inline"
-    },
-    invalid: {
-      true: "invalid"
-    }
+const formField = variants("form-field", {
+  inline: {
+    true: "inline"
+  },
+  invalid: {
+    true: "invalid"
   }
 });
 

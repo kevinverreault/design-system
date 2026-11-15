@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 
 /** The edges a Sheet can be attached to. */
 export const sheetSides = {
@@ -9,17 +9,15 @@ export const sheetSides = {
 } as const;
 
 /** Variants of the dialog shell that Dialog, AlertDialog and Sheet share. */
-export const dialog = cva("dialog", {
-  variants: {
-    size: {
-      small: "size-small",
-      medium: "size-medium",
-      large: "size-large"
-    },
-    side: {
-      none: "",
-      ...sheetSides
-    }
+export const dialog = variants("dialog", {
+  size: {
+    small: "size-small",
+    medium: "size-medium",
+    large: "size-large"
+  },
+  side: {
+    none: "",
+    ...sheetSides
   }
 });
 
