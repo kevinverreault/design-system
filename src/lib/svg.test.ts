@@ -35,6 +35,12 @@ describe('parseSvg', () => {
     expect(attributes).toEqual({ 'aria-label': `Tom & Jerry "x" 'y' 'z' AB <>`, 'data-q': 'a"b' });
   });
 
+  test('leaves a character reference beyond Unicode as written', () => {
+    const { attributes } = parseSvg('<svg data-a="&#x110000;" data-b="&#99999999;"></svg>');
+
+    expect(attributes).toEqual({ 'data-a': '&#x110000;', 'data-b': '&#99999999;' });
+  });
+
   test('reads unquoted and boolean attributes', () => {
     expect(parseSvg('<svg width=24 height = "24" focusable></svg>').attributes).toEqual({ width: '24', height: '24', focusable: '' });
   });

@@ -16,13 +16,15 @@ const CLOSING_TAG = "</svg>";
 
 const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
 
-/** Decodes the XML entities and character references. */
+/** Decodes the XML entities and character references. A reference to no valid character stays as written. */
 function decode(value: string): string {
-  return value.replace(/&(?:#x([0-9a-f]+)|#(\d+)|(amp|lt|gt|quot|apos));/gi, (entity, hex, decimal, name) =>
-    hex ? String.fromCodePoint(parseInt(hex, 16))
-      : decimal ? String.fromCodePoint(parseInt(decimal, 10))
-        : ENTITIES[name.toLowerCase()] ?? entity
-  );
+  return value.replace(/&(?:#x([0-9a-f]+)|#(\d+)|(amp|lt|gt|quot|apos));/gi, (entity, hex, decimal, name) => {
+    if (name) {
+      return ENTITIES[name.toLowerCase()] ?? entity;
+    }
+    const codePoint = hex ? parseInt(hex, 16) : parseInt(decimal, 10);
+    return codePoint <= 0x10ffff ? String.fromCodePoint(codePoint) : entity;
+  });
 }
 
 /** Reads the root `<svg>` of an SVG file's source. Throws when there is none. */
