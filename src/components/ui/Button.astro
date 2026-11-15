@@ -1,40 +1,38 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 import { containsInteractiveContent } from '../../lib/interactive-content';
 
-const button = cva("button", {
-  variants: {
-    variant: {
-      primary: "primary",
-      secondary: "secondary",
-      muted: "muted",
-      danger: "danger"
-    },
-    decoration: {
-      plain: "plain",
-      outline: "outline",
-      ghost: "ghost",
-      underline: "underline"
-    },
-    size: {
-      icon: "icon",
-      small: "text-sm",
-      medium: "text-md",
-      large: "text-xl",
-      "extra-large":  "text-2xl"
-    },
-    shape: {
-      rectangle: "",
-      square: "square",
-      circle: "circle",
-      rounded: "rounded"
-    },
-    textVariant: {
-      default: "default-text",
-      colored: "colored-text"
-    }
+const button = variants("button", {
+  variant: {
+    primary: "primary",
+    secondary: "secondary",
+    muted: "muted",
+    danger: "danger"
+  },
+  decoration: {
+    plain: "plain",
+    outline: "outline",
+    ghost: "ghost",
+    underline: "underline"
+  },
+  size: {
+    icon: "icon",
+    small: "text-sm",
+    medium: "text-md",
+    large: "text-xl",
+    "extra-large":  "text-2xl"
+  },
+  shape: {
+    rectangle: "",
+    square: "square",
+    circle: "circle",
+    rounded: "rounded"
+  },
+  textVariant: {
+    default: "default-text",
+    colored: "colored-text"
   }
 });
 

@@ -1,20 +1,18 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 
-const pane = cva("pane", {
-  variants: {
-    align: {
-      start: "align-start",
-      center: "align-center",
-      end: "align-end"
-    },
-    valign: {
-      start: "valign-start",
-      center: "valign-center",
-      end: "valign-end"
-    }
+const pane = variants("pane", {
+  align: {
+    start: "align-start",
+    center: "align-center",
+    end: "align-end"
+  },
+  valign: {
+    start: "valign-start",
+    center: "valign-center",
+    end: "valign-end"
   }
 });
 

@@ -1,16 +1,14 @@
 ---
 import '../../styles/global.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 
-const table = cva("table", {
-  variants: {
-    striped: {
-      true: "striped"
-    },
-    hover: {
-      true: "hover"
-    }
+const table = variants("table", {
+  striped: {
+    true: "striped"
+  },
+  hover: {
+    true: "hover"
   }
 });
 

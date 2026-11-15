@@ -1,16 +1,14 @@
 ---
 import '../../styles/global.css'
 import './control.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 
-const selectRoot = cva("select", {
-  variants: {
-    size: {
-      small: "text-sm",
-      medium: "text-md",
-      large: "text-xl"
-    }
+const selectRoot = variants("select", {
+  size: {
+    small: "text-sm",
+    medium: "text-md",
+    large: "text-xl"
   }
 });
 

@@ -1,21 +1,19 @@
 ---
-import '@styles/global.css'
-import { cva, type VariantProps } from 'cva';
+import '../../styles/global.css'
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 
-const anchor = cva("a", {
-  variants: {
-    variant: {
-      default: "default",
-      primary: "primary",
-      secondary: "secondary"
-    },
-    size: {
-      small: "text-sm",
-      medium: "text-base",
-      large: "text-lg",
-      xl: "text-xl"
-    }
+const anchor = variants("a", {
+  variant: {
+    default: "default",
+    primary: "primary",
+    secondary: "secondary"
+  },
+  size: {
+    small: "text-sm",
+    medium: "text-base",
+    large: "text-lg",
+    xl: "text-xl"
   }
 });
 

@@ -1,5 +1,5 @@
 ---
-import { parse } from 'node-html-parser';
+import { parseSvg } from '../../lib/svg';
 import type { HTMLAttributes } from "astro/types";
 
 export interface Props 
@@ -19,15 +19,16 @@ function getSVG(name: string) {
     throw new Error(`${filepath} not found`);
   }
 
-  const root = parse(files[filepath]);
+  try {
+    const { attributes, innerHTML } = parseSvg(files[filepath]);
 
-  const svg = root.querySelector('svg')!;
-  const { attributes, innerHTML } = svg;
-
-  return {
-    baseAttributes: attributes,
-    innerHTML,
-  };
+    return {
+      baseAttributes: attributes,
+      innerHTML,
+    };
+  } catch (error) {
+    throw new Error(`${filepath}: ${(error as Error).message}`, { cause: error });
+  }
 }
 
 const { icon, ...attributes } = Astro.props as Props;

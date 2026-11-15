@@ -1,15 +1,13 @@
 ---
 import '../../styles/global.css'
 import './control.css'
-import { cva, type VariantProps } from 'cva';
+import { variants, type VariantProps } from '../../lib/variants';
 import type { HTMLAttributes } from "astro/types";
 
-const radioGroup = cva("radio-group", {
-  variants: {
-    orientation: {
-      vertical: "vertical",
-      horizontal: "horizontal"
-    }
+const radioGroup = variants("radio-group", {
+  orientation: {
+    vertical: "vertical",
+    horizontal: "horizontal"
   }
 });
 
