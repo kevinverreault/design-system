@@ -1,4 +1,5 @@
 ---
+import ThemeInit from '../components/ui/ThemeInit.astro';
 import '../styles/global.css';
 import Image from '../components/media/Image.astro';
 import Lightbox from '../components/media/Lightbox.astro';
@@ -12,9 +13,10 @@ const photos = [1, 2, 3, 4, 5].map(photo => ({
 ---
 
 <!doctype html>
-<html lang="en" class="theme-dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
+		<ThemeInit />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lightbox preloading</title>
   </head>

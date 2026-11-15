@@ -100,7 +100,13 @@ import '../../styles/global.css';
 				button.setAttribute('aria-pressed', String(dark));
 			};
 
-			button.addEventListener('click', () => setTheme(!this.isDark()));
+			button.addEventListener('click', () => {
+				const dark = !this.isDark();
+				setTheme(dark);
+				try {
+					localStorage.setItem('theme', dark ? 'dark' : 'light');
+				} catch {}
+			});
 
 			setTheme(this.isDark());
 		}

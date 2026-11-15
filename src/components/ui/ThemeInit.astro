@@ -1,0 +1,21 @@
+---
+// Applies the saved theme (or the system preference) before first paint. Place in <head>.
+---
+
+<script is:inline>
+	(() => {
+		const apply = (root) => {
+			let dark;
+			try {
+				const saved = localStorage.getItem('theme');
+				dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+			} catch {
+				dark = matchMedia('(prefers-color-scheme: dark)').matches;
+			}
+			root.classList.toggle('theme-dark', dark);
+		};
+		apply(document.documentElement);
+		// A client-side router swaps in a new <html>; keep the theme on it.
+		document.addEventListener('astro:before-swap', (event) => apply(event.newDocument.documentElement));
+	})();
+</script>

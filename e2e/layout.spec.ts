@@ -50,4 +50,22 @@ test.describe('Theme', () => {
     await expect.poll(() => background(band)).not.toBe(lightBand);
     expect(await background(credit)).toBe(lightCredit);
   });
+
+  test('follows the system theme until chosen, then persists it', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.goto('/');
+    await expect(page.locator('html')).not.toHaveClass(/theme-dark/);
+
+    await page.locator('theme-toggle button').click();
+    await expect(page.locator('html')).toHaveClass(/theme-dark/);
+
+    await page.goto('/client-router');
+    await expect(page.locator('html')).toHaveClass(/theme-dark/);
+  });
+
+  test('uses a dark system theme when none is saved', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveClass(/theme-dark/);
+  });
 });
